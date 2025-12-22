@@ -244,11 +244,13 @@ export default function Navbar() {
             </div>
             
             <div className="flex items-center space-x-4">
-              <Link href={'/upload'}>
-              <button className="hidden md:flex items-center space-x-2 text-gray-700 hover:text-red-600 font-medium transition-colors px-4 py-2 rounded-lg hover:bg-gray-50">
-                <span>Upload</span>
-              </button>
-              </Link>
+              {currentUser && (
+                <Link href={'/upload'}>
+                  <button className="hidden md:flex items-center space-x-2 text-gray-700 hover:text-red-600 font-medium transition-colors px-4 py-2 rounded-lg hover:bg-gray-50">
+                    <span>Add Warehouse</span>
+                  </button>
+                </Link>
+              )}
               
               {currentUser ? (
                 <div className="relative" ref={profileMenuRef}>
@@ -341,15 +343,13 @@ export default function Navbar() {
               <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Sell</a>
               <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Home Loans</a>
               <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Agent Finder</a>
-              <button 
-                onClick={() => {
-                  openAuthModal('signin')
-                  setMobileMenuOpen(false)
-                }}
-                className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium md:hidden"
-              >
-                Saved Homes
-              </button>
+              {currentUser && (
+                <Link href={'/upload'}>
+                  <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">
+                    Add Warehouse
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
         )}
