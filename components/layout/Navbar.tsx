@@ -1,7 +1,31 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, Home, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle } from 'lucide-react'
-import Link from 'next/link'
+import { Menu, X, Home, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus } from 'lucide-react'
+import Link from 'next/link';
+
+interface UserData {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  first_name?: string;
+  last_name?: string;
+  authProvider?: string;
+}
+
+interface SignInData {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
+
+interface SignUpData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  phone: string;
+}
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -9,17 +33,17 @@ export default function Navbar() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [currentUser, setCurrentUser] = useState<UserData | null>(null)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
 
-  const [signInData, setSignInData] = useState({
+  const [signInData, setSignInData] = useState<SignInData>({
     email: '',
     password: '',
     rememberMe: false
   })
 
-  const [signUpData, setSignUpData] = useState({
+  const [signUpData, setSignUpData] = useState<SignUpData>({
     firstName: '',
     lastName: '',
     email: '',
@@ -177,7 +201,7 @@ export default function Navbar() {
       await fetch('/api/auth/signout', { method: 'POST' })
       setCurrentUser(null)
       setShowProfileMenu(false)
-      window.location.reload()
+      window.location.href = '/'
     } catch (err) {
       console.error('Sign out failed:', err)
     }
@@ -189,14 +213,14 @@ export default function Navbar() {
     setError('')
   }
 
-  const getUserInitials = () => {
+  const getUserInitials = (): string => {
     if (!currentUser) return '??'
     const first = currentUser.firstName?.[0] || currentUser.first_name?.[0] || ''
     const last = currentUser.lastName?.[0] || currentUser.last_name?.[0] || ''
     return (first + last).toUpperCase() || 'U'
   }
 
-  const getUserFullName = () => {
+  const getUserFullName = (): string => {
     if (!currentUser) return ''
     const firstName = currentUser.firstName || currentUser.first_name || ''
     const lastName = currentUser.lastName || currentUser.last_name || ''
@@ -205,69 +229,85 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex items-center space-x-3">
-              <div className="bg-red-600 p-2 rounded-lg">
-                <Home className="h-6 w-6 text-white cursor-pointer" />
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <div className="bg-gradient-to-br from-red-600 to-red-700 p-2 rounded-lg shadow-sm">
+                <Home className="h-5 w-5 text-white" />
               </div>
-             <Link href={'/'}> <span className="text-2xl font-bold text-gray-900 cursor-pointer">Rexon</span></Link>
+              <Link href={'/'}>
+              <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent tracking-tight">
+                Rexon
+              </span>
+              </Link>
             </div>
             
+            {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-1">
-              <div className="relative group">
-                <button className="flex items-center space-x-1 px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
-                  <span>Buy</span>
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              </div>
+              <button className="flex items-center space-x-1 px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                <span>Buy</span>
+                <ChevronDown className="h-4 w-4" />
+              </button>
               
-              <div className="relative group">
-                <button className="flex items-center space-x-1 px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
-                  <span>Rent</span>
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              </div>
+              <button className="flex items-center space-x-1 px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                <span>Rent</span>
+                <ChevronDown className="h-4 w-4" />
+              </button>
               
-              <a href="#" className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
+              <button className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
                 Sell
-              </a>
+              </button>
               
-              <a href="#" className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
-                Home Loans
-              </a>
+              <button className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                About
+              </button>
               
-              <a href="#" className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-all">
-                Agent Finder
-              </a>
+              <button className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                Contact
+              </button>
             </div>
             
-            <div className="flex items-center space-x-4">
+            {/* Right Side Actions */}
+            <div className="flex items-center space-x-3">
+              {/* Agent Join Button - Desktop */}
+              <Link href='/agent/join'>
+              <button className="hidden md:flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 hover:border-red-200">
+                <span>Join as Agent</span>
+              </button>
+              </Link>
+
+              {/* List Property Button - Only when logged in */}
               {currentUser && (
-                <Link href={'/upload'}>
-                  <button className="hidden md:flex items-center space-x-2 text-gray-700 hover:text-red-600 font-medium transition-colors px-4 py-2 rounded-lg hover:bg-gray-50">
-                    <span>Add Warehouse</span>
-                  </button>
+                <Link href='/property'>
+                <button className="hidden md:flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm">
+                  <Plus className="h-4 w-4" />
+                  <span>List Property</span>
+                </button>
                 </Link>
               )}
               
+              {/* User Profile or Sign In */}
               {currentUser ? (
                 <div className="relative" ref={profileMenuRef}>
                   <button
                     onClick={() => setShowProfileMenu(!showProfileMenu)}
-                    className="flex items-center space-x-3 focus:outline-none"
+                    className="flex items-center space-x-3 focus:outline-none group"
+                    aria-label="User menu"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-semibold text-sm shadow-md group-hover:shadow-lg transition-all ring-2 ring-white">
                       {getUserInitials()}
                     </div>
+                    <ChevronDown className="h-4 w-4 text-gray-500 hidden md:block group-hover:text-gray-700 transition-colors" />
                   </button>
 
                   {showProfileMenu && (
-                    <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="p-4 bg-gradient-to-br from-red-50 to-white border-b border-gray-100">
+                    <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
+                      {/* Profile Header */}
+                      <div className="p-4 bg-gradient-to-br from-gray-50 to-white border-b border-gray-100">
                         <div className="flex items-start space-x-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-bold text-base shadow-md flex-shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-bold shadow-md flex-shrink-0">
                             {getUserInitials()}
                           </div>
                           <div className="flex-1 min-w-0">
@@ -278,34 +318,31 @@ export default function Navbar() {
                               {currentUser.email}
                             </p>
                             {currentUser.authProvider && currentUser.authProvider !== 'email' && (
-                              <p className="text-xs text-gray-500 mt-1">
-                                via {currentUser.authProvider.charAt(0).toUpperCase() + currentUser.authProvider.slice(1)}
-                              </p>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                                {currentUser.authProvider.charAt(0).toUpperCase() + currentUser.authProvider.slice(1)}
+                              </span>
                             )}
                           </div>
                         </div>
                       </div>
 
+                      {/* Menu Items */}
                       <div className="py-2">
-                        <button
-                          className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
+                        <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                           <UserCircle className="h-4 w-4 text-gray-500" />
-                          <span>View Profile</span>
+                          <span className="font-medium">My Profile</span>
                         </button>
                         
-                        <button
-                          className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          <Home className="h-4 w-4 text-gray-500" />
-                          <span>My Properties</span>
+                        <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                          <Building2 className="h-4 w-4 text-gray-500" />
+                          <span className="font-medium">My Properties</span>
                         </button>
                         
                         <div className="border-t border-gray-100 my-2"></div>
                         
                         <button
                           onClick={handleSignOut}
-                          className="w-full flex items-center space-x-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                         >
                           <LogOut className="h-4 w-4" />
                           <span className="font-medium">Sign Out</span>
@@ -317,15 +354,16 @@ export default function Navbar() {
               ) : (
                 <button 
                   onClick={() => openAuthModal('signin')}
-                  className="flex items-center space-x-2 bg-red-600 text-white px-6 py-2.5 rounded-lg hover:bg-red-700 transition-all font-medium shadow-sm hover:shadow-md"
+                  className="flex items-center space-x-2 bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm"
                 >
                   <User className="h-4 w-4" />
                   <span>Sign In</span>
                 </button>
               )}
               
+              {/* Mobile Menu Button */}
               <button 
-                className="lg:hidden p-2 text-gray-700"
+                className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle mobile menu"
               >
@@ -335,36 +373,54 @@ export default function Navbar() {
           </div>
         </div>
         
+        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-100 bg-white">
-            <div className="px-4 py-4 space-y-2">
-              <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Buy</a>
-              <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Rent</a>
-              <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Sell</a>
-              <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Home Loans</a>
-              <a href="#" className="block px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Agent Finder</a>
-              {currentUser && (
-                <Link href={'/upload'}>
-                  <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">
-                    Add Warehouse
+          <div className="lg:hidden border-t border-gray-200 bg-white">
+            <div className="px-4 py-4 space-y-1">
+              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+                Buy
+              </button>
+              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+                Rent
+              </button>
+              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+                Sell
+              </button>
+              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+                About
+              </button>
+              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+                Contact
+              </button>
+              
+              <div className="pt-2 pb-1 space-y-2">
+                <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium border border-gray-200 transition-colors">
+                  Join as Agent
+                </button>
+                
+                {currentUser && (
+                  <button className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors">
+                    <Plus className="h-4 w-4" />
+                    <span>List Property</span>
                   </button>
-                </Link>
-              )}
+                )}
+              </div>
             </div>
           </div>
         )}
       </nav>
 
+      {/* Auth Modal */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300"
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setShowAuthModal(false)}
             aria-hidden="true"
           />
           
           <div 
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-100 opacity-100 max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
             role="dialog"
             aria-modal="true"
           >
@@ -377,8 +433,9 @@ export default function Navbar() {
             </button>
             
             <div className="p-8">
+              {/* Modal Header */}
               <div className="text-center mb-8">
-                <div className="bg-red-600 p-3 rounded-xl inline-block mb-4">
+                <div className="bg-gradient-to-br from-red-600 to-red-700 p-3 rounded-xl inline-block mb-4 shadow-md">
                   <Home className="h-8 w-8 text-white" />
                 </div>
                 <h2 className="text-3xl font-bold text-gray-900 mb-2">
@@ -389,13 +446,14 @@ export default function Navbar() {
                 </p>
               </div>
 
+              {/* Toggle Tabs */}
               <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
                 <button
                   onClick={() => {
                     setAuthMode('signin')
                     setError('')
                   }}
-                  className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
+                  className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all ${
                     authMode === 'signin'
                       ? 'bg-white text-gray-900 shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
@@ -408,16 +466,17 @@ export default function Navbar() {
                     setAuthMode('signup')
                     setError('')
                   }}
-                  className={`flex-1 py-2 px-4 rounded-md font-medium transition-all ${
+                  className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all ${
                     authMode === 'signup'
                       ? 'bg-white text-gray-900 shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Create Account
+                  Sign Up
                 </button>
               </div>
 
+              {/* Error Message */}
               {error && (
                 <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-2">
                   <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
@@ -425,6 +484,7 @@ export default function Navbar() {
                 </div>
               )}
               
+              {/* Social Sign In Buttons */}
               <div className="space-y-3 mb-6">
                 <button 
                   onClick={handleGoogleSignIn}
@@ -452,6 +512,7 @@ export default function Navbar() {
                 </button>
               </div>
               
+              {/* Divider */}
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-gray-200"></div>
@@ -461,6 +522,7 @@ export default function Navbar() {
                 </div>
               </div>
               
+              {/* Sign In Form */}
               {authMode === 'signin' && (
                 <div className="space-y-4">
                   <div>
@@ -510,21 +572,22 @@ export default function Navbar() {
                       />
                       <span className="text-gray-700">Remember me</span>
                     </label>
-                    <a href="#" className="text-red-600 hover:text-red-700 font-medium hover:underline">
+                    <button className="text-red-600 hover:text-red-700 font-medium hover:underline">
                       Forgot password?
-                    </a>
+                    </button>
                   </div>
                   
                   <button
                     onClick={handleEmailSignIn}
                     disabled={loading}
-                    className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 active:bg-red-800 transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-all font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? 'Signing In...' : 'Sign In'}
                   </button>
                 </div>
               )}
 
+              {/* Sign Up Form */}
               {authMode === 'signup' && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -591,7 +654,7 @@ export default function Navbar() {
                         type="tel"
                         value={signUpData.phone}
                         onChange={(e) => setSignUpData({...signUpData, phone: e.target.value})}
-                        placeholder="+1 (555) 000-0000"
+                        placeholder="+91 98765 43210"
                         className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all"
                       />
                     </div>

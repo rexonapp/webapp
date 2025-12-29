@@ -1,11 +1,12 @@
 import Footer from '@/components/layout/Footer';
-import PropertySearch from '@/components/search/propertysearch'
-import { Home, MapPin, Award, Clock, TrendingUp, Shield } from 'lucide-react';
+import PropertySearch from '@/components/search/propertysearch';
+import { Home, Building2, Users, Award, Clock, TrendingUp, Shield } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HomePage() {
   const stats = [
-    { icon: Home, value: '50,000+', label: 'Active Listings' },
-    { icon: MapPin, value: '200+', label: 'Cities Covered' },
+    { icon: Building2, value: '50,000+', label: 'Active Listings' },
+    { icon: Users, value: '200+', label: 'Cities Covered' },
     { icon: Award, value: '#1', label: 'Customer Rated' },
     { icon: Clock, value: '24/7', label: 'Support Available' }
   ];
@@ -14,39 +15,98 @@ export default function HomePage() {
     {
       icon: TrendingUp,
       title: 'Real-Time Market Data',
-      description: 'Access up-to-the-minute pricing, trends, and neighborhood insights powered by our proprietary algorithms.'
+      description: 'Access up-to-the-minute pricing, trends, and neighborhood insights powered by our proprietary algorithms tailored for the Indian market.'
     },
     {
       icon: Shield,
       title: 'Verified Listings Only',
-      description: 'Every property is verified and updated daily. No fake listings, no outdated information.'
+      description: 'Every property is verified and updated daily. No fake listings, no outdated information. Trust guaranteed.'
     },
     {
       icon: Clock,
       title: 'Lightning Fast Search',
-      description: 'Our advanced search technology helps you find your perfect home faster than any other platform.'
+      description: 'Our advanced search technology helps you find your perfect warehouse or commercial space faster than any other platform.'
     }
   ];
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      
       <main className="flex-1">
-        <section className="relative bg-gradient-to-b from-gray-50 to-white py-20 md:py-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-10">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-5 leading-tight text-gray-900">
-                Find Your Warehouse
+        {/* Hero Section with Banner */}
+        <section className="relative py-24 md:py-32 overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+            }}></div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="text-center mb-12">
+              {/* Main Headline */}
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+                List. Discover. Connect.
               </h1>
-              <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                Search millions of for-sale and rental listings, compare home values and connect with local professionals.
+              
+              {/* Sub-text */}
+              <p className="text-lg md:text-xl mb-12 max-w-3xl mx-auto text-gray-700">
+                Properties by Owners, Agents & Builders – All in One Place
               </p>
+
+              {/* Enhanced Search Bar */}
+              <div className="mb-16">
+                <PropertySearch />
+              </div>
+
+              {/* User Type Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <Link href="/property">
+                  <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-xl border-2 border-gray-200 hover:border-red-200 hover:shadow-xl transition-all duration-300 cursor-pointer group h-full">
+                    <div className="w-16 h-16 bg-red-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <Home className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">
+                      Property Owner
+                    </h3>
+                    <p className="text-gray-600 text-base leading-relaxed">
+                      List your warehouse or commercial property and connect with verified buyers and tenants
+                    </p>
+                  </div>
+                </Link>
+
+                <Link href="/agent/join">
+                  <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-xl border-2 border-gray-200 hover:border-red-200 hover:shadow-xl transition-all duration-300 cursor-pointer group h-full">
+                    <div className="w-16 h-16 bg-red-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <Users className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">
+                      Real Estate Agent
+                    </h3>
+                    <p className="text-gray-600 text-base leading-relaxed">
+                      Manage multiple properties and connect with potential clients efficiently
+                    </p>
+                  </div>
+                </Link>
+
+                <Link href="/register/customer">
+                  <div className="bg-gradient-to-br from-gray-50 to-white p-8 rounded-xl border-2 border-gray-200 hover:border-red-200 hover:shadow-xl transition-all duration-300 cursor-pointer group h-full">
+                    <div className="w-16 h-16 bg-red-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <Building2 className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-red-600 transition-colors">
+                      Company / Customer
+                    </h3>
+                    <p className="text-gray-600 text-base leading-relaxed">
+                      Find the perfect warehouse or commercial space for your business needs
+                    </p>
+                  </div>
+                </Link>
+              </div>
             </div>
-            
-            <PropertySearch />
           </div>
         </section>
         
+        {/* Stats Section */}
         <section className="py-16 bg-white border-y border-gray-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -70,14 +130,15 @@ export default function HomePage() {
           </div>
         </section>
         
+        {/* Features Section */}
         <section className="py-20 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
-                Why Choose Us?
+                Why Choose Rexon?
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                We're changing the way people buy and sell homes with technology and service you can trust.
+                We're changing the way people find and list commercial properties in India with technology and service you can trust
               </p>
             </div>
             
@@ -101,18 +162,35 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        
+
+        {/* User Type Cards Section */}
         <section className="py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                Get Started Today
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Join thousands of property owners, agents, and businesses who trust Rexon
+              </p>
+            </div>
+          </div>
+        </section>
+        
+        {/* CTA Section */}
+        <section className="py-20 bg-gradient-to-br from-red-50 to-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-900">
-              Ready to Find Your Dream Home?
+              Ready to Find Your Ideal Commercial Space?
             </h2>
             <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-              Join thousands of happy homeowners who found their perfect property with us.
+              Join thousands of satisfied property owners and businesses who found their perfect match with Rexon
             </p>
-            <button className="bg-red-500 text-white px-10 py-3.5 rounded-lg hover:bg-red-600 transition-colors font-semibold shadow-md hover:shadow-lg">
-              Start Your Search Today
-            </button>
+            <Link href="/properties">
+              <button className="bg-red-500 text-white px-10 py-3.5 rounded-lg hover:bg-red-600 transition-colors font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                Browse Properties Now
+              </button>
+            </Link>
           </div>
         </section>
       </main>
