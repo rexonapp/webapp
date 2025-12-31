@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, Home, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus } from 'lucide-react'
+import { Menu, X, Home, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus, Settings } from 'lucide-react'
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface UserData {
   id: string;
@@ -36,6 +37,7 @@ export default function Navbar() {
   const [currentUser, setCurrentUser] = useState<UserData | null>(null)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
+  const router= useRouter();
 
   const [signInData, setSignInData] = useState<SignInData>({
     email: '',
@@ -50,6 +52,8 @@ export default function Navbar() {
     password: '',
     phone: ''
   })
+  const pathname = usePathname(); 
+
 
   useEffect(() => {
     checkSession()
@@ -65,6 +69,9 @@ export default function Navbar() {
       window.history.replaceState({}, '', window.location.pathname)
     }
   }
+  useEffect(() => {
+    setShowProfileMenu(false);
+  }, [pathname]);
 
   const checkSession = async () => {
     try {
@@ -336,6 +343,15 @@ export default function Navbar() {
                         <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                           <Building2 className="h-4 w-4 text-gray-500" />
                           <span className="font-medium">My Properties</span>
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setShowProfileMenu(false);
+                            router.push('/settings/banner/upload');
+                          }} 
+                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        ><Settings className="h-4 w-4 text-gray-500" />
+                          <span className="font-medium">settings</span>
                         </button>
                         
                         <div className="border-t border-gray-100 my-2"></div>
