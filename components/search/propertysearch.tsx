@@ -1,8 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { MapPin, Search, Building2, IndianRupee } from 'lucide-react'
+import { MapPin, Search, Building2, IndianRupee, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select'
+import { Badge } from '@/components/ui/badge'
 
 interface City {
   name: string;
@@ -42,15 +53,18 @@ export default function PropertySearch() {
     { id: 'godown', label: 'Godown' }
   ];
 
-  // Price budget ranges in Indian Rupees (lakhs and crores)
+  // Updated price budget ranges starting from ₹50,000
   const priceBudgets: PriceBudget[] = [
-    { id: 'under-50l', label: 'Under ₹50 Lakhs', max: 5000000 },
-    { id: '50l-1cr', label: '₹50 Lakhs - ₹1 Crore', min: 5000000, max: 10000000 },
-    { id: '1cr-2cr', label: '₹1 Crore - ₹2 Crore', min: 10000000, max: 20000000 },
-    { id: '2cr-5cr', label: '₹2 Crore - ₹5 Crore', min: 20000000, max: 50000000 },
-    { id: '5cr-10cr', label: '₹5 Crore - ₹10 Crore', min: 50000000, max: 100000000 },
-    { id: '10cr-20cr', label: '₹10 Crore - ₹20 Crore', min: 100000000, max: 200000000 },
-    { id: 'above-20cr', label: 'Above ₹20 Crore', min: 200000000 }
+    { id: 'under-1l', label: 'Under ₹1L', max: 100000 },
+    { id: '1l-5l', label: '₹1L - ₹5L', min: 100000, max: 500000 },
+    { id: '5l-10l', label: '₹5L - ₹10L', min: 500000, max: 1000000 },
+    { id: '10l-25l', label: '₹10L - ₹25L', min: 1000000, max: 2500000 },
+    { id: '25l-50l', label: '₹25L - ₹50L', min: 2500000, max: 5000000 },
+    { id: '50l-1cr', label: '₹50L - ₹1Cr', min: 5000000, max: 10000000 },
+    { id: '1cr-2cr', label: '₹1Cr - ₹2Cr', min: 10000000, max: 20000000 },
+    { id: '2cr-5cr', label: '₹2Cr - ₹5Cr', min: 20000000, max: 50000000 },
+    { id: '5cr-10cr', label: '₹5Cr - ₹10Cr', min: 50000000, max: 100000000 },
+    { id: 'above-10cr', label: 'Above ₹10Cr', min: 100000000 }
   ];
   
   // Major Indian cities for warehouse and commercial properties
@@ -117,16 +131,22 @@ export default function PropertySearch() {
       handleSearch();
     }
   };
+
+  const clearFilter = (filterType: 'location' | 'type' | 'budget') => {
+    if (filterType === 'location') setSearchQuery('');
+    if (filterType === 'type') setSelectedPropertyType('');
+    if (filterType === 'budget') setSelectedBudget('');
+  };
   
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        {/* Main Search Row */}
-        <div className="flex flex-col lg:flex-row">
-          {/* Location Input - Large and Prominent */}
-          <div className="flex-[2] flex items-center px-6 py-4 border-b lg:border-b-0 lg:border-r border-gray-200 relative">
-            <MapPin className="h-5 w-5 text-gray-500 mr-3 flex-shrink-0" />
-            <input
+    <div className="w-full max-w-4xl mx-auto px-4">
+      <div className="overflow-hidden shadow-lg border border-gray-200/50 bg-white/95 backdrop-blur-sm rounded-lg">
+        {/* Desktop Layout - Hidden on mobile */}
+        <div className="hidden lg:flex items-center">
+          {/* Location Input */}
+          <div className="flex-[2] min-w-0 flex items-center gap-2.5 px-4 py-3 border-r border-gray-200 relative">
+            <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <Input
               type="text"
               placeholder="Search by city, locality or pincode"
               value={searchQuery}
@@ -137,107 +157,314 @@ export default function PropertySearch() {
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               onKeyPress={handleKeyPress}
-              className="flex-1 outline-none text-gray-900 text-base font-medium placeholder-gray-400"
+              className="flex-1 min-w-0 border-0 p-0 h-auto text-sm font-normal placeholder:text-gray-400 placeholder:font-normal bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
               aria-label="Search for properties by location"
             />
             
             {/* Location Suggestions Dropdown */}
             {showSuggestions && searchQuery && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 max-h-80 overflow-y-auto z-30">
+              <Card className="absolute top-full left-0 right-0 mt-1 shadow-xl max-h-[320px] overflow-y-auto z-50 border border-gray-200 rounded-md">
                 {filteredCities.length > 0 ? (
-                  filteredCities.map((city, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleCitySelect(city.name)}
-                      className="w-full text-left px-5 py-3.5 hover:bg-gray-50 transition-colors flex items-center justify-between border-b border-gray-100 last:border-b-0"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm text-gray-900 font-medium">{city.name}</span>
-                      </div>
-                      <span className="text-xs text-gray-500 font-medium">{city.properties} properties</span>
-                    </button>
-                  ))
+                  <div className="divide-y divide-gray-100">
+                    {filteredCities.map((city, index) => (
+                      <Button
+                        key={index}
+                        variant="ghost"
+                        onClick={() => handleCitySelect(city.name)}
+                        className="w-full justify-between px-3.5 py-2.5 h-auto rounded-none hover:bg-red-50/80 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3.5 w-3.5 text-red-600/70 flex-shrink-0" />
+                          <span className="text-sm text-gray-700 font-normal">{city.name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{city.properties}</span>
+                      </Button>
+                    ))}
+                  </div>
                 ) : (
-                  <div className="p-5">
-                    <p className="text-sm text-gray-600 text-center">No cities found matching "{searchQuery}"</p>
+                  <div className="p-4">
+                    <p className="text-sm text-gray-500 text-center">No cities found</p>
                   </div>
                 )}
-              </div>
+              </Card>
             )}
           </div>
           
-          {/* Compact Filters Section */}
-          <div className="flex flex-col sm:flex-row lg:flex-[1.2]">
-            {/* Property Type Dropdown - Compact */}
-            <div className="flex-1 flex items-center px-4 py-3 border-b sm:border-b-0 sm:border-r lg:border-r border-gray-200 bg-gray-50">
-              <Building2 className="h-3.5 w-3.5 text-gray-500 mr-2 flex-shrink-0" />
-              <select
-                value={selectedPropertyType}
-                onChange={(e) => setSelectedPropertyType(e.target.value)}
-                className="flex-1 outline-none text-gray-700 text-xs font-medium bg-transparent cursor-pointer pr-1"
-                aria-label="Select property type"
-              >
-                <option value="">Property Type</option>
+          {/* Property Type Dropdown */}
+          <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
+            <Building2 className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
+              <SelectTrigger className="flex-1 min-w-0 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0 [&>span]:truncate">
+                <SelectValue placeholder="Property Type" className="text-gray-500" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
                 {propertyTypes.map((type) => (
-                  <option key={type.id} value={type.id}>
+                  <SelectItem key={type.id} value={type.id} className="text-sm">
                     {type.label}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-            </div>
-            
-            {/* Price Budget Dropdown - Compact */}
-            <div className="flex-1 flex items-center px-4 py-3 border-b sm:border-b-0 border-gray-200 bg-gray-50">
-              <IndianRupee className="h-3.5 w-3.5 text-gray-500 mr-2 flex-shrink-0" />
-              <select
-                value={selectedBudget}
-                onChange={(e) => setSelectedBudget(e.target.value)}
-                className="flex-1 outline-none text-gray-700 text-xs font-medium bg-transparent cursor-pointer pr-1"
-                aria-label="Select price budget"
-              >
-                <option value="">Budget</option>
-                {priceBudgets.map((budget) => (
-                  <option key={budget.id} value={budget.id}>
-                    {budget.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+              </SelectContent>
+            </Select>
           </div>
           
-          {/* Search Button - Bold and Prominent */}
-          <button
+          {/* Budget Dropdown */}
+          <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
+            <IndianRupee className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <Select value={selectedBudget} onValueChange={setSelectedBudget}>
+              <SelectTrigger className="flex-1 min-w-0 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0 [&>span]:truncate">
+                <SelectValue placeholder="Budget" className="text-gray-500" />
+              </SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {priceBudgets.map((budget) => (
+                  <SelectItem key={budget.id} value={budget.id} className="text-sm">
+                    {budget.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Search Button */}
+          <Button
             onClick={handleSearch}
-            className="bg-red-600 text-white px-8 py-5 lg:py-0 hover:bg-red-700 active:bg-red-800 transition-all flex items-center justify-center space-x-2 font-semibold text-base shadow-sm"
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 h-auto rounded-none rounded-r-lg font-medium text-sm shadow-none flex items-center justify-center gap-2  transition-colors"
             aria-label="Search properties"
           >
-            <Search className="h-5 w-5" />
-            <span className="hidden sm:inline">Search</span>
-          </button>
+            <Search className="h-4 w-4" />
+            <span>Search</span>
+          </Button>
+        </div>
+
+        {/* Tablet Layout - Hidden on mobile and desktop */}
+        <div className="hidden md:flex lg:hidden flex-col">
+          {/* Location Search */}
+          <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 relative">
+            <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <Input
+              type="text"
+              placeholder="Search by city, locality or pincode"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              onKeyPress={handleKeyPress}
+              className="flex-1 border-0 p-0 h-auto text-sm font-normal placeholder:text-gray-400 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+            
+            {/* Tablet Location Suggestions */}
+            {showSuggestions && searchQuery && (
+              <Card className="absolute top-full left-0 right-0 mt-1 shadow-xl max-h-[280px] overflow-y-auto z-50 border border-gray-200 rounded-md">
+                {filteredCities.length > 0 ? (
+                  <div className="divide-y divide-gray-100">
+                    {filteredCities.map((city, index) => (
+                      <Button
+                        key={index}
+                        variant="ghost"
+                        onClick={() => handleCitySelect(city.name)}
+                        className="w-full justify-between px-3.5 py-2.5 h-auto rounded-none hover:bg-red-50/80"
+                      >
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3.5 w-3.5 text-red-600/70 flex-shrink-0" />
+                          <span className="text-sm text-gray-700">{city.name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500">{city.properties}</span>
+                      </Button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3.5">
+                    <p className="text-sm text-gray-500 text-center">No cities found</p>
+                  </div>
+                )}
+              </Card>
+            )}
+          </div>
+
+          {/* Filters and Search Row */}
+          <div className="flex items-center">
+            <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
+              <Building2 className="h-4 w-4 text-red-600 flex-shrink-0" />
+              <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
+                <SelectTrigger className="flex-1 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
+                  <SelectValue placeholder="Property Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {propertyTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id} className="text-sm">
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
+              <IndianRupee className="h-4 w-4 text-red-600 flex-shrink-0" />
+              <Select value={selectedBudget} onValueChange={setSelectedBudget}>
+                <SelectTrigger className="flex-1 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
+                  <SelectValue placeholder="Budget" />
+                </SelectTrigger>
+                <SelectContent>
+                  {priceBudgets.map((budget) => (
+                    <SelectItem key={budget.id} value={budget.id} className="text-sm">
+                      {budget.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button
+              onClick={handleSearch}
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-none rounded-br-lg font-medium text-sm shadow-none flex items-center justify-center gap-2"
+            >
+              <Search className="h-4 w-4" />
+              <span>Search</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Mobile Layout - Visible only on mobile */}
+        <div className="md:hidden">
+          {/* Location Search */}
+          <div className="flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 relative">
+            <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <Input
+              type="text"
+              placeholder="Search location..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              onKeyPress={handleKeyPress}
+              className="flex-1 border-0 p-0 h-auto text-sm font-normal placeholder:text-gray-400 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+            />
+            
+            {/* Mobile Location Suggestions */}
+            {showSuggestions && searchQuery && (
+              <Card className="absolute top-full left-0 right-0 mt-1 shadow-xl max-h-[240px] overflow-y-auto z-50 border border-gray-200 rounded-md">
+                {filteredCities.length > 0 ? (
+                  <div className="divide-y divide-gray-100">
+                    {filteredCities.map((city, index) => (
+                      <Button
+                        key={index}
+                        variant="ghost"
+                        onClick={() => handleCitySelect(city.name)}
+                        className="w-full justify-between px-3 py-2.5 h-auto rounded-none hover:bg-red-50/80"
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <MapPin className="h-3 w-3 text-red-600/70 flex-shrink-0" />
+                          <span className="text-xs text-gray-700 truncate">{city.name}</span>
+                        </div>
+                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{city.properties}</span>
+                      </Button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3">
+                    <p className="text-xs text-gray-500 text-center">No cities found</p>
+                  </div>
+                )}
+              </Card>
+            )}
+          </div>
+
+          {/* Filters Row */}
+          <div className="grid grid-cols-2 border-b border-gray-200">
+            <div className="flex items-center gap-1.5 px-3 py-3 border-r border-gray-200">
+              <Building2 className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />
+              <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
+                <SelectTrigger className="flex-1 border-0 p-0 h-auto text-xs font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {propertyTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id} className="text-xs">
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-center gap-1.5 px-3 py-3">
+              <IndianRupee className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />
+              <Select value={selectedBudget} onValueChange={setSelectedBudget}>
+                <SelectTrigger className="flex-1 border-0 p-0 h-auto text-xs font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
+                  <SelectValue placeholder="Budget" />
+                </SelectTrigger>
+                <SelectContent>
+                  {priceBudgets.map((budget) => (
+                    <SelectItem key={budget.id} value={budget.id} className="text-xs">
+                      {budget.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Mobile Search Button */}
+          <Button
+            onClick={handleSearch}
+            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-none rounded-b-lg font-medium text-sm shadow-none flex items-center justify-center gap-2"
+          >
+            <Search className="h-4 w-4" />
+            <span>Search Properties</span>
+          </Button>
         </div>
       </div>
 
       {/* Active Filters Display */}
       {(searchQuery || selectedPropertyType || selectedBudget) && (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           {searchQuery && (
-            <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-              <MapPin className="h-3 w-3 mr-1.5" />
-              {searchQuery}
-            </span>
+            <Badge variant="secondary" className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-md transition-colors">
+              <MapPin className="h-3 w-3" />
+              <span className="max-w-[120px] sm:max-w-[160px] truncate">{searchQuery}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => clearFilter('location')}
+                className="h-4 w-4 p-0 hover:bg-blue-200/60 rounded-sm ml-0.5"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
           )}
           {selectedPropertyType && (
-            <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <Building2 className="h-3 w-3 mr-1.5" />
-              {propertyTypes.find(t => t.id === selectedPropertyType)?.label}
-            </span>
+            <Badge variant="secondary" className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-md transition-colors">
+              <Building2 className="h-3 w-3" />
+              <span className="max-w-[120px] sm:max-w-[160px] truncate">{propertyTypes.find(t => t.id === selectedPropertyType)?.label}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => clearFilter('type')}
+                className="h-4 w-4 p-0 hover:bg-emerald-200/60 rounded-sm ml-0.5"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
           )}
           {selectedBudget && (
-            <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200">
-              <IndianRupee className="h-3 w-3 mr-1.5" />
-              {priceBudgets.find(b => b.id === selectedBudget)?.label}
-            </span>
+            <Badge variant="secondary" className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 rounded-md transition-colors">
+              <IndianRupee className="h-3 w-3" />
+              <span className="max-w-[120px] sm:max-w-[160px] truncate">{priceBudgets.find(b => b.id === selectedBudget)?.label}</span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => clearFilter('budget')}
+                className="h-4 w-4 p-0 hover:bg-purple-200/60 rounded-sm ml-0.5"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
           )}
         </div>
       )}
