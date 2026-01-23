@@ -42,7 +42,12 @@ export async function POST(request: NextRequest) {
     // Personal Details
     const fullName = formData.get('fullName') as string;
     const dateOfBirth = formData.get('dateOfBirth') as string || null;
-    const gender = formData.get('gender') as string || null;
+    const genderRaw = formData.get('gender') as string || null;
+
+    // Map gender to database-allowed values (capitalize first letter)
+    const gender = genderRaw
+      ? genderRaw.charAt(0).toUpperCase() + genderRaw.slice(1).toLowerCase()
+      : null;
     
     // Contact Information
     const primaryPhone = formData.get('primaryPhone') as string;

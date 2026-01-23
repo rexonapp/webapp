@@ -170,6 +170,37 @@ export async function POST(request: NextRequest) {
     // Map listingType to price_type for database
     const priceType = listingType === 'rent' ? 'Rent' : listingType === 'sale' ? 'Sale' : 'Lease';
 
+    // Map frontend property types to database-allowed values
+    // Database constraint only allows: 'Warehouse', 'Industrial', 'Commercial'
+    const propertyTypeMap: { [key: string]: string } = {
+      'Warehouse': 'Warehouse',
+      'Cold Storage': 'Warehouse',
+      'Godown': 'Warehouse',
+      'Industrial Shed': 'Industrial',
+      'Manufacturing Unit': 'Industrial',
+      'Factory Space': 'Industrial',
+      'Logistics Hub': 'Commercial',
+      'Distribution Center': 'Commercial',
+    };
+
+    const normalizedPropertyType = propertyTypeMap[propertyType] || 'Warehouse';
+
+    // Map frontend road connectivity to database-allowed values
+    // Database constraint only allows: 'National Highway', 'State Highway', 'City Road', 'Other'
+    const roadConnectivityMap: { [key: string]: string } = {
+      'National Highway': 'National Highway',
+      'State Highway': 'State Highway',
+      'Main Road': 'City Road',
+      'Interior Road': 'Other',
+      'Service Road': 'Other',
+      'City Road': 'City Road',
+      'Other': 'Other',
+    };
+
+    const normalizedRoadConnectivity = roadConnectivity
+      ? roadConnectivityMap[roadConnectivity] || 'Other'
+      : null;
+
     // Insert warehouse record
     const warehouseResult = await query(
       `INSERT INTO warehouses 
@@ -182,11 +213,11 @@ export async function POST(request: NextRequest) {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
        RETURNING id, property_name, title, address, city, created_at`,
       [
-        userId, 
+        userId,
         title,
         title,
-        description, 
-        propertyType,
+        description,
+        normalizedPropertyType,
         parseFloat(totalArea),
         sizeUnit,
         parseFloat(totalArea),
@@ -197,7 +228,7 @@ export async function POST(request: NextRequest) {
         city,
         state,
         pincode,
-        roadConnectivity,
+        normalizedRoadConnectivity,
         contactPersonName,
         contactPersonPhone,
         contactPersonEmail,
@@ -221,21 +252,20 @@ export async function POST(request: NextRequest) {
       const s3Url = await uploadToS3(file, s3Key);
 
       const uploadResult = await query(
-        `INSERT INTO uploads 
-         (user_id, warehouse_id, image_order, is_primary, file_name, file_type, file_size, s3_key, s3_url, media_type, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-         RETURNING id, file_name, s3_url, is_primary, image_order, media_type`,
+        `INSERT INTO uploads
+         (user_id, warehouse_id, image_order, is_primary, file_name, file_type, file_size, s3_key, s3_url, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         RETURNING id, file_name, s3_url, is_primary, image_order`,
         [
-          userId, 
-          warehouseId, 
+          userId,
+          warehouseId,
           index,
           index === 0,
-          file.name, 
-          file.type, 
-          file.size, 
-          s3Key, 
+          file.name,
+          file.type,
+          file.size,
+          s3Key,
           s3Url,
-          'image',
           'Active'
         ]
       );
@@ -253,21 +283,20 @@ export async function POST(request: NextRequest) {
       const s3Url = await uploadToS3(file, s3Key);
 
       const uploadResult = await query(
-        `INSERT INTO uploads 
-         (user_id, warehouse_id, image_order, is_primary, file_name, file_type, file_size, s3_key, s3_url, media_type, status)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-         RETURNING id, file_name, s3_url, is_primary, image_order, media_type`,
+        `INSERT INTO uploads
+         (user_id, warehouse_id, image_order, is_primary, file_name, file_type, file_size, s3_key, s3_url, status)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+         RETURNING id, file_name, s3_url, is_primary, image_order`,
         [
-          userId, 
-          warehouseId, 
+          userId,
+          warehouseId,
           index,
           false,
-          file.name, 
-          file.type, 
-          file.size, 
-          s3Key, 
+          file.name,
+          file.type,
+          file.size,
+          s3Key,
           s3Url,
-          'video',
           'Active'
         ]
       );
@@ -328,15 +357,15 @@ export async function GET(request: NextRequest) {
     const warehouses = await Promise.all(
       warehousesResult.rows.map(async (warehouse) => {
         const mediaResult = await query(
-          `SELECT id, file_name, file_type, file_size, s3_url, is_primary, image_order, media_type, created_at
+          `SELECT id, file_name, file_type, file_size, s3_url, is_primary, image_order, created_at
            FROM uploads
            WHERE warehouse_id = $1 AND status = 'Active'
-           ORDER BY media_type ASC, image_order ASC, created_at ASC`,
+           ORDER BY file_type ASC, image_order ASC, created_at ASC`,
           [warehouse.id]
         );
 
-        const images = mediaResult.rows.filter(m => m.media_type === 'image');
-        const videos = mediaResult.rows.filter(m => m.media_type === 'video');
+        const images = mediaResult.rows.filter(m => m.file_type?.startsWith('image/'));
+        const videos = mediaResult.rows.filter(m => m.file_type?.startsWith('video/'));
 
         return {
           ...warehouse,

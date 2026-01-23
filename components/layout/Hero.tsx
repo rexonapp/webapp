@@ -189,7 +189,7 @@ export default function HeroWithBanner() {
                 </Card>
 
                 {/* Company/Customer Card */}
-                <Card className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer group border-gray-200 hover:border-red-300 transform hover:-translate-y-1 sm:col-span-2 lg:col-span-1">
+                <Card onClick={()=>router.push('/customer')} className="bg-white/95 backdrop-blur-sm shadow-xl hover:shadow-2xl transition-all duration-300 cursor-pointer group border-gray-200 hover:border-red-300 transform hover:-translate-y-1 sm:col-span-2 lg:col-span-1">
                   <CardHeader className="pb-2 pt-4 px-4 sm:px-5">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform shadow-md flex-shrink-0">

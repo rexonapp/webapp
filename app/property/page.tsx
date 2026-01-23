@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react';
-import { Upload, X, CheckCircle, AlertCircle, MapPin, Building2, User, IndianRupee, FileText, Image as ImageIcon, Video, Plus, Eye } from 'lucide-react';
+import { Upload, X, CheckCircle, AlertCircle, MapPin, Building2, User, IndianRupee, FileText, Image as ImageIcon, Video, Plus, Eye, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,10 +10,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import MapSelector from './MapSelector';
 
 interface WarehouseFormData {
@@ -39,6 +40,22 @@ interface WarehouseFormData {
   amenities: string[];
   images: File[];
   videos: File[];
+}
+
+interface FieldErrors {
+  title?: string;
+  propertyType?: string;
+  totalArea?: string;
+  availableFrom?: string;
+  pricePerSqFt?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  contactPersonPhone?: string;
+  contactPersonEmail?: string;
+  images?: string;
+  videos?: string;
 }
 
 const PROPERTY_TYPES = [
@@ -70,9 +87,11 @@ const INDIAN_STATES = [
 const ROAD_CONNECTIVITY = [
   'National Highway',
   'State Highway',
+  'City Road',
   'Main Road',
   'Interior Road',
-  'Service Road'
+  'Service Road',
+  'Other'
 ];
 
 const MAX_IMAGES = 10;
@@ -109,12 +128,107 @@ export default function WarehouseUploadForm() {
   
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [videoPreviews, setVideoPreviews] = useState<string[]>([]);
   const [showMap, setShowMap] = useState(false);
   const [showImageGallery, setShowImageGallery] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [imageToDelete, setImageToDelete] = useState<number | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+
+  const validateField = (name: string, value: any): string | undefined => {
+    switch (name) {
+      case 'title':
+        if (!value || value.trim() === '') return 'Property title is required';
+        if (value.length < 5) return 'Title must be at least 5 characters';
+        break;
+
+      case 'propertyType':
+        if (!value) return 'Property type is required';
+        break;
+
+      case 'totalArea':
+        if (!value || value === '') return 'Total area is required';
+        if (parseFloat(value) <= 0) return 'Total area must be greater than 0';
+        break;
+
+      case 'availableFrom':
+        if (!value) return 'Available from date is required';
+        break;
+
+      case 'pricePerSqFt':
+        if (!value || value === '') return 'Price per sq.ft is required';
+        if (parseFloat(value) <= 0) return 'Price must be greater than 0';
+        break;
+
+      // case 'address':
+      //   if (!value || value.trim() === '') return 'Address is required';
+      //   if (value.length < 10) return 'Address must be at least 10 characters';
+      //   break;
+
+      case 'city':
+        if (!value || value.trim() === '') return 'City is required';
+        break;
+
+      case 'state':
+        if (!value) return 'State is required';
+        break;
+
+        case 'pincode':
+          if (value) {
+            if (!/^\d+$/.test(value)) {
+              return 'Pincode must contain only numbers';
+            }
+            if (value.length !== 6) {
+              return 'Pincode must be exactly 6 digits';
+            }
+          }
+          break;
+
+      case 'contactPersonPhone':
+        if (value && !/^[6-9]\d{9}$/.test(value.replace(/\s/g, ''))) {
+          return 'Enter a valid 10-digit mobile number starting with 6-9';
+        }
+        break;
+
+      case 'contactPersonEmail':
+        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return 'Enter a valid email address';
+        }
+        break;
+
+      case 'images':
+        if (!formData.images || formData.images.length === 0) {
+          return 'At least one property image is required';
+        }
+        break;
+    }
+    return undefined;
+  };
+
+  const handleFieldChange = (name: string, value: any) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    // Mark field as touched
+    setTouchedFields(prev => new Set(prev).add(name));
+
+    // Validate field
+    const error = validateField(name, value);
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
+  };
+
+  const handleFieldBlur = (name: string) => {
+    setTouchedFields(prev => new Set(prev).add(name));
+    const error = validateField(name, formData[name as keyof WarehouseFormData]);
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: error
+    }));
+  };
 
   const toggleAmenity = (amenity: string) => {
     setFormData(prev => ({
@@ -129,65 +243,103 @@ export default function WarehouseUploadForm() {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
+    // Clear previous image errors
+    setFieldErrors(prev => ({ ...prev, images: undefined }));
+    setTouchedFields(prev => new Set(prev).add('images'));
+
     if (formData.images.length + files.length > MAX_IMAGES) {
-      setMessage({ type: 'error', text: `Maximum ${MAX_IMAGES} images allowed. You can add ${MAX_IMAGES - formData.images.length} more.` });
+      const error = `Maximum ${MAX_IMAGES} images allowed. You can add ${MAX_IMAGES - formData.images.length} more.`;
+      setFieldErrors(prev => ({ ...prev, images: error }));
       return;
     }
 
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
-    
+    // Accept common image formats: jpg, jpeg, png, webp, gif
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    const imageFiles = files.filter(file => allowedTypes.includes(file.type.toLowerCase()));
+
     if (imageFiles.length !== files.length) {
-      setMessage({ type: 'error', text: 'Only image files are allowed' });
+      setFieldErrors(prev => ({
+        ...prev,
+        images: 'Only image files are allowed (JPG, JPEG, PNG, WEBP, GIF)'
+      }));
       return;
     }
 
     const oversized = imageFiles.filter(file => file.size > MAX_IMAGE_SIZE);
     if (oversized.length > 0) {
-      setMessage({ type: 'error', text: 'Some images exceed 5MB limit' });
+      setFieldErrors(prev => ({
+        ...prev,
+        images: 'Some images exceed 5MB limit'
+      }));
       return;
     }
 
     const previews = imageFiles.map(file => URL.createObjectURL(file));
     setImagePreviews(prev => [...prev, ...previews]);
     setFormData(prev => ({ ...prev, images: [...prev.images, ...imageFiles] }));
-    setMessage(null);
+
+    // Clear error if images are now valid
+    if ([...formData.images, ...imageFiles].length > 0) {
+      setFieldErrors(prev => ({ ...prev, images: undefined }));
+    }
   };
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
+    // Clear previous video errors
+    setFieldErrors(prev => ({ ...prev, videos: undefined }));
+    setTouchedFields(prev => new Set(prev).add('videos'));
+
     if (formData.videos.length + files.length > MAX_VIDEOS) {
-      setMessage({ type: 'error', text: `Maximum ${MAX_VIDEOS} videos allowed. You can add ${MAX_VIDEOS - formData.videos.length} more.` });
+      const error = `Maximum ${MAX_VIDEOS} videos allowed. You can add ${MAX_VIDEOS - formData.videos.length} more.`;
+      setFieldErrors(prev => ({ ...prev, videos: error }));
       return;
     }
 
     const videoFiles = files.filter(file => file.type.startsWith('video/'));
-    
+
     if (videoFiles.length !== files.length) {
-      setMessage({ type: 'error', text: 'Only video files are allowed' });
+      setFieldErrors(prev => ({ ...prev, videos: 'Only video files are allowed' }));
       return;
     }
 
     const oversized = videoFiles.filter(file => file.size > MAX_VIDEO_SIZE);
     if (oversized.length > 0) {
-      setMessage({ type: 'error', text: 'Some videos exceed 100MB limit' });
+      setFieldErrors(prev => ({ ...prev, videos: 'Some videos exceed 100MB limit' }));
       return;
     }
 
     const previews = videoFiles.map(file => URL.createObjectURL(file));
     setVideoPreviews(prev => [...prev, ...previews]);
     setFormData(prev => ({ ...prev, videos: [...prev.videos, ...videoFiles] }));
-    setMessage(null);
+
+    // Clear error
+    setFieldErrors(prev => ({ ...prev, videos: undefined }));
+  };
+
+  const confirmDeleteImage = (index: number) => {
+    setImageToDelete(index);
   };
 
   const removeImage = (index: number) => {
     URL.revokeObjectURL(imagePreviews[index]);
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    const updatedImages = formData.images.filter((_, i) => i !== index);
     setFormData(prev => ({
       ...prev,
-      images: prev.images.filter((_, i) => i !== index)
+      images: updatedImages
     }));
+    setImageToDelete(null);
+
+    // Validate images after removal
+    setTouchedFields(prev => new Set(prev).add('images'));
+    if (updatedImages.length === 0) {
+      setFieldErrors(prev => ({ ...prev, images: 'At least one property image is required' }));
+    } else {
+      setFieldErrors(prev => ({ ...prev, images: undefined }));
+    }
   };
 
   const removeVideo = (index: number) => {
@@ -204,33 +356,61 @@ export default function WarehouseUploadForm() {
     setShowImageGallery(true);
   };
 
+  const goToNextImage = () => {
+    setSelectedImageIndex((prev) => (prev + 1) % imagePreviews.length);
+  };
+
+  const goToPreviousImage = () => {
+    setSelectedImageIndex((prev) => (prev - 1 + imagePreviews.length) % imagePreviews.length);
+  };
+
   const validateForm = (): boolean => {
-    if (!formData.title || !formData.propertyType || !formData.totalArea) {
-      setMessage({ type: 'error', text: 'Please fill in all required fields marked with *' });
-      return false;
+    const errors: FieldErrors = {};
+    const requiredFields = [
+      'title',
+      'propertyType',
+      'totalArea',
+      'availableFrom',
+      'pricePerSqFt',
+      'address',
+      'city',
+      'state'
+    ];
+
+    // Validate all required fields
+    requiredFields.forEach(field => {
+      const error = validateField(field, formData[field as keyof WarehouseFormData]);
+      if (error) {
+        errors[field as keyof FieldErrors] = error;
+      }
+    });
+
+    // Validate optional fields that have values
+    if (formData.pincode) {
+      const error = validateField('pincode', formData.pincode);
+      if (error) errors.pincode = error;
     }
 
-    if (!formData.pricePerSqFt || parseFloat(formData.pricePerSqFt) <= 0) {
-      setMessage({ type: 'error', text: 'Please enter a valid price per sq.ft' });
-      return false;
+    if (formData.contactPersonPhone) {
+      const error = validateField('contactPersonPhone', formData.contactPersonPhone);
+      if (error) errors.contactPersonPhone = error;
     }
 
-    if (formData.pincode && !/^\d{6}$/.test(formData.pincode)) {
-      setMessage({ type: 'error', text: 'Please enter a valid 6-digit pincode' });
-      return false;
+    if (formData.contactPersonEmail) {
+      const error = validateField('contactPersonEmail', formData.contactPersonEmail);
+      if (error) errors.contactPersonEmail = error;
     }
 
-    if (formData.contactPersonPhone && !/^[6-9]\d{9}$/.test(formData.contactPersonPhone.replace(/\s/g, ''))) {
-      setMessage({ type: 'error', text: 'Please enter a valid 10-digit Indian mobile number' });
-      return false;
-    }
+    // Validate images
+    const imageError = validateField('images', formData.images);
+    if (imageError) errors.images = imageError;
 
-    if (formData.images.length === 0) {
-      setMessage({ type: 'error', text: 'At least one property image is required' });
-      return false;
-    }
+    // Set all errors and mark all fields as touched
+    setFieldErrors(errors);
+    const allFields = new Set([...requiredFields, 'pincode', 'contactPersonPhone', 'contactPersonEmail', 'images']);
+    setTouchedFields(allFields);
 
-    return true;
+    return Object.keys(errors).length === 0;
   };
   const handleLocationSelect = (lat: string, lng: string) => {
     setFormData(prev => ({
@@ -241,9 +421,14 @@ export default function WarehouseUploadForm() {
   };
 
   const handleSubmit = async () => {
-    setMessage(null);
-
     if (!validateForm()) {
+      toast.error('Please fill in all required fields correctly');
+
+      // Scroll to first error
+      const firstErrorField = document.querySelector('.border-red-500');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
       return;
     }
 
@@ -276,7 +461,7 @@ export default function WarehouseUploadForm() {
         });
       }, 300);
 
-      const response = await fetch('/api/properties/create', {
+      const response = await fetch('/api/upload', {
         method: 'POST',
         body: uploadFormData,
       });
@@ -290,18 +475,26 @@ export default function WarehouseUploadForm() {
         throw new Error(data.error || 'Upload failed');
       }
 
-      setMessage({ type: 'success', text: 'Property listed successfully!' });
+      toast.success('Property listed successfully!', {
+        description: 'Your property has been submitted for review.',
+      });
+
+      // Reset form after successful upload
+      setTimeout(() => {
+        window.location.href = '/mylistings';
+      }, 2000);
 
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Upload failed. Please try again.',
+      toast.error('Upload failed', {
+        description: error instanceof Error ? error.message : 'Please try again.',
       });
     } finally {
       setUploading(false);
       setUploadProgress(0);
     }
   };
+  const today = new Date().toISOString().split("T")[0];
+
 
   const visibleImageCount = 3;
   const remainingImages = imagePreviews.length - visibleImageCount;
@@ -321,17 +514,6 @@ export default function WarehouseUploadForm() {
           <h1 className="text-4xl font-bold text-gray-900 mb-2">Add New Property</h1>
           <p className="text-gray-600">Fill in the mandatory details below to list your property on Rexon. Adding high-quality photos and videos increases visibility.</p>
         </div>
-
-        {message && (
-          <Alert variant={message.type === 'error' ? 'destructive' : 'default'} className="mb-6">
-            {message.type === 'success' ? (
-              <CheckCircle className="h-4 w-4" />
-            ) : (
-              <AlertCircle className="h-4 w-4" />
-            )}
-            <AlertDescription>{message.text}</AlertDescription>
-          </Alert>
-        )}
 
         {uploading && (
           <Card className="mb-6 border-red-200 bg-red-50">
@@ -369,10 +551,19 @@ export default function WarehouseUploadForm() {
                   <Input
                     id="title"
                     value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    onChange={(e) => handleFieldChange('title', e.target.value)}
+                    onBlur={() => handleFieldBlur('title')}
                     placeholder="e.g., Green Valley Warehousing Complex"
-                    className="border-gray-300 focus:border-red-500 focus:ring-red-500"
+                    className={`border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                      touchedFields.has('title') && fieldErrors.title ? 'border-red-500' : ''
+                    }`}
                   />
+                  {touchedFields.has('title') && fieldErrors.title && (
+                    <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {fieldErrors.title}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -382,11 +573,13 @@ export default function WarehouseUploadForm() {
                 </Label>
                 <Select
                   value={formData.propertyType}
-                  onValueChange={(value) => setFormData({ ...formData, propertyType: value })}
+                  onValueChange={(value) => handleFieldChange('propertyType', value)}
                 >
-                  <SelectTrigger 
-                    id="propertyType" 
-                    className="w-full h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
+                  <SelectTrigger
+                    id="propertyType"
+                    className={`w-full h-11 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                      touchedFields.has('propertyType') && fieldErrors.propertyType ? 'border-red-500' : ''
+                    }`}
                   >
                     <SelectValue placeholder="Select type..." />
                   </SelectTrigger>
@@ -396,6 +589,12 @@ export default function WarehouseUploadForm() {
                     ))}
                   </SelectContent>
                 </Select>
+                {touchedFields.has('propertyType') && fieldErrors.propertyType && (
+                  <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                    <AlertCircle className="h-4 w-4" />
+                    {fieldErrors.propertyType}
+                  </p>
+                )}
               </div>
 
                   <div className="space-y-2">
@@ -408,9 +607,12 @@ export default function WarehouseUploadForm() {
                         type="number"
                         min='0'
                         value={formData.totalArea}
-                        onChange={(e) => setFormData({ ...formData, totalArea: e.target.value })}
+                        onChange={(e) => handleFieldChange('totalArea', e.target.value)}
+                        onBlur={() => handleFieldBlur('totalArea')}
                         placeholder="0"
-                        className="flex-1 border-gray-300 focus:border-red-500 focus:ring-red-500"
+                        className={`flex-1 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                          touchedFields.has('totalArea') && fieldErrors.totalArea ? 'border-red-500' : ''
+                        }`}
                       />
                       <Select
                         value={formData.sizeUnit}
@@ -425,6 +627,12 @@ export default function WarehouseUploadForm() {
                         </SelectContent>
                       </Select>
                     </div>
+                    {touchedFields.has('totalArea') && fieldErrors.totalArea && (
+                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {fieldErrors.totalArea}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -461,10 +669,20 @@ export default function WarehouseUploadForm() {
                     <Input
                       id="availableFrom"
                       type="date"
+                      min={today}
                       value={formData.availableFrom}
-                      onChange={(e) => setFormData({ ...formData, availableFrom: e.target.value })}
-                      className="h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
+                      onChange={(e) => handleFieldChange('availableFrom', e.target.value)}
+                      onBlur={() => handleFieldBlur('availableFrom')}
+                      className={`h-11 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                        touchedFields.has('availableFrom') && fieldErrors.availableFrom ? 'border-red-500' : ''
+                      }`}
                     />
+                    {touchedFields.has('availableFrom') && fieldErrors.availableFrom && (
+                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {fieldErrors.availableFrom}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2 w-full">
@@ -481,6 +699,7 @@ export default function WarehouseUploadForm() {
                       <SelectContent className='max-w-[calc(100vw-2rem)]'>
                         <SelectItem value="rent">For Rent</SelectItem>
                         <SelectItem value="sale">For Sale</SelectItem>
+                        <SelectItem value="sale">For Lease</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -495,12 +714,22 @@ export default function WarehouseUploadForm() {
                     <Input
                       id="pricePerSqFt"
                       type="number"
+                      min={'0'}
                       value={formData.pricePerSqFt}
-                      onChange={(e) => setFormData({ ...formData, pricePerSqFt: e.target.value })}
-                      className="pl-8 h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
+                      onChange={(e) => handleFieldChange('pricePerSqFt', e.target.value)}
+                      onBlur={() => handleFieldBlur('pricePerSqFt')}
+                      className={`pl-8 h-11 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                        touchedFields.has('pricePerSqFt') && fieldErrors.pricePerSqFt ? 'border-red-500' : ''
+                      }`}
                       placeholder="0.00"
                     />
                   </div>
+                  {touchedFields.has('pricePerSqFt') && fieldErrors.pricePerSqFt && (
+                    <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {fieldErrors.pricePerSqFt}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -510,6 +739,7 @@ export default function WarehouseUploadForm() {
                     <Input
                       id="totalPrice"
                       type="number"
+                      min={0}
                       value={formData.totalPrice}
                       onChange={(e) => setFormData({ ...formData, totalPrice: e.target.value })}
                       className="pl-8 h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
@@ -538,11 +768,20 @@ export default function WarehouseUploadForm() {
                   <Textarea
                     id="address"
                     value={formData.address}
-                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                    onChange={(e) => handleFieldChange('address', e.target.value)}
+                    onBlur={() => handleFieldBlur('address')}
                     placeholder="Enter full street address"
-                    className="border-gray-300 focus:border-red-500 focus:ring-red-500 resize-none"
+                    className={`border-gray-300 focus:border-red-500 focus:ring-red-500 resize-none ${
+                      touchedFields.has('address') && fieldErrors.address ? 'border-red-500' : ''
+                    }`}
                     rows={2}
                   />
+                  {touchedFields.has('address') && fieldErrors.address && (
+                    <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {fieldErrors.address}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -553,10 +792,19 @@ export default function WarehouseUploadForm() {
                     <Input
                       id="city"
                       value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      onChange={(e) => handleFieldChange('city', e.target.value)}
+                      onBlur={() => handleFieldBlur('city')}
                       placeholder="e.g., Mumbai"
-                      className="h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
+                      className={`h-11 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                        touchedFields.has('city') && fieldErrors.city ? 'border-red-500' : ''
+                      }`}
                     />
+                    {touchedFields.has('city') && fieldErrors.city && (
+                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {fieldErrors.city}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2 w-full">
@@ -565,9 +813,14 @@ export default function WarehouseUploadForm() {
                     </Label>
                     <Select
                       value={formData.state}
-                      onValueChange={(value) => setFormData({ ...formData, state: value })}
+                      onValueChange={(value) => handleFieldChange('state', value)}
                     >
-                      <SelectTrigger id="state" className="h-11 w-full border-gray-300 focus:border-red-500 focus:ring-red-500">
+                      <SelectTrigger
+                        id="state"
+                        className={`h-11 w-full border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                          touchedFields.has('state') && fieldErrors.state ? 'border-red-500' : ''
+                        }`}
+                      >
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
                       <SelectContent className='max-w-[calc(100vw-2rem)]'>
@@ -576,6 +829,12 @@ export default function WarehouseUploadForm() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {touchedFields.has('state') && fieldErrors.state && (
+                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {fieldErrors.state}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -585,11 +844,20 @@ export default function WarehouseUploadForm() {
                     <Input
                       id="pincode"
                       value={formData.pincode}
-                      onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                      onChange={(e) => handleFieldChange('pincode', e.target.value)}
+                      onBlur={() => handleFieldBlur('pincode')}
                       placeholder="400001"
                       maxLength={6}
-                      className="h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
+                      className={`h-11 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                        touchedFields.has('pincode') && fieldErrors.pincode ? 'border-red-500' : ''
+                      }`}
                     />
+                    {touchedFields.has('pincode') && fieldErrors.pincode && (
+                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {fieldErrors.pincode}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2 w-full">
@@ -724,10 +992,19 @@ export default function WarehouseUploadForm() {
                       id="contactEmail"
                       type="email"
                       value={formData.contactPersonEmail}
-                      onChange={(e) => setFormData({ ...formData, contactPersonEmail: e.target.value })}
+                      onChange={(e) => handleFieldChange('contactPersonEmail', e.target.value)}
+                      onBlur={() => handleFieldBlur('contactPersonEmail')}
                       placeholder="email@example.com"
-                      className="h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
+                      className={`h-11 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                        touchedFields.has('contactPersonEmail') && fieldErrors.contactPersonEmail ? 'border-red-500' : ''
+                      }`}
                     />
+                    {touchedFields.has('contactPersonEmail') && fieldErrors.contactPersonEmail && (
+                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {fieldErrors.contactPersonEmail}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -736,11 +1013,23 @@ export default function WarehouseUploadForm() {
                   <Input
                     id="contactPhone"
                     type="tel"
+                    pattern='[0-9]{10}'
+                    maxLength={10}
+                    minLength={10}
                     value={formData.contactPersonPhone}
-                    onChange={(e) => setFormData({ ...formData, contactPersonPhone: e.target.value })}
+                    onChange={(e) => handleFieldChange('contactPersonPhone', e.target.value)}
+                    onBlur={() => handleFieldBlur('contactPersonPhone')}
                     placeholder="+91 98765 43210"
-                    className="h-11 border-gray-300 focus:border-red-500 focus:ring-red-500"
+                    className={`h-11 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                      touchedFields.has('contactPersonPhone') && fieldErrors.contactPersonPhone ? 'border-red-500' : ''
+                    }`}
                   />
+                  {touchedFields.has('contactPersonPhone') && fieldErrors.contactPersonPhone && (
+                    <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <AlertCircle className="h-4 w-4" />
+                      {fieldErrors.contactPersonPhone}
+                    </p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -756,8 +1045,9 @@ export default function WarehouseUploadForm() {
                     <div className="flex items-center">
                       <ImageIcon className="h-5 w-5 text-red-600 mr-2" />
                       <CardTitle className="text-lg">Property Images</CardTitle>
+                      <span className='text-red-600 mx-3'>*</span>
                     </div>
-                    <Badge className="bg-red-600 hover:bg-red-700">Required</Badge>
+                    {/* <Badge className="bg-red-600 hover:bg-red-700">Required</Badge> */}
                   </div>
                   <CardDescription className="text-xs">
                     Upload up to {MAX_IMAGES} images (Max 5MB each)
@@ -765,23 +1055,35 @@ export default function WarehouseUploadForm() {
                 </CardHeader>
                 <CardContent className="pt-6">
                   {imagePreviews.length === 0 ? (
-                    <Label htmlFor="images" className="block w-full cursor-pointer">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-red-500 hover:bg-red-50 transition-all">
-                        <input
-                          id="images"
-                          type="file"
-                          multiple
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          className="hidden"
-                        />
-                        <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <Upload className="h-8 w-8 text-red-600" />
+                    <div>
+                      <Label htmlFor="images" className="block w-full cursor-pointer">
+                        <div className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-red-500 hover:bg-red-50 transition-all ${
+                          touchedFields.has('images') && fieldErrors.images
+                            ? 'border-red-500 bg-red-50'
+                            : 'border-gray-300'
+                        }`}>
+                          <input
+                            id="images"
+                            type="file"
+                            multiple
+                            accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                            onChange={handleImageChange}
+                            className="hidden"
+                          />
+                          <div className="w-16 h-16 bg-gradient-to-br from-red-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Upload className="h-8 w-8 text-red-600" />
+                          </div>
+                          <p className="text-sm font-semibold text-gray-900 mb-1">Click to upload images</p>
+                          <p className="text-xs text-gray-500">JPG, JPEG, PNG, WEBP, GIF up to 5MB</p>
                         </div>
-                        <p className="text-sm font-semibold text-gray-900 mb-1">Click to upload images</p>
-                        <p className="text-xs text-gray-500">PNG, JPG up to 5MB</p>
-                      </div>
-                    </Label>
+                      </Label>
+                      {touchedFields.has('images') && fieldErrors.images && (
+                        <p className="text-sm text-red-500 flex items-center gap-1 mt-2">
+                          <AlertCircle className="h-4 w-4" />
+                          {fieldErrors.images}
+                        </p>
+                      )}
+                    </div>
                   ) : (
                     <div className="space-y-4">
                       <div className="grid grid-cols-3 gap-2">
@@ -799,13 +1101,16 @@ export default function WarehouseUploadForm() {
                               variant="destructive"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                removeImage(index);
+                                confirmDeleteImage(index);
                               }}
                               className="absolute -top-2 -right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 shadow-lg"
                             >
-                              <X className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3" />
                             </Button>
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg transition-all flex items-center justify-center">
+                            <div
+                              className="absolute inset-0 bg-black/0 group-hover:bg-black/20 rounded-lg transition-all flex items-center justify-center cursor-pointer"
+                              onClick={() => openGallery(index)}
+                            >
                               <Eye className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                             </div>
                           </div>
@@ -830,7 +1135,7 @@ export default function WarehouseUploadForm() {
                                 id="images-add"
                                 type="file"
                                 multiple
-                                accept="image/*"
+                                accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
                                 onChange={handleImageChange}
                                 className="hidden"
                               />
@@ -839,7 +1144,7 @@ export default function WarehouseUploadForm() {
                           </Label>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center justify-between text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
                         <span className="font-medium">{formData.images.length} / {MAX_IMAGES} images</span>
                         <Button
@@ -852,6 +1157,12 @@ export default function WarehouseUploadForm() {
                           View All
                         </Button>
                       </div>
+                      {touchedFields.has('images') && fieldErrors.images && (
+                        <p className="text-sm text-red-500 flex items-center gap-1">
+                          <AlertCircle className="h-4 w-4" />
+                          {fieldErrors.images}
+                        </p>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -875,7 +1186,11 @@ export default function WarehouseUploadForm() {
                   {formData.videos.length < MAX_VIDEOS && (
                     <div className="mb-4">
                       <Label htmlFor="videos" className="block w-full cursor-pointer">
-                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-red-500 hover:bg-red-50 transition-all">
+                        <div className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-red-500 hover:bg-red-50 transition-all ${
+                          touchedFields.has('videos') && fieldErrors.videos
+                            ? 'border-red-500 bg-red-50'
+                            : 'border-gray-300'
+                        }`}>
                           <input
                             id="videos"
                             type="file"
@@ -893,6 +1208,12 @@ export default function WarehouseUploadForm() {
                           </p>
                         </div>
                       </Label>
+                      {touchedFields.has('videos') && fieldErrors.videos && (
+                        <p className="text-sm text-red-500 flex items-center gap-1 mt-2">
+                          <AlertCircle className="h-4 w-4" />
+                          {fieldErrors.videos}
+                        </p>
+                      )}
                     </div>
                   )}
 
@@ -919,6 +1240,12 @@ export default function WarehouseUploadForm() {
                           </div>
                         </div>
                       ))}
+                      {touchedFields.has('videos') && fieldErrors.videos && (
+                        <p className="text-sm text-red-500 flex items-center gap-1 mt-2">
+                          <AlertCircle className="h-4 w-4" />
+                          {fieldErrors.videos}
+                        </p>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -995,59 +1322,126 @@ export default function WarehouseUploadForm() {
         </div>
       </div>
 
-      {/* Image Gallery Modal */}
+      {/* Image Gallery Modal - View Only */}
       <Dialog open={showImageGallery} onOpenChange={setShowImageGallery}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold">All Property Images ({imagePreviews.length})</DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+  <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-3xl lg:max-w-5xl xl:max-w-6xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+    <DialogHeader className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-5 md:pt-6 pb-3 sm:pb-4 border-b">
+      <div className="flex items-center justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <DialogTitle className="text-lg sm:text-xl md:text-2xl font-bold truncate">
+            Property Images
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm text-muted-foreground mt-1">
+            {selectedImageIndex + 1} of {imagePreviews.length}
+          </DialogDescription>
+        </div>
+      </div>
+    </DialogHeader>
+
+    <div className="relative p-3 sm:p-4 md:p-6 overflow-y-auto">
+      {/* Main Image Display - Add group class for hover effect */}
+      <div className="group relative w-full bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg sm:rounded-xl overflow-hidden shadow-2xl flex items-center justify-center">
+        <div 
+          className="w-full h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] flex items-center justify-center"
+          style={{ minHeight: '300px', maxHeight: '800px' }}
+        >
+          <img
+            src={imagePreviews[selectedImageIndex]}
+            alt={`Property ${selectedImageIndex + 1}`}
+            className="max-w-full max-h-full w-auto h-auto object-contain"
+          />
+        </div>
+
+        {/* Navigation Overlay */}
+        {imagePreviews.length > 1 && (
+          <>
+            {/* Previous Button - Always visible on mobile, hover-only on desktop */}
+            <Button
+              type="button"
+              size="icon"
+              variant="secondary"
+              onClick={goToPreviousImage}
+              className="absolute left-2 sm:left-3 md:left-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full bg-white/95 hover:bg-white shadow-2xl border-2 border-gray-200 hover:scale-110 transition-all
+              md:opacity-0 md:group-hover:opacity-100"
+            >
+              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-gray-700" />
+            </Button>
+
+            {/* Next Button - Always visible on mobile, hover-only on desktop */}
+            <Button
+              type="button"
+              size="icon"
+              variant="secondary"
+              onClick={goToNextImage}
+              className="absolute right-2 sm:right-3 md:right-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full bg-white/95 hover:bg-white shadow-2xl border-2 border-gray-200 hover:scale-110 transition-all
+              md:opacity-0 md:group-hover:opacity-100"
+            >
+              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-gray-700" />
+            </Button>
+
+            {/* Image Counter Overlay - Always visible on mobile, hover-only on desktop */}
+            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 bg-black/75 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium backdrop-blur-sm transition-opacity
+            md:opacity-0 md:group-hover:opacity-100">
+              {selectedImageIndex + 1} / {imagePreviews.length}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Thumbnail Strip - Responsive */}
+      {imagePreviews.length > 1 && (
+        <div className="mt-3 sm:mt-4 md:mt-6">
+          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 px-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             {imagePreviews.map((preview, index) => (
-              <div key={index} className="relative group aspect-square">
+              <button
+                key={index}
+                onClick={() => setSelectedImageIndex(index)}
+                className={`relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-md sm:rounded-lg overflow-hidden transition-all ${
+                  index === selectedImageIndex
+                    ? 'ring-2 sm:ring-4 ring-red-500 scale-105 shadow-lg'
+                    : 'ring-1 sm:ring-2 ring-gray-200 hover:ring-red-300 hover:scale-105'
+                }`}
+              >
                 <img
                   src={preview}
-                  alt={`Property ${index + 1}`}
-                  className="w-full h-full object-cover rounded-lg border-2 border-gray-200 group-hover:border-red-500 transition-all"
+                  alt={`Thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
                 />
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="destructive"
-                  onClick={() => {
-                    removeImage(index);
-                    if (imagePreviews.length === 1) {
-                      setShowImageGallery(false);
-                    }
-                  }}
-                  className="absolute -top-2 -right-2 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-red-500 hover:bg-red-600 shadow-lg"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-                <div className="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                  Image {index + 1}
-                </div>
-              </div>
+                {index === selectedImageIndex && (
+                  <div className="absolute inset-0 bg-red-500/20" />
+                )}
+              </button>
             ))}
-            
-            {formData.images.length < MAX_IMAGES && (
-              <Label htmlFor="images-modal" className="block cursor-pointer">
-                <div className="aspect-square bg-gradient-to-br from-red-50 to-orange-50 rounded-lg border-2 border-dashed border-red-300 flex flex-col items-center justify-center hover:border-red-500 hover:bg-red-100 transition-all group">
-                  <input
-                    id="images-modal"
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="hidden"
-                  />
-                  <Plus className="h-10 w-10 text-red-500 group-hover:text-red-600 mb-2 group-hover:scale-110 transition-transform" />
-                  <p className="text-xs text-red-600 font-medium">Add More</p>
-                </div>
-              </Label>
-            )}
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
+    </div>
+  </DialogContent>
+</Dialog>
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={imageToDelete !== null} onOpenChange={() => setImageToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this image? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (imageToDelete !== null) {
+                  removeImage(imageToDelete);
+                }
+              }}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
