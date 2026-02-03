@@ -16,8 +16,8 @@ import {
 import { Badge } from '@/components/ui/badge'
 
 interface City {
-  name: string;
-  properties: string;
+  city: string;
+  state: string;
 }
 
 interface PropertyType {
@@ -38,7 +38,10 @@ export default function PropertySearch() {
   const [selectedPropertyType, setSelectedPropertyType] = useState('');
   const [selectedBudget, setSelectedBudget] = useState('');
   const router = useRouter();
-  
+  const [cities, setCities] = useState<City[]>([]);
+  const [isLoadingCities, setIsLoadingCities] = useState(false);
+  const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
+
   // Property types for commercial real estate
   const propertyTypes: PropertyType[] = [
     { id: 'warehouse', label: 'Warehouse' },
@@ -68,37 +71,69 @@ export default function PropertySearch() {
   ];
   
   // Major Indian cities for warehouse and commercial properties
-  const cities: City[] = [
-    { name: 'Mumbai, Maharashtra', properties: '8,542' },
-    { name: 'Delhi NCR', properties: '12,341' },
-    { name: 'Bangalore, Karnataka', properties: '7,893' },
-    { name: 'Hyderabad, Telangana', properties: '5,621' },
-    { name: 'Chennai, Tamil Nadu', properties: '4,987' },
-    { name: 'Pune, Maharashtra', properties: '5,234' },
-    { name: 'Ahmedabad, Gujarat', properties: '3,876' },
-    { name: 'Kolkata, West Bengal', properties: '3,456' },
-    { name: 'Surat, Gujarat', properties: '2,341' },
-    { name: 'Jaipur, Rajasthan', properties: '1,987' },
-    { name: 'Lucknow, Uttar Pradesh', properties: '1,765' },
-    { name: 'Kanpur, Uttar Pradesh', properties: '1,543' },
-    { name: 'Nagpur, Maharashtra', properties: '1,432' },
-    { name: 'Indore, Madhya Pradesh', properties: '1,298' },
-    { name: 'Thane, Maharashtra', properties: '2,156' },
-    { name: 'Bhopal, Madhya Pradesh', properties: '987' },
-    { name: 'Visakhapatnam, Andhra Pradesh', properties: '1,123' },
-    { name: 'Vadodara, Gujarat', properties: '1,045' },
-    { name: 'Ghaziabad, Uttar Pradesh', properties: '876' },
-    { name: 'Ludhiana, Punjab', properties: '765' },
-    { name: 'Coimbatore, Tamil Nadu', properties: '654' },
-    { name: 'Kochi, Kerala', properties: '598' },
-    { name: 'Chandigarh', properties: '543' },
-    { name: 'Noida, Uttar Pradesh', properties: '1,876' },
-    { name: 'Gurugram, Haryana', properties: '2,234' }
-  ];
+  // const cities: City[] = [
+  //   { city: 'Mumbai, Maharashtra', properties: '8,542' },
+  //   { city: 'Delhi NCR', properties: '12,341' },
+  //   { city: 'Bangalore, Karnataka', properties: '7,893' },
+  //   { city: 'Hyderabad, Telangana', properties: '5,621' },
+  //   { city: 'Chennai, Tamil Nadu', properties: '4,987' },
+  //   { city: 'Pune, Maharashtra', properties: '5,234' },
+  //   { city: 'Ahmedabad, Gujarat', properties: '3,876' },
+  //   { city: 'Kolkata, West Bengal', properties: '3,456' },
+  //   { city: 'Surat, Gujarat', properties: '2,341' },
+  //   { city: 'Jaipur, Rajasthan', properties: '1,987' },
+  //   { city: 'Lucknow, Uttar Pradesh', properties: '1,765' },
+  //   { city: 'Kanpur, Uttar Pradesh', properties: '1,543' },
+  //   { city: 'Nagpur, Maharashtra', properties: '1,432' },
+  //   { city: 'Indore, Madhya Pradesh', properties: '1,298' },
+  //   { city: 'Thane, Maharashtra', properties: '2,156' },
+  //   { city: 'Bhopal, Madhya Pradesh', properties: '987' },
+  //   { city: 'Visakhapatnam, Andhra Pradesh', properties: '1,123' },
+  //   { city: 'Vadodara, Gujarat', properties: '1,045' },
+  //   { city: 'Ghaziabad, Uttar Pradesh', properties: '876' },
+  //   { city: 'Ludhiana, Punjab', properties: '765' },
+  //   { city: 'Coimbatore, Tamil Nadu', properties: '654' },
+  //   { city: 'Kochi, Kerala', properties: '598' },
+  //   { city: 'Chandigarh', properties: '543' },
+  //   { city: 'Noida, Uttar Pradesh', properties: '1,876' },
+  //   { city: 'Gurugram, Haryana', properties: '2,234' }
+  // ];
   
-  const filteredCities = cities.filter(city =>
-    city.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // const filteredCities = cities.filter(city =>
+  //   city.city.toLowerCase().includes(searchQuery.toLowerCase())
+  // );
+  
+  // const fetchCities = async (query: string) => {
+  //   if (query.length < 2) {
+  //     setShowSuggestions(false);
+  //     setCities([]);
+  //     return;
+  //   }
+  
+  //   try {
+  //     setIsLoadingCities(true);
+  //     const res = await fetch(`/api/cities?q=${encodeURIComponent(query)}`);
+  //     const data = await res.json();
+  //     setCitySuggestions(data);
+  //     console.log(data, "data")
+  //     setCities(data);
+  //   } catch (err) {
+  //     console.error("Failed to fetch cities", err);
+  //     setCities([]);
+  //   } finally {
+  //     setIsLoadingCities(false);
+  //   }
+  // };
+
+
+  const fetchCities = async (query: string) => {
+
+    const res = await fetch("/api/cities");
+    const cities = await res.json();
+    console.log(cities);
+  }
+  
+  
   
   const handleSearch = () => {
     // Build query parameters
@@ -121,8 +156,13 @@ export default function PropertySearch() {
     setShowSuggestions(false);
   };
   
-  const handleCitySelect = (cityName: string) => {
-    setSearchQuery(cityName);
+  // const handleCitySelect = (cityName: string) => {
+  //   setSearchQuery(cityName);
+  //   setShowSuggestions(false);
+  // };
+
+  const handleCitySelect = (city: City) => {
+    setSearchQuery(`${city.city}, ${city.state}`);
     setShowSuggestions(false);
   };
 
@@ -150,9 +190,15 @@ export default function PropertySearch() {
               type="text"
               placeholder="Search by city, locality or pincode"
               value={searchQuery}
+              // onChange={(e) => {
+              //   setSearchQuery(e.target.value);
+              //   setShowSuggestions(true);
+              // }}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                const value = e.target.value;
+                setSearchQuery(value);
                 setShowSuggestions(true);
+                fetchCities(value);
               }}
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
@@ -164,20 +210,26 @@ export default function PropertySearch() {
             {/* Location Suggestions Dropdown */}
             {showSuggestions && searchQuery && (
               <Card className="absolute top-full left-0 right-0 mt-1 shadow-xl max-h-[320px] overflow-y-auto z-50 border border-gray-200 rounded-md">
-                {filteredCities.length > 0 ? (
-                  <div className="divide-y divide-gray-100">
-                    {filteredCities.map((city, index) => (
-                      <Button
-                        key={index}
+                {/* {filteredCities.length > 0 ? */}
+                {isLoadingCities ? (
+                  <div className="p-3 text-sm text-gray-500 text-center">
+                    Loading cities...
+                  </div>
+                ) : cities.length > 0 ?
+                  (
+                    <div className="divide-y divide-gray-100">
+                      {cities.map((city, index) => (
+                        <Button
+                          key={index}
                         variant="ghost"
-                        onClick={() => handleCitySelect(city.name)}
+                        onClick={() => handleCitySelect(city)}
                         className="w-full justify-between px-3.5 py-2.5 h-auto rounded-none hover:bg-red-50/80 transition-colors"
                       >
                         <div className="flex items-center gap-2">
                           <MapPin className="h-3.5 w-3.5 text-red-600/70 flex-shrink-0" />
-                          <span className="text-sm text-gray-700 font-normal">{city.name}</span>
+                          <span className="text-sm text-gray-700 font-normal">  {city.city}, {city.state}</span>
                         </div>
-                        <span className="text-xs text-gray-500">{city.properties}</span>
+                        {/* <span className="text-xs text-gray-500">{city.properties}</span> */}
                       </Button>
                     ))}
                   </div>
@@ -244,9 +296,15 @@ export default function PropertySearch() {
               type="text"
               placeholder="Search by city, locality or pincode"
               value={searchQuery}
+              // onChange={(e) => {
+              //   setSearchQuery(e.target.value);
+              //   setShowSuggestions(true);
+              // }}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                const value = e.target.value;
+                setSearchQuery(value);
                 setShowSuggestions(true);
+                fetchCities(value);
               }}
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
@@ -257,20 +315,24 @@ export default function PropertySearch() {
             {/* Tablet Location Suggestions */}
             {showSuggestions && searchQuery && (
               <Card className="absolute top-full left-0 right-0 mt-1 shadow-xl max-h-[280px] overflow-y-auto z-50 border border-gray-200 rounded-md">
-                {filteredCities.length > 0 ? (
+                {isLoadingCities ? (
+                  <div className="p-3 text-sm text-gray-500 text-center">
+                    Loading cities...
+                  </div>
+                ) : cities.length > 0 ? (
                   <div className="divide-y divide-gray-100">
-                    {filteredCities.map((city, index) => (
+                    {cities.map((city, index) => (
                       <Button
                         key={index}
                         variant="ghost"
-                        onClick={() => handleCitySelect(city.name)}
+                        onClick={() => handleCitySelect(city)}
                         className="w-full justify-between px-3.5 py-2.5 h-auto rounded-none hover:bg-red-50/80"
                       >
                         <div className="flex items-center gap-2">
                           <MapPin className="h-3.5 w-3.5 text-red-600/70 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">{city.name}</span>
+                          <span className="text-sm text-gray-700">{city.city}</span>
                         </div>
-                        <span className="text-xs text-gray-500">{city.properties}</span>
+                        <span className="text-xs text-gray-500">{city.state}</span>
                       </Button>
                     ))}
                   </div>
@@ -336,9 +398,15 @@ export default function PropertySearch() {
               type="text"
               placeholder="Search location..."
               value={searchQuery}
+              // onChange={(e) => {
+              //   setSearchQuery(e.target.value);
+              //   setShowSuggestions(true);
+              // }}
               onChange={(e) => {
-                setSearchQuery(e.target.value);
+                const value = e.target.value;
+                setSearchQuery(value);
                 setShowSuggestions(true);
+                fetchCities(value);
               }}
               onFocus={() => setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
@@ -349,20 +417,24 @@ export default function PropertySearch() {
             {/* Mobile Location Suggestions */}
             {showSuggestions && searchQuery && (
               <Card className="absolute top-full left-0 right-0 mt-1 shadow-xl max-h-[240px] overflow-y-auto z-50 border border-gray-200 rounded-md">
-                {filteredCities.length > 0 ? (
+              {isLoadingCities ? (
+                  <div className="p-3 text-sm text-gray-500 text-center">
+                    Loading cities...
+                  </div>
+                ) : cities.length > 0 ? (
                   <div className="divide-y divide-gray-100">
-                    {filteredCities.map((city, index) => (
+                    {cities.map((city, index) => (
                       <Button
                         key={index}
                         variant="ghost"
-                        onClick={() => handleCitySelect(city.name)}
+                        onClick={() => handleCitySelect(city)}
                         className="w-full justify-between px-3 py-2.5 h-auto rounded-none hover:bg-red-50/80"
                       >
                         <div className="flex items-center gap-1.5">
                           <MapPin className="h-3 w-3 text-red-600/70 flex-shrink-0" />
-                          <span className="text-xs text-gray-700 truncate">{city.name}</span>
+                          <span className="text-xs text-gray-700 truncate">{city.city}</span>
                         </div>
-                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{city.properties}</span>
+                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{city.state}</span>
                       </Button>
                     ))}
                   </div>
@@ -422,7 +494,7 @@ export default function PropertySearch() {
       </div>
 
       {/* Active Filters Display */}
-      {(searchQuery || selectedPropertyType || selectedBudget) && (
+      {/* {(searchQuery || selectedPropertyType || selectedBudget) && (
         <div className="mt-3 flex flex-wrap gap-2">
           {searchQuery && (
             <Badge variant="secondary" className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-md transition-colors">
@@ -467,7 +539,7 @@ export default function PropertySearch() {
             </Badge>
           )}
         </div>
-      )}
+      )} */}
     </div>
   );
 }
