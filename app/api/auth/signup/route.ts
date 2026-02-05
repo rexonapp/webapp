@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     const result = await query(
       `INSERT INTO users (first_name, last_name, email, phone, password_hash, auth_provider, is_verified)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, first_name, last_name, email, auth_provider`,
+       RETURNING id, first_name, last_name, email, auth_provider, role`,
       [firstName, lastName, email.toLowerCase(), phone || null, passwordHash, 'email', false]
     );
 
@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
       firstName: user.first_name,
       lastName: user.last_name,
       authProvider: user.auth_provider,
+      role: user.role || 'customer',
     });
 
     await query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
         lastName: user.last_name,
         email: user.email,
         authProvider: user.auth_provider,
+        role: user.role || 'customer',
       },
     });
   } catch (error) {

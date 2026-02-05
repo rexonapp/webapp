@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     const normalizedEmail = msEmail.toLowerCase();
 
     const msUserResult = await query(
-      'SELECT id, first_name, last_name, email, auth_provider, microsoft_id FROM users WHERE microsoft_id = $1',
+      'SELECT id, first_name, last_name, email, auth_provider, microsoft_id, role FROM users WHERE microsoft_id = $1',
       [msUser.id]
     );
 
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
     } else {
       // User doesn't exist by Microsoft ID, check if email exists
       const emailCheckResult = await query(
-        'SELECT id, first_name, last_name, email, auth_provider, microsoft_id FROM users WHERE email = $1',
+        'SELECT id, first_name, last_name, email, auth_provider, microsoft_id, role FROM users WHERE email = $1',
         [normalizedEmail]
       );
 
@@ -122,7 +122,7 @@ export async function GET(request: NextRequest) {
         const insertResult = await query(
           `INSERT INTO users (first_name, last_name, email, microsoft_id, auth_provider, is_verified, created_at, last_login)
            VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-           RETURNING id, first_name, last_name, email, auth_provider, microsoft_id`,
+           RETURNING id, first_name, last_name, email, auth_provider, microsoft_id, role`,
           [
             msUser.givenName || '',
             msUser.surname || '',
@@ -144,6 +144,7 @@ export async function GET(request: NextRequest) {
       firstName: user.first_name,
       lastName: user.last_name,
       authProvider: user.auth_provider,
+      role: user.role || 'customer',
     });
 
     return NextResponse.redirect(new URL('/', request.url));

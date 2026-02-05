@@ -1,23 +1,24 @@
 'use client'
 
-import { useState } from 'react'
-import { MapPin, Search, Building2, IndianRupee, X } from 'lucide-react'
+import { useState, useEffect, useRef, useMemo } from 'react'
+import { MapPin, Search, Building2, Ruler, Check } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
+import { cn } from "@/lib/utils"
 
 interface City {
+  id?: string;
   city: string;
-  state: string;
+  stateCode?: string; // Optional since API might not always provide it
+  latitude?: number;
+  longitude?: number;
 }
 
 interface PropertyType {
@@ -25,22 +26,32 @@ interface PropertyType {
   label: string;
 }
 
-interface PriceBudget {
+interface Distance {
   id: string;
   label: string;
-  min?: number;
-  max?: number;
+  value: number; // in metres
 }
 
 export default function PropertySearch() {
+  const [showDropdown, setShowDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [selectedPropertyType, setSelectedPropertyType] = useState('');
-  const [selectedBudget, setSelectedBudget] = useState('');
+  const [selectedDistance, setSelectedDistance] = useState('');
   const router = useRouter();
   const [cities, setCities] = useState<City[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
-  const [citySuggestions, setCitySuggestions] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
+
+  // Separate refs for each layout since all are rendered but hidden with CSS
+  const desktopInputRef = useRef<HTMLInputElement>(null);
+  const desktopDropdownRef = useRef<HTMLDivElement>(null);
+  const tabletInputRef = useRef<HTMLInputElement>(null);
+  const tabletDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Property types for commercial real estate
   const propertyTypes: PropertyType[] = [
@@ -56,192 +67,313 @@ export default function PropertySearch() {
     { id: 'godown', label: 'Godown' }
   ];
 
-  // Updated price budget ranges starting from ₹50,000
-  const priceBudgets: PriceBudget[] = [
-    { id: 'under-1l', label: 'Under ₹1L', max: 100000 },
-    { id: '1l-5l', label: '₹1L - ₹5L', min: 100000, max: 500000 },
-    { id: '5l-10l', label: '₹5L - ₹10L', min: 500000, max: 1000000 },
-    { id: '10l-25l', label: '₹10L - ₹25L', min: 1000000, max: 2500000 },
-    { id: '25l-50l', label: '₹25L - ₹50L', min: 2500000, max: 5000000 },
-    { id: '50l-1cr', label: '₹50L - ₹1Cr', min: 5000000, max: 10000000 },
-    { id: '1cr-2cr', label: '₹1Cr - ₹2Cr', min: 10000000, max: 20000000 },
-    { id: '2cr-5cr', label: '₹2Cr - ₹5Cr', min: 20000000, max: 50000000 },
-    { id: '5cr-10cr', label: '₹5Cr - ₹10Cr', min: 50000000, max: 100000000 },
-    { id: 'above-10cr', label: 'Above ₹10Cr', min: 100000000 }
+  // Distance options in metres
+  const distanceOptions: Distance[] = [
+    { id: '500', label: '500 metres or less', value: 500 },
+    { id: '1000', label: '1000 metres or less', value: 1000 },
+    { id: '2000', label: '2000 metres or less', value: 2000 },
+    { id: '5000', label: '5000 metres or less', value: 5000 },
+    { id: '10000', label: '10000 metres or above', value: 10000 }
   ];
   
-  // Major Indian cities for warehouse and commercial properties
-  // const cities: City[] = [
-  //   { city: 'Mumbai, Maharashtra', properties: '8,542' },
-  //   { city: 'Delhi NCR', properties: '12,341' },
-  //   { city: 'Bangalore, Karnataka', properties: '7,893' },
-  //   { city: 'Hyderabad, Telangana', properties: '5,621' },
-  //   { city: 'Chennai, Tamil Nadu', properties: '4,987' },
-  //   { city: 'Pune, Maharashtra', properties: '5,234' },
-  //   { city: 'Ahmedabad, Gujarat', properties: '3,876' },
-  //   { city: 'Kolkata, West Bengal', properties: '3,456' },
-  //   { city: 'Surat, Gujarat', properties: '2,341' },
-  //   { city: 'Jaipur, Rajasthan', properties: '1,987' },
-  //   { city: 'Lucknow, Uttar Pradesh', properties: '1,765' },
-  //   { city: 'Kanpur, Uttar Pradesh', properties: '1,543' },
-  //   { city: 'Nagpur, Maharashtra', properties: '1,432' },
-  //   { city: 'Indore, Madhya Pradesh', properties: '1,298' },
-  //   { city: 'Thane, Maharashtra', properties: '2,156' },
-  //   { city: 'Bhopal, Madhya Pradesh', properties: '987' },
-  //   { city: 'Visakhapatnam, Andhra Pradesh', properties: '1,123' },
-  //   { city: 'Vadodara, Gujarat', properties: '1,045' },
-  //   { city: 'Ghaziabad, Uttar Pradesh', properties: '876' },
-  //   { city: 'Ludhiana, Punjab', properties: '765' },
-  //   { city: 'Coimbatore, Tamil Nadu', properties: '654' },
-  //   { city: 'Kochi, Kerala', properties: '598' },
-  //   { city: 'Chandigarh', properties: '543' },
-  //   { city: 'Noida, Uttar Pradesh', properties: '1,876' },
-  //   { city: 'Gurugram, Haryana', properties: '2,234' }
-  // ];
-  
-  // const filteredCities = cities.filter(city =>
-  //   city.city.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
-  
-  // const fetchCities = async (query: string) => {
-  //   if (query.length < 2) {
-  //     setShowSuggestions(false);
-  //     setCities([]);
-  //     return;
-  //   }
-  
-  //   try {
-  //     setIsLoadingCities(true);
-  //     const res = await fetch(`/api/cities?q=${encodeURIComponent(query)}`);
-  //     const data = await res.json();
-  //     setCitySuggestions(data);
-  //     console.log(data, "data")
-  //     setCities(data);
-  //   } catch (err) {
-  //     console.error("Failed to fetch cities", err);
-  //     setCities([]);
-  //   } finally {
-  //     setIsLoadingCities(false);
-  //   }
-  // };
 
+  // Fetch cities from API on component mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        setIsLoadingCities(true);
+        setError(null);
+        const res = await fetch("/api/cities");
 
-  const fetchCities = async (query: string) => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch cities');
+        }
 
-    const res = await fetch("/api/cities");
-    const cities = await res.json();
-    console.log(cities);
-  }
-  
-  
-  
+        const data = await res.json();
+
+        // Validate data structure
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid data format');
+        }
+
+        setCities(data);
+        console.log(`✅ Loaded ${data.length} cities successfully`);
+      } catch (error) {
+        console.error("❌ Error fetching cities:", error);
+        setError('Unable to load cities. Please refresh the page.');
+        setCities([]); // Prevent breaking the site
+      } finally {
+        setIsLoadingCities(false);
+      }
+    };
+
+    fetchCities();
+  }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      // If click is outside the container entirely, close dropdown
+      if (containerRef.current && !containerRef.current.contains(target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter cities based on search query with limit to prevent performance issues
+  const filteredCities = useMemo(() => {
+    if (!cities || cities.length === 0) {
+      console.log('⚠️ No cities available for filtering');
+      return [];
+    }
+
+    const query = searchQuery.toLowerCase().trim();
+
+    // Don't show any cities if query is empty
+    if (!query) {
+      return [];
+    }
+
+    const filtered = cities
+      .filter((city) => {
+        // Skip invalid cities
+        if (!city || !city.city) return false;
+
+        // Safe toLowerCase with null checks
+        const cityName = city.city?.toLowerCase() || '';
+        const stateCode = city.stateCode?.toLowerCase() || '';
+
+        return (
+          cityName.includes(query) ||
+          (stateCode && stateCode.includes(query))
+        );
+      })
+      .slice(0, 50); // Limit to 50 results for performance
+
+    console.log(`📊 Filtered ${filtered.length} cities (query: "${searchQuery}")`);
+    return filtered;
+  }, [cities, searchQuery]);
+
   const handleSearch = () => {
     // Build query parameters
     const params = new URLSearchParams();
-    
-    if (searchQuery.trim()) {
-      params.append('location', searchQuery);
+
+    if (selectedCity && selectedCity.city) {
+      params.append('city', selectedCity.city);
+      // Only append state if it exists
+      if (selectedCity.stateCode) {
+        params.append('state', selectedCity.stateCode);
+      }
+      // Append geocodes if they exist - important for location-based search
+      if (selectedCity.latitude !== undefined && selectedCity.longitude !== undefined) {
+        params.append('lat', selectedCity.latitude.toString());
+        params.append('lng', selectedCity.longitude.toString());
+      }
     }
-    
+
     if (selectedPropertyType) {
       params.append('type', selectedPropertyType);
     }
-    
-    if (selectedBudget) {
-      params.append('budget', selectedBudget);
+
+    if (selectedDistance) {
+      params.append('distance', selectedDistance);
     }
-    
+
     // Navigate to search results page with all filters
     router.push(`/search?${params.toString()}`);
-    setShowSuggestions(false);
+    setShowDropdown(false);
   };
-  
-  // const handleCitySelect = (cityName: string) => {
-  //   setSearchQuery(cityName);
-  //   setShowSuggestions(false);
-  // };
 
   const handleCitySelect = (city: City) => {
-    setSearchQuery(`${city.city}, ${city.state}`);
-    setShowSuggestions(false);
+    if (!city || !city.city) return; // Safety check
+
+    setSelectedCity(city);
+    // Safe display with fallback
+    const displayText = city.stateCode
+      ? `${city.city}, ${city.stateCode}`
+      : city.city;
+    setSearchQuery(displayText);
+    setShowDropdown(false);
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSearch();
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setShowDropdown(true);
+    setHighlightedIndex(-1); // Reset highlight when typing
+    console.log('🔍 Search query:', value, 'Dropdown:', true);
+
+    // Clear selected city if user is typing something different
+    if (selectedCity) {
+      const currentDisplay = selectedCity.stateCode
+        ? `${selectedCity.city}, ${selectedCity.stateCode}`
+        : selectedCity.city;
+      if (value !== currentDisplay) {
+        setSelectedCity(null);
+      }
     }
   };
 
-  const clearFilter = (filterType: 'location' | 'type' | 'budget') => {
-    if (filterType === 'location') setSearchQuery('');
-    if (filterType === 'type') setSelectedPropertyType('');
-    if (filterType === 'budget') setSelectedBudget('');
+  const handleInputFocus = () => {
+    console.log('👆 Input focused');
+    // Only show dropdown if user has typed something
+    if (searchQuery.trim().length > 0) {
+      setShowDropdown(true);
+    }
+    setHighlightedIndex(-1);
   };
+
+  // Keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showDropdown || filteredCities.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setHighlightedIndex((prev) =>
+          prev < filteredCities.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (highlightedIndex >= 0 && highlightedIndex < filteredCities.length) {
+          handleCitySelect(filteredCities[highlightedIndex]);
+        } else if (filteredCities.length === 1) {
+          // Auto-select if only one result
+          handleCitySelect(filteredCities[0]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setShowDropdown(false);
+        setHighlightedIndex(-1);
+        break;
+    }
+  };
+
+  // Scroll highlighted item into view
+  useEffect(() => {
+    if (highlightedIndex >= 0) {
+      const dropdowns = [desktopDropdownRef, tabletDropdownRef, mobileDropdownRef];
+      dropdowns.forEach((ref) => {
+        if (ref.current) {
+          const highlightedElement = ref.current.children[highlightedIndex] as HTMLElement;
+          if (highlightedElement) {
+            highlightedElement.scrollIntoView({
+              block: 'nearest',
+              behavior: 'smooth',
+            });
+          }
+        }
+      });
+    }
+  }, [highlightedIndex]);
   
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
-      <div className="overflow-hidden shadow-lg border border-gray-200/50 bg-white/95 backdrop-blur-sm rounded-lg">
+    <>
+      <style jsx>{`
+        @keyframes dropdown-enter {
+          from {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        .animate-dropdown-enter {
+          animation: dropdown-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+      `}</style>
+      <div className="w-full max-w-4xl mx-auto px-4">
+        <div ref={containerRef} className="relative shadow-lg border border-gray-200/50 bg-white/95 backdrop-blur-sm rounded-lg">
         {/* Desktop Layout - Hidden on mobile */}
         <div className="hidden lg:flex items-center">
-          {/* Location Input */}
+          {/* City Typeahead */}
           <div className="flex-[2] min-w-0 flex items-center gap-2.5 px-4 py-3 border-r border-gray-200 relative">
             <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
-            <Input
+            <input
+              ref={desktopInputRef}
               type="text"
-              placeholder="Search by city, locality or pincode"
               value={searchQuery}
-              // onChange={(e) => {
-              //   setSearchQuery(e.target.value);
-              //   setShowSuggestions(true);
-              // }}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchQuery(value);
-                setShowSuggestions(true);
-                fetchCities(value);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              onKeyPress={handleKeyPress}
-              className="flex-1 min-w-0 border-0 p-0 h-auto text-sm font-normal placeholder:text-gray-400 placeholder:font-normal bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
-              aria-label="Search for properties by location"
+              onChange={handleInputChange}
+              onFocus={handleInputFocus}
+              onKeyDown={handleKeyDown}
+              placeholder="Search city..."
+              className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
+              autoComplete="off"
             />
-            
-            {/* Location Suggestions Dropdown */}
-            {showSuggestions && searchQuery && (
-              <Card className="absolute top-full left-0 right-0 mt-1 shadow-xl max-h-[320px] overflow-y-auto z-50 border border-gray-200 rounded-md">
-                {/* {filteredCities.length > 0 ? */}
-                {isLoadingCities ? (
-                  <div className="p-3 text-sm text-gray-500 text-center">
-                    Loading cities...
+            {showDropdown && (
+              <div
+                ref={desktopDropdownRef}
+                className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-2xl z-50 max-h-[250px] overflow-y-auto animate-dropdown-enter"
+                style={{
+                  boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
+                }}
+              >
+                {error ? (
+                  <div className="px-4 py-3 text-sm text-red-600 bg-red-50/80 backdrop-blur-sm m-2 rounded-lg">
+                    <div className="font-semibold">Error loading cities</div>
+                    <div className="text-xs mt-1">{error}</div>
                   </div>
-                ) : cities.length > 0 ?
-                  (
-                    <div className="divide-y divide-gray-100">
-                      {cities.map((city, index) => (
-                        <Button
-                          key={index}
-                        variant="ghost"
-                        onClick={() => handleCitySelect(city)}
-                        className="w-full justify-between px-3.5 py-2.5 h-auto rounded-none hover:bg-red-50/80 transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-3.5 w-3.5 text-red-600/70 flex-shrink-0" />
-                          <span className="text-sm text-gray-700 font-normal">  {city.city}, {city.state}</span>
-                        </div>
-                        {/* <span className="text-xs text-gray-500">{city.properties}</span> */}
-                      </Button>
-                    ))}
+                ) : isLoadingCities ? (
+                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                      Loading cities...
+                    </div>
+                  </div>
+                ) : cities.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
+                    No cities loaded. Please refresh the page.
+                  </div>
+                ) : filteredCities.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
+                    {searchQuery
+                      ? `No city found matching "${searchQuery}".`
+                      : 'Type city name to search...'}
                   </div>
                 ) : (
-                  <div className="p-4">
-                    <p className="text-sm text-gray-500 text-center">No cities found</p>
-                  </div>
+                  filteredCities.map((city, index) => (
+                    <div
+                      key={city.id || index}
+                      onClick={() => handleCitySelect(city)}
+                      onMouseEnter={() => setHighlightedIndex(index)}
+                      className={cn(
+                        "mx-2 my-1 px-3 py-2.5 cursor-pointer flex items-center gap-2.5 text-sm transition-all duration-200 rounded-lg",
+                        highlightedIndex === index
+                          ? "bg-gradient-to-r from-red-50 to-red-100/80 backdrop-blur-sm shadow-md scale-[1.02] border border-red-200/50"
+                          : "hover:bg-gray-50/80 hover:backdrop-blur-sm hover:scale-[1.01]"
+                      )}
+                    >
+                      <Check
+                        className={cn(
+                          "h-4 w-4 text-red-600 flex-shrink-0 transition-all duration-200",
+                          selectedCity?.city === city.city &&
+                          (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
+                            ? "opacity-100 scale-110"
+                            : "opacity-0 scale-90"
+                        )}
+                      />
+                      <MapPin className="h-4 w-4 text-red-600/70 flex-shrink-0" />
+                      <span className="font-medium text-gray-800">{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
+                    </div>
+                  ))
                 )}
-              </Card>
+              </div>
             )}
           </div>
-          
+
           {/* Property Type Dropdown */}
           <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
             <Building2 className="h-4 w-4 text-red-600 flex-shrink-0" />
@@ -249,7 +381,7 @@ export default function PropertySearch() {
               <SelectTrigger className="flex-1 min-w-0 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0 [&>span]:truncate">
                 <SelectValue placeholder="Property Type" className="text-gray-500" />
               </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
+              <SelectContent className="max-h-[250px]">
                 {propertyTypes.map((type) => (
                   <SelectItem key={type.id} value={type.id} className="text-sm">
                     {type.label}
@@ -258,28 +390,28 @@ export default function PropertySearch() {
               </SelectContent>
             </Select>
           </div>
-          
-          {/* Budget Dropdown */}
+
+          {/* Distance Dropdown */}
           <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
-            <IndianRupee className="h-4 w-4 text-red-600 flex-shrink-0" />
-            <Select value={selectedBudget} onValueChange={setSelectedBudget}>
+            <Ruler className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <Select value={selectedDistance} onValueChange={setSelectedDistance}>
               <SelectTrigger className="flex-1 min-w-0 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0 [&>span]:truncate">
-                <SelectValue placeholder="Budget" className="text-gray-500" />
+                <SelectValue placeholder="Distance" className="text-gray-500" />
               </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {priceBudgets.map((budget) => (
-                  <SelectItem key={budget.id} value={budget.id} className="text-sm">
-                    {budget.label}
+              <SelectContent className="max-h-[250px]">
+                {distanceOptions.map((distance) => (
+                  <SelectItem key={distance.id} value={distance.id} className="text-sm">
+                    {distance.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          
+
           {/* Search Button */}
           <Button
             onClick={handleSearch}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 h-auto rounded-none rounded-r-lg font-medium text-sm shadow-none flex items-center justify-center gap-2  transition-colors"
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 h-auto rounded-none rounded-r-lg font-medium text-sm shadow-none flex items-center justify-center gap-2 transition-colors"
             aria-label="Search properties"
           >
             <Search className="h-4 w-4" />
@@ -289,66 +421,85 @@ export default function PropertySearch() {
 
         {/* Tablet Layout - Hidden on mobile and desktop */}
         <div className="hidden md:flex lg:hidden flex-col">
-          {/* Location Search */}
+          {/* City Typeahead */}
           <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 relative">
-            <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
-            <Input
+            <MapPin className="h-4 w-4 text-red-600 shrink-0" />
+            <input
+              ref={tabletInputRef}
               type="text"
-              placeholder="Search by city, locality or pincode"
               value={searchQuery}
-              // onChange={(e) => {
-              //   setSearchQuery(e.target.value);
-              //   setShowSuggestions(true);
-              // }}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchQuery(value);
-                setShowSuggestions(true);
-                fetchCities(value);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              onKeyPress={handleKeyPress}
-              className="flex-1 border-0 p-0 h-auto text-sm font-normal placeholder:text-gray-400 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+              onChange={handleInputChange}
+              onFocus={handleInputFocus}
+              onKeyDown={handleKeyDown}
+              placeholder="Search city..."
+              className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
+              autoComplete="off"
             />
-            
-            {/* Tablet Location Suggestions */}
-            {showSuggestions && searchQuery && (
-              <Card className="absolute top-full left-0 right-0 mt-1 shadow-xl max-h-[280px] overflow-y-auto z-50 border border-gray-200 rounded-md">
-                {isLoadingCities ? (
-                  <div className="p-3 text-sm text-gray-500 text-center">
-                    Loading cities...
+            {showDropdown && (
+              <div
+                ref={tabletDropdownRef}
+                className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-2xl z-50 max-h-[250px] overflow-y-auto animate-dropdown-enter"
+                style={{
+                  boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
+                }}
+              >
+                {error ? (
+                  <div className="px-4 py-3 text-sm text-red-600 bg-red-50/80 backdrop-blur-sm m-2 rounded-lg">
+                    <div className="font-semibold">Error loading cities</div>
+                    <div className="text-xs mt-1">{error}</div>
                   </div>
-                ) : cities.length > 0 ? (
-                  <div className="divide-y divide-gray-100">
-                    {cities.map((city, index) => (
-                      <Button
-                        key={index}
-                        variant="ghost"
-                        onClick={() => handleCitySelect(city)}
-                        className="w-full justify-between px-3.5 py-2.5 h-auto rounded-none hover:bg-red-50/80"
-                      >
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-3.5 w-3.5 text-red-600/70 flex-shrink-0" />
-                          <span className="text-sm text-gray-700">{city.city}</span>
-                        </div>
-                        <span className="text-xs text-gray-500">{city.state}</span>
-                      </Button>
-                    ))}
+                ) : isLoadingCities ? (
+                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                      Loading cities...
+                    </div>
+                  </div>
+                ) : cities.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
+                    No cities loaded. Please refresh the page.
+                  </div>
+                ) : filteredCities.length === 0 ? (
+                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
+                    {searchQuery
+                      ? `No city found matching "${searchQuery}".`
+                      : 'Type city name to search...'}
                   </div>
                 ) : (
-                  <div className="p-3.5">
-                    <p className="text-sm text-gray-500 text-center">No cities found</p>
-                  </div>
+                  filteredCities.map((city, index) => (
+                    <div
+                      key={city.id || index}
+                      onClick={() => handleCitySelect(city)}
+                      onMouseEnter={() => setHighlightedIndex(index)}
+                      className={cn(
+                        "mx-2 my-1 px-3 py-2.5 cursor-pointer flex items-center gap-2.5 text-sm transition-all duration-200 rounded-lg",
+                        highlightedIndex === index
+                          ? "bg-gradient-to-r from-red-50 to-red-100/80 backdrop-blur-sm shadow-md scale-[1.02] border border-red-200/50"
+                          : "hover:bg-gray-50/80 hover:backdrop-blur-sm hover:scale-[1.01]"
+                      )}
+                    >
+                      <Check
+                        className={cn(
+                          "h-4 w-4 text-red-600 flex-shrink-0 transition-all duration-200",
+                          selectedCity?.city === city.city &&
+                          (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
+                            ? "opacity-100 scale-110"
+                            : "opacity-0 scale-90"
+                        )}
+                      />
+                      <MapPin className="h-4 w-4 text-red-600/70 flex-shrink-0" />
+                      <span className="font-medium text-gray-800">{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
+                    </div>
+                  ))
                 )}
-              </Card>
+              </div>
             )}
           </div>
 
           {/* Filters and Search Row */}
           <div className="flex items-center">
             <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
-              <Building2 className="h-4 w-4 text-red-600 flex-shrink-0" />
+              <Building2 className="h-4 w-4 text-red-600 shrink-0" />
               <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
                 <SelectTrigger className="flex-1 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
                   <SelectValue placeholder="Property Type" />
@@ -362,17 +513,17 @@ export default function PropertySearch() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
-              <IndianRupee className="h-4 w-4 text-red-600 flex-shrink-0" />
-              <Select value={selectedBudget} onValueChange={setSelectedBudget}>
+              <Ruler className="h-4 w-4 text-red-600 shrink-0" />
+              <Select value={selectedDistance} onValueChange={setSelectedDistance}>
                 <SelectTrigger className="flex-1 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
-                  <SelectValue placeholder="Budget" />
+                  <SelectValue placeholder="Distance" />
                 </SelectTrigger>
                 <SelectContent>
-                  {priceBudgets.map((budget) => (
-                    <SelectItem key={budget.id} value={budget.id} className="text-sm">
-                      {budget.label}
+                  {distanceOptions.map((distance) => (
+                    <SelectItem key={distance.id} value={distance.id} className="text-sm">
+                      {distance.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -391,66 +542,85 @@ export default function PropertySearch() {
 
         {/* Mobile Layout - Visible only on mobile */}
         <div className="md:hidden">
-          {/* Location Search */}
+          {/* City Typeahead */}
           <div className="flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 relative">
-            <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
-            <Input
+            <MapPin className="h-4 w-4 text-red-600 shrink-0" />
+            <input
+              ref={mobileInputRef}
               type="text"
-              placeholder="Search location..."
               value={searchQuery}
-              // onChange={(e) => {
-              //   setSearchQuery(e.target.value);
-              //   setShowSuggestions(true);
-              // }}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchQuery(value);
-                setShowSuggestions(true);
-                fetchCities(value);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              onKeyPress={handleKeyPress}
-              className="flex-1 border-0 p-0 h-auto text-sm font-normal placeholder:text-gray-400 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+              onChange={handleInputChange}
+              onFocus={handleInputFocus}
+              onKeyDown={handleKeyDown}
+              placeholder="Search city..."
+              className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
+              autoComplete="off"
             />
-            
-            {/* Mobile Location Suggestions */}
-            {showSuggestions && searchQuery && (
-              <Card className="absolute top-full left-0 right-0 mt-1 shadow-xl max-h-[240px] overflow-y-auto z-50 border border-gray-200 rounded-md">
-              {isLoadingCities ? (
-                  <div className="p-3 text-sm text-gray-500 text-center">
-                    Loading cities...
+            {showDropdown && (
+              <div
+                ref={mobileDropdownRef}
+                className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-2xl z-50 max-h-[250px] overflow-y-auto animate-dropdown-enter"
+                style={{
+                  boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
+                }}
+              >
+                {error ? (
+                  <div className="px-3.5 py-3 text-xs text-red-600 bg-red-50/80 backdrop-blur-sm m-2 rounded-lg">
+                    <div className="font-semibold">Error loading cities</div>
+                    <div className="text-[10px] mt-1">{error}</div>
                   </div>
-                ) : cities.length > 0 ? (
-                  <div className="divide-y divide-gray-100">
-                    {cities.map((city, index) => (
-                      <Button
-                        key={index}
-                        variant="ghost"
-                        onClick={() => handleCitySelect(city)}
-                        className="w-full justify-between px-3 py-2.5 h-auto rounded-none hover:bg-red-50/80"
-                      >
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="h-3 w-3 text-red-600/70 flex-shrink-0" />
-                          <span className="text-xs text-gray-700 truncate">{city.city}</span>
-                        </div>
-                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">{city.state}</span>
-                      </Button>
-                    ))}
+                ) : isLoadingCities ? (
+                  <div className="px-3.5 py-3 text-xs text-gray-600 m-2">
+                    <div className="flex items-center gap-2">
+                      <div className="animate-spin h-3 w-3 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                      Loading cities...
+                    </div>
+                  </div>
+                ) : cities.length === 0 ? (
+                  <div className="px-3.5 py-3 text-xs text-gray-600 m-2">
+                    No cities loaded. Refresh page.
+                  </div>
+                ) : filteredCities.length === 0 ? (
+                  <div className="px-3.5 py-3 text-xs text-gray-600 m-2">
+                    {searchQuery
+                      ? `No city found matching "${searchQuery}".`
+                      : 'Type to search...'}
                   </div>
                 ) : (
-                  <div className="p-3">
-                    <p className="text-xs text-gray-500 text-center">No cities found</p>
-                  </div>
+                  filteredCities.map((city, index) => (
+                    <div
+                      key={city.id || index}
+                      onClick={() => handleCitySelect(city)}
+                      onMouseEnter={() => setHighlightedIndex(index)}
+                      className={cn(
+                        "mx-2 my-1 px-3 py-2.5 cursor-pointer flex items-center gap-2 text-xs transition-all duration-200 rounded-lg",
+                        highlightedIndex === index
+                          ? "bg-gradient-to-r from-red-50 to-red-100/80 backdrop-blur-sm shadow-md scale-[1.02] border border-red-200/50"
+                          : "hover:bg-gray-50/80 hover:backdrop-blur-sm hover:scale-[1.01]"
+                      )}
+                    >
+                      <Check
+                        className={cn(
+                          "h-3.5 w-3.5 text-red-600 flex-shrink-0 transition-all duration-200",
+                          selectedCity?.city === city.city &&
+                          (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
+                            ? "opacity-100 scale-110"
+                            : "opacity-0 scale-90"
+                        )}
+                      />
+                      <MapPin className="h-3.5 w-3.5 text-red-600/70 flex-shrink-0" />
+                      <span className="font-medium text-gray-800">{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
+                    </div>
+                  ))
                 )}
-              </Card>
+              </div>
             )}
           </div>
 
           {/* Filters Row */}
           <div className="grid grid-cols-2 border-b border-gray-200">
             <div className="flex items-center gap-1.5 px-3 py-3 border-r border-gray-200">
-              <Building2 className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />
+              <Building2 className="h-3.5 w-3.5 text-red-600 shrink-0" />
               <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
                 <SelectTrigger className="flex-1 border-0 p-0 h-auto text-xs font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
                   <SelectValue placeholder="Type" />
@@ -464,17 +634,17 @@ export default function PropertySearch() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="flex items-center gap-1.5 px-3 py-3">
-              <IndianRupee className="h-3.5 w-3.5 text-red-600 flex-shrink-0" />
-              <Select value={selectedBudget} onValueChange={setSelectedBudget}>
+              <Ruler className="h-3.5 w-3.5 text-red-600 shrink-0" />
+              <Select value={selectedDistance} onValueChange={setSelectedDistance}>
                 <SelectTrigger className="flex-1 border-0 p-0 h-auto text-xs font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
-                  <SelectValue placeholder="Budget" />
+                  <SelectValue placeholder="Distance" />
                 </SelectTrigger>
                 <SelectContent>
-                  {priceBudgets.map((budget) => (
-                    <SelectItem key={budget.id} value={budget.id} className="text-xs">
-                      {budget.label}
+                  {distanceOptions.map((distance) => (
+                    <SelectItem key={distance.id} value={distance.id} className="text-xs">
+                      {distance.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -492,54 +662,7 @@ export default function PropertySearch() {
           </Button>
         </div>
       </div>
-
-      {/* Active Filters Display */}
-      {/* {(searchQuery || selectedPropertyType || selectedBudget) && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {searchQuery && (
-            <Badge variant="secondary" className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 rounded-md transition-colors">
-              <MapPin className="h-3 w-3" />
-              <span className="max-w-[120px] sm:max-w-[160px] truncate">{searchQuery}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => clearFilter('location')}
-                className="h-4 w-4 p-0 hover:bg-blue-200/60 rounded-sm ml-0.5"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-          {selectedPropertyType && (
-            <Badge variant="secondary" className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 rounded-md transition-colors">
-              <Building2 className="h-3 w-3" />
-              <span className="max-w-[120px] sm:max-w-[160px] truncate">{propertyTypes.find(t => t.id === selectedPropertyType)?.label}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => clearFilter('type')}
-                className="h-4 w-4 p-0 hover:bg-emerald-200/60 rounded-sm ml-0.5"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-          {selectedBudget && (
-            <Badge variant="secondary" className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 rounded-md transition-colors">
-              <IndianRupee className="h-3 w-3" />
-              <span className="max-w-[120px] sm:max-w-[160px] truncate">{priceBudgets.find(b => b.id === selectedBudget)?.label}</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => clearFilter('budget')}
-                className="h-4 w-4 p-0 hover:bg-purple-200/60 rounded-sm ml-0.5"
-              >
-                <X className="h-3 w-3" />
-              </Button>
-            </Badge>
-          )}
-        </div>
-      )} */}
     </div>
+    </>
   );
 }

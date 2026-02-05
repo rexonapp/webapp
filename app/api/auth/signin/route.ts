@@ -16,8 +16,8 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await query(
-      `SELECT id, first_name, last_name, email, password_hash, auth_provider 
-       FROM users 
+      `SELECT id, first_name, last_name, email, password_hash, auth_provider, role
+       FROM users
        WHERE email = $1`,
       [email.toLowerCase()]
     );
@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
       firstName: user.first_name,
       lastName: user.last_name,
       authProvider: user.auth_provider,
+      role: user.role || 'customer',
     });
 
     await query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
@@ -65,6 +66,7 @@ export async function POST(request: NextRequest) {
         lastName: user.last_name,
         email: user.email,
         authProvider: user.auth_provider,
+        role: user.role || 'customer',
       },
     });
   } catch (error) {

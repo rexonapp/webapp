@@ -11,6 +11,7 @@ export interface SessionData extends JWTPayload {
   firstName: string;
   lastName: string;
   authProvider: string;
+  role?: string;
 }
 
 export async function createSession(data: SessionData) {

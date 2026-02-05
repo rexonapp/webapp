@@ -34,22 +34,25 @@ export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <main className="flex-1">
+        {/* Full-screen Hero */}
+        
         <Hero />
         
-        <section className="py-16 bg-background border-y">
+        {/* Stats Section */}
+        <section className="py-20 bg-background border-y">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
                   <div key={index} className="text-center">
-                    <div className="inline-flex items-center justify-center w-14 h-14 bg-red-50 rounded-xl mb-3">
-                      <Icon className="h-7 w-7 text-red-500" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-red-50 rounded-xl mb-4">
+                      <Icon className="h-8 w-8 text-red-500" />
                     </div>
-                    <div className="text-2xl md:text-3xl font-bold text-foreground mb-1">
+                    <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">
                       {stat.value}
                     </div>
-                    <div className="text-muted-foreground font-medium text-sm">
+                    <div className="text-muted-foreground font-medium">
                       {stat.label}
                     </div>
                   </div>
@@ -59,13 +62,14 @@ export default function HomePage() {
           </div>
         </section>
         
-        <section className="py-20 bg-muted/30">
+        {/* Features Section */}
+        <section className="py-24 bg-muted/30">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+              <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
                 Why Choose Rexon?
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
                 We're changing the way people find and list commercial properties in India with technology and service you can trust
               </p>
             </div>
@@ -74,15 +78,15 @@ export default function HomePage() {
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
-                  <Card key={index} className="hover:shadow-lg transition-all duration-300 hover:border-red-200">
+                  <Card key={index} className="hover:shadow-2xl transition-all duration-300 hover:border-red-200 hover:-translate-y-1">
                     <CardHeader>
-                      <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center mb-2">
-                        <Icon className="h-6 w-6 text-red-500" />
+                      <div className="w-14 h-14 bg-red-50 rounded-xl flex items-center justify-center mb-3">
+                        <Icon className="h-7 w-7 text-red-500" />
                       </div>
-                      <CardTitle className="text-xl">{feature.title}</CardTitle>
+                      <CardTitle className="text-2xl">{feature.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <CardDescription className="text-sm leading-relaxed">
+                      <CardDescription className="text-base leading-relaxed">
                         {feature.description}
                       </CardDescription>
                     </CardContent>
@@ -93,29 +97,17 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-20 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
-                Get Started Today
-              </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                Join thousands of property owners, agents, and businesses who trust Rexon
-              </p>
-            </div>
-          </div>
-        </section>
-        
-        <section className="py-20 bg-gradient-to-br from-red-50 to-background">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
+        {/* CTA Section */}
+        <section className="py-24 bg-gradient-to-br from-red-50 via-white to-red-50/50">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-foreground">
               Ready to Find Your Ideal Commercial Space?
             </h2>
-            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
               Join thousands of satisfied property owners and businesses who found their perfect match with Rexon
             </p>
             <Link href="/properties">
-              <Button size="lg" className="bg-red-500 hover:bg-red-600 text-white px-10 shadow-md hover:shadow-lg">
+              <Button size="lg" className="bg-red-500 hover:bg-red-600 text-white px-12 py-6 text-lg shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all">
                 Browse Properties Now
               </Button>
             </Link>

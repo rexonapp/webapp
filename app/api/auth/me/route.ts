@@ -1,3 +1,4 @@
+//api/auth/me/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 
