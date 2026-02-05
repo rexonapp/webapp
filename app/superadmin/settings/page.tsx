@@ -116,10 +116,10 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <GlassCard className="p-6" gradient="violet">
+      <GlassCard className="p-6" gradient="blue">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
               System Settings
             </h2>
             <p className="text-sm text-gray-600 mt-1 font-medium">Configure system-wide settings and preferences</p>
@@ -127,7 +127,7 @@ export default function SettingsPage() {
           <Button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-lg shadow-violet-500/30 hover:shadow-xl hover:shadow-violet-500/40 transition-all"
+            className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-cyan-500/40 transition-all"
           >
             <Save className="w-5 h-5" />
             {saving ? 'Saving...' : 'Save Changes'}
@@ -137,28 +137,22 @@ export default function SettingsPage() {
 
       <div className="space-y-6">
         {settingsSections.map((section, sectionIdx) => {
-          const gradients = ['blue', 'emerald', 'amber', 'rose'];
-          const gradient = gradients[sectionIdx % gradients.length] as 'blue' | 'emerald' | 'amber' | 'rose';
+          const gradients = ['blue', 'cyan', 'blue', 'cyan'];
+          const gradient = gradients[sectionIdx % gradients.length] as 'blue' | 'cyan';
 
           const iconClasses = {
             blue: 'p-3 rounded-xl bg-blue-500/10 ring-4 ring-blue-500/10',
-            emerald: 'p-3 rounded-xl bg-emerald-500/10 ring-4 ring-emerald-500/10',
-            amber: 'p-3 rounded-xl bg-amber-500/10 ring-4 ring-amber-500/10',
-            rose: 'p-3 rounded-xl bg-rose-500/10 ring-4 ring-rose-500/10',
+            cyan: 'p-3 rounded-xl bg-cyan-500/10 ring-4 ring-cyan-500/10',
           };
 
           const iconColorClasses = {
             blue: 'w-6 h-6 text-blue-600',
-            emerald: 'w-6 h-6 text-emerald-600',
-            amber: 'w-6 h-6 text-amber-600',
-            rose: 'w-6 h-6 text-rose-600',
+            cyan: 'w-6 h-6 text-cyan-600',
           };
 
           const separatorClasses = {
             blue: 'bg-gradient-to-r from-transparent via-blue-200 to-transparent mb-6',
-            emerald: 'bg-gradient-to-r from-transparent via-emerald-200 to-transparent mb-6',
-            amber: 'bg-gradient-to-r from-transparent via-amber-200 to-transparent mb-6',
-            rose: 'bg-gradient-to-r from-transparent via-rose-200 to-transparent mb-6',
+            cyan: 'bg-gradient-to-r from-transparent via-cyan-200 to-transparent mb-6',
           };
 
           return (
@@ -195,7 +189,7 @@ export default function SettingsPage() {
                           ...settings,
                           [setting.id]: checked
                         })}
-                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-violet-600 data-[state=checked]:to-indigo-600"
+                        className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-600 data-[state=checked]:to-cyan-600"
                       />
                     ) : (
                       <Input
@@ -205,7 +199,7 @@ export default function SettingsPage() {
                           ...settings,
                           [setting.id]: e.target.value
                         })}
-                        className="w-28 bg-white/60 border-white/60 focus:bg-white focus:border-violet-400 text-center font-bold transition-all"
+                        className="w-28 bg-white/60 border-white/60 focus:bg-white focus:border-cyan-400 text-center font-bold transition-all"
                       />
                     )}
                   </div>
@@ -219,22 +213,22 @@ export default function SettingsPage() {
       {/* Role Management Section */}
       <GlassCard
         className="p-6"
-        gradient="violet"
+        gradient="blue"
         // style={{ animation: 'slideUp 0.6s ease-out 0.5s backwards' }}
       >
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-3 rounded-xl bg-violet-500/10 ring-4 ring-violet-500/10">
-            <Shield className="w-6 h-6 text-violet-600" />
+          <div className="p-3 rounded-xl bg-blue-500/10 ring-4 ring-blue-500/10">
+            <Shield className="w-6 h-6 text-blue-600" />
           </div>
           <h3 className="text-xl font-bold text-gray-900">Role Permissions</h3>
         </div>
 
-        <Separator className="bg-gradient-to-r from-transparent via-violet-200 to-transparent mb-6" />
+        <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent mb-6" />
 
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-white/40 bg-gradient-to-r from-violet-50/50 via-indigo-50/50 to-purple-50/50">
+              <TableRow className="border-b border-white/40 bg-gradient-to-r from-blue-50/50 via-cyan-50/50 to-sky-50/50">
                 <TableHead className="text-left font-bold text-gray-700">Permission</TableHead>
                 <TableHead className="text-center font-bold text-gray-700">Super Admin</TableHead>
                 <TableHead className="text-center font-bold text-gray-700">Admin</TableHead>
@@ -255,22 +249,22 @@ export default function SettingsPage() {
                   <TableCell className="font-bold text-gray-900">{perm.name}</TableCell>
                   <TableCell className="text-center">
                     {perm.superadmin && (
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 mx-auto shadow-lg shadow-emerald-500/50 group-hover:scale-125 transition-transform"></div>
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 mx-auto shadow-lg shadow-cyan-500/50 group-hover:scale-125 transition-transform"></div>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
                     {perm.admin && (
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 mx-auto shadow-lg shadow-emerald-500/50 group-hover:scale-125 transition-transform"></div>
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 mx-auto shadow-lg shadow-cyan-500/50 group-hover:scale-125 transition-transform"></div>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
                     {perm.manager && (
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 mx-auto shadow-lg shadow-emerald-500/50 group-hover:scale-125 transition-transform"></div>
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 mx-auto shadow-lg shadow-cyan-500/50 group-hover:scale-125 transition-transform"></div>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
                     {perm.user && (
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 mx-auto shadow-lg shadow-emerald-500/50 group-hover:scale-125 transition-transform"></div>
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 mx-auto shadow-lg shadow-cyan-500/50 group-hover:scale-125 transition-transform"></div>
                     )}
                   </TableCell>
                 </TableRow>

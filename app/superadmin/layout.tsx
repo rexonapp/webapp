@@ -69,14 +69,14 @@ export default function SuperAdminLayout({
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/20">
         <div className="flex flex-col items-center gap-6">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 rounded-full blur-xl animate-pulse"></div>
-            <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-blue-600 border-r-indigo-600"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 rounded-full blur-xl animate-pulse"></div>
+            <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-blue-600 border-r-cyan-600"></div>
           </div>
           <div className="text-center">
-            <p className="text-lg font-semibold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+            <p className="text-lg font-semibold bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 bg-clip-text text-transparent">
               Loading...
             </p>
             <p className="text-sm text-gray-500 mt-1">Please wait</p>
@@ -87,7 +87,7 @@ export default function SuperAdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/20">
       {/* Backdrop overlay when sidebar is open on mobile */}
       {sidebarOpen && (
         <div
@@ -107,7 +107,7 @@ export default function SuperAdminLayout({
           <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/95 backdrop-blur-2xl border-r border-white/40 shadow-2xl" />
 
           {/* Animated gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 via-indigo-500/5 to-violet-500/5 opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 via-cyan-500/5 to-sky-500/5 opacity-0 hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
           <div className="relative h-full flex flex-col">
             {/* Logo Section */}
@@ -116,13 +116,13 @@ export default function SuperAdminLayout({
                 {sidebarOpen ? (
                   <div className="flex items-center gap-3 group">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 rounded-xl blur-md group-hover:blur-lg transition-all opacity-50" />
-                      <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg transition-all">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 rounded-xl blur-md group-hover:blur-lg transition-all opacity-50" />
+                      <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 flex items-center justify-center shadow-lg transition-all">
                         <Building2 className="w-6 h-6 text-white" />
                       </div>
                     </div>
                     <div className="overflow-hidden">
-                      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 bg-clip-text text-transparent">
                         WarehouseOS
                       </h1>
                       <p className="text-xs font-medium text-blue-600/70">Super Admin Panel</p>
@@ -130,8 +130,8 @@ export default function SuperAdminLayout({
                   </div>
                 ) : (
                   <div className="relative group mx-auto">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 rounded-xl blur-md group-hover:blur-lg transition-all opacity-50" />
-                    <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 flex items-center justify-center shadow-lg transition-all">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 rounded-xl blur-md group-hover:blur-lg transition-all opacity-50" />
+                    <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 flex items-center justify-center shadow-lg transition-all">
                       <Building2 className="w-6 h-6 text-white" />
                     </div>
                   </div>
@@ -167,8 +167,8 @@ export default function SuperAdminLayout({
                     variant="ghost"
                     className={`w-full justify-start gap-4 h-12 rounded-xl transition-all duration-300 group relative overflow-hidden ${
                       isActive
-                        ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40'
-                        : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700'
+                        ? 'bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-cyan-500/40'
+                        : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:text-blue-700'
                     } ${!sidebarOpen && 'justify-center px-0'}`}
                   >
                     {isActive && (
@@ -191,14 +191,14 @@ export default function SuperAdminLayout({
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className={`w-full justify-start gap-3 h-auto p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 group ${
+                    className={`w-full justify-start gap-3 h-auto p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 transition-all duration-300 group ${
                       !sidebarOpen && 'justify-center px-2'
                     }`}
                   >
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full blur-sm group-hover:blur-md transition-all opacity-30" />
-                      <Avatar className="w-10 h-10 relative ring-2 ring-blue-200 group-hover:ring-blue-400 transition-all">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-sm font-bold">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-full blur-sm group-hover:blur-md transition-all opacity-30" />
+                      <Avatar className="w-10 h-10 relative ring-2 ring-blue-200 group-hover:ring-cyan-400 transition-all">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white text-sm font-bold">
                           {user.first_name?.[0]}{user.last_name?.[0]}
                         </AvatarFallback>
                       </Avatar>
@@ -246,7 +246,7 @@ export default function SuperAdminLayout({
                   <Menu className="w-5 h-5 text-gray-700" />
                 </Button>
                 <div>
-                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 bg-clip-text text-transparent">
                     {getActiveTab()}
                   </h1>
                   <p className="text-sm text-gray-600 mt-0.5 font-medium">Manage your warehouse operations</p>
@@ -287,9 +287,9 @@ export default function SuperAdminLayout({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative rounded-full hover:bg-blue-50 transition-all group">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full blur-sm group-hover:blur-md transition-all opacity-30" />
-                      <Avatar className="w-9 h-9 relative ring-2 ring-blue-200 group-hover:ring-blue-400 transition-all">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-sm font-bold">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-full blur-sm group-hover:blur-md transition-all opacity-30" />
+                      <Avatar className="w-9 h-9 relative ring-2 ring-blue-200 group-hover:ring-cyan-400 transition-all">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white text-sm font-bold">
                           {user.first_name?.[0]}{user.last_name?.[0]}
                         </AvatarFallback>
                       </Avatar>
@@ -299,7 +299,7 @@ export default function SuperAdminLayout({
                     <div className="px-3 py-3 border-b border-blue-100">
                       <div className="flex items-center gap-3">
                         <Avatar className="w-12 h-12 ring-2 ring-blue-200">
-                          <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white font-bold">
                             {user.first_name?.[0]}{user.last_name?.[0]}
                           </AvatarFallback>
                         </Avatar>

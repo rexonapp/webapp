@@ -329,7 +329,8 @@ export default function HeroWithBanner() {
             </p>
           </div>
 
-          <div className="w-full max-w-4xl mx-auto animate-slide-up-delayed-1 mt-1">
+          {/* Search Section with responsive spacing */}
+          <div className="w-full max-w-4xl mx-auto animate-slide-up-delayed-1 mt-1 py-3.5 sm:py-5 md:py-6 lg:py-[7.5rem]">
             <div className="relative">
               <div className="absolute -inset-2 bg-gradient-to-r from-red-500/20 via-red-400/30 to-red-500/20 blur-2xl opacity-60 rounded-3xl"></div>
               <div className="relative">
@@ -338,7 +339,8 @@ export default function HeroWithBanner() {
             </div>
           </div>
 
-          <div className="w-full max-w-5xl py-30 mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 lg:gap-3 animate-slide-up-delayed-2 mt-24 sm:mt-28 md:mt-32 lg:mt-36">
+          {/* Cards Section with responsive spacing matching search dropdown clearance */}
+          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-3 animate-slide-up-delayed-2 py-3.5 sm:py-5 md:py-6 lg:py-[7.5rem] px-2 sm:px-0">
 
             <Card
               onClick={() => router.push('/property')}
@@ -348,24 +350,24 @@ export default function HeroWithBanner() {
               {/* Glossy top shine */}
               <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl"></div>
 
-              <CardHeader className="pb-1 pt-2.5 px-3 sm:px-3.5">
+              <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
-                    <Home className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
+                    <Home className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
                   </div>
-                  <CardTitle className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-red-200 transition-colors duration-300 text-left">
+                  <CardTitle className="text-[11px] sm:text-sm md:text-base font-bold text-white group-hover:text-red-200 transition-colors duration-300 text-left leading-tight">
                     Property Owner
                   </CardTitle>
                 </div>
               </CardHeader>
 
-              <CardContent className="pb-2.5 px-3 sm:px-3.5 space-y-1">
-                <CardDescription className="text-[10px] sm:text-xs leading-relaxed text-white/90 text-left line-clamp-2">
+              <CardContent className="pb-2 px-2.5 sm:px-3.5 space-y-0.5 sm:space-y-1">
+                <CardDescription className="text-[9px] sm:text-xs leading-snug sm:leading-relaxed text-white/90 text-left line-clamp-2">
                   List your warehouse or commercial property and connect with verified buyers
                 </CardDescription>
-                <div className="flex items-center text-red-200 font-semibold text-[10px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300">
+                <div className="flex items-center text-red-200 font-semibold text-[9px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
                   <span>Get Started</span>
-                  <ChevronRight className="w-3 h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+                  <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </CardContent>
             </Card>
@@ -378,24 +380,24 @@ export default function HeroWithBanner() {
               {/* Glossy top shine */}
               <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl"></div>
 
-              <CardHeader className="pb-1 pt-2.5 px-3 sm:px-3.5">
+              <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
-                    <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
+                    <Users className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
                   </div>
-                  <CardTitle className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-red-200 transition-colors duration-300 text-left">
+                  <CardTitle className="text-[11px] sm:text-sm md:text-base font-bold text-white group-hover:text-red-200 transition-colors duration-300 text-left leading-tight">
                     Real Estate Agent
                   </CardTitle>
                 </div>
               </CardHeader>
 
-              <CardContent className="pb-2.5 px-3 sm:px-3.5 space-y-1">
-                <CardDescription className="text-[10px] sm:text-xs leading-relaxed text-white/90 text-left line-clamp-2">
+              <CardContent className="pb-2 px-2.5 sm:px-3.5 space-y-0.5 sm:space-y-1">
+                <CardDescription className="text-[9px] sm:text-xs leading-snug sm:leading-relaxed text-white/90 text-left line-clamp-2">
                   Manage multiple properties and connect with potential clients efficiently
                 </CardDescription>
-                <div className="flex items-center text-red-200 font-semibold text-[10px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300">
+                <div className="flex items-center text-red-200 font-semibold text-[9px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
                   <span>Join Now</span>
-                  <ChevronRight className="w-3 h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+                  <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </CardContent>
             </Card>
@@ -408,24 +410,24 @@ export default function HeroWithBanner() {
               {/* Glossy top shine */}
               <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl"></div>
 
-              <CardHeader className="pb-1 pt-2.5 px-3 sm:px-3.5">
+              <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
-                    <Building2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
+                  <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
+                    <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
                   </div>
-                  <CardTitle className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-red-200 transition-colors duration-300 text-left">
+                  <CardTitle className="text-[11px] sm:text-sm md:text-base font-bold text-white group-hover:text-red-200 transition-colors duration-300 text-left leading-tight">
                     Company / Customer
                   </CardTitle>
                 </div>
               </CardHeader>
 
-              <CardContent className="pb-2.5 px-3 sm:px-3.5 space-y-1">
-                <CardDescription className="text-[10px] sm:text-xs leading-relaxed text-white/90 text-left line-clamp-2">
+              <CardContent className="pb-2 px-2.5 sm:px-3.5 space-y-0.5 sm:space-y-1">
+                <CardDescription className="text-[9px] sm:text-xs leading-snug sm:leading-relaxed text-white/90 text-left line-clamp-2">
                   Find the perfect warehouse or commercial space for your business needs
                 </CardDescription>
-                <div className="flex items-center text-red-200 font-semibold text-[10px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300">
+                <div className="flex items-center text-red-200 font-semibold text-[9px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
                   <span>Find Space</span>
-                  <ChevronRight className="w-3 h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+                  <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </CardContent>
             </Card>

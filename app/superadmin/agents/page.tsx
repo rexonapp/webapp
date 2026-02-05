@@ -30,8 +30,8 @@ interface Agent {
 }
 
 const statusColors = {
-  pending: 'bg-amber-100 text-amber-700 border-amber-300 shadow-sm',
-  approved: 'bg-emerald-100 text-emerald-700 border-emerald-300 shadow-sm',
+  pending: 'bg-sky-100 text-sky-700 border-sky-300 shadow-sm',
+  approved: 'bg-cyan-100 text-cyan-700 border-cyan-300 shadow-sm',
   rejected: 'bg-rose-100 text-rose-700 border-rose-300 shadow-sm',
 };
 
@@ -108,11 +108,11 @@ export default function AgentsPage() {
       <div className="flex items-center justify-center h-96">
         <div className="flex flex-col items-center gap-6">
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-full blur-xl animate-pulse"></div>
-            <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-violet-600 border-r-indigo-600"></div>
+            <div className="absolute inset-0 bg-cyan-500 rounded-full blur-xl animate-pulse"></div>
+            <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-cyan-600 border-r-cyan-600"></div>
           </div>
           <div className="text-center">
-            <p className="text-lg font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+            <p className="text-lg font-semibold bg-cyan-500 bg-clip-text text-transparent">
               Loading agents...
             </p>
             <p className="text-sm text-gray-500 mt-1">Please wait</p>

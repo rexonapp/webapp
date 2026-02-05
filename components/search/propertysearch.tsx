@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef, useMemo } from 'react'
-import { MapPin, Search, Building2, Ruler, Check } from 'lucide-react'
+import { useState, useEffect, useMemo } from 'react'
+import { MapPin, Search, Building2, Ruler, Check, ChevronsUpDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -11,6 +11,20 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
 import { cn } from "@/lib/utils"
 
 interface City {
@@ -33,7 +47,9 @@ interface Distance {
 }
 
 export default function PropertySearch() {
-  const [showDropdown, setShowDropdown] = useState(false);
+  const [openDesktop, setOpenDesktop] = useState(false);
+  const [openTablet, setOpenTablet] = useState(false);
+  const [openMobile, setOpenMobile] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [selectedPropertyType, setSelectedPropertyType] = useState('');
@@ -42,16 +58,6 @@ export default function PropertySearch() {
   const [cities, setCities] = useState<City[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [highlightedIndex, setHighlightedIndex] = useState(-1);
-
-  // Separate refs for each layout since all are rendered but hidden with CSS
-  const desktopInputRef = useRef<HTMLInputElement>(null);
-  const desktopDropdownRef = useRef<HTMLDivElement>(null);
-  const tabletInputRef = useRef<HTMLInputElement>(null);
-  const tabletDropdownRef = useRef<HTMLDivElement>(null);
-  const mobileInputRef = useRef<HTMLInputElement>(null);
-  const mobileDropdownRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Property types for commercial real estate
   const propertyTypes: PropertyType[] = [
@@ -160,33 +166,17 @@ export default function PropertySearch() {
     fetchCities();
   }, []);
 
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-
-      // If click is outside the container entirely, close dropdown
-      if (containerRef.current && !containerRef.current.contains(target)) {
-        setShowDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   // Filter cities based on search query with limit to prevent performance issues
   const filteredCities = useMemo(() => {
     if (!cities || cities.length === 0) {
-      console.log('⚠️ No cities available for filtering');
       return [];
     }
 
     const query = searchQuery.toLowerCase().trim();
 
-    // Don't show any cities if query is empty
+    // If no query, return top 50 cities
     if (!query) {
-      return [];
+      return cities.slice(0, 50);
     }
 
     const filtered = cities
@@ -205,7 +195,6 @@ export default function PropertySearch() {
       })
       .slice(0, 50); // Limit to 50 results for performance
 
-    console.log(`📊 Filtered ${filtered.length} cities (query: "${searchQuery}")`);
     return filtered;
   }, [cities, searchQuery]);
 
@@ -236,193 +225,126 @@ export default function PropertySearch() {
 
     // Navigate to search results page with all filters
     router.push(`/search?${params.toString()}`);
-    setShowDropdown(false);
+    // Close all dropdowns
+    setOpenDesktop(false);
+    setOpenTablet(false);
+    setOpenMobile(false);
   };
 
   const handleCitySelect = (city: City) => {
     if (!city || !city.city) return; // Safety check
 
     setSelectedCity(city);
-    // Safe display with fallback
+    // Update search query to show selected city
     const displayText = city.stateCode
       ? `${city.city}, ${city.stateCode}`
       : city.city;
     setSearchQuery(displayText);
-    setShowDropdown(false);
+    // Close all dropdowns
+    setOpenDesktop(false);
+    setOpenTablet(false);
+    setOpenMobile(false);
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-    setShowDropdown(true);
-    setHighlightedIndex(-1); // Reset highlight when typing
-    console.log('🔍 Search query:', value, 'Dropdown:', true);
-
-    // Clear selected city if user is typing something different
-    if (selectedCity) {
+  // Clear selected city when user types something different
+  useEffect(() => {
+    if (selectedCity && searchQuery) {
       const currentDisplay = selectedCity.stateCode
         ? `${selectedCity.city}, ${selectedCity.stateCode}`
         : selectedCity.city;
-      if (value !== currentDisplay) {
+      if (searchQuery !== currentDisplay) {
         setSelectedCity(null);
       }
     }
+  }, [searchQuery, selectedCity]);
+
+  // Get display text for selected city
+  const getDisplayText = () => {
+    if (selectedCity) {
+      return selectedCity.stateCode
+        ? `${selectedCity.city}, ${selectedCity.stateCode}`
+        : selectedCity.city;
+    }
+    return '';
   };
 
-  const handleInputFocus = () => {
-    console.log('👆 Input focused');
-    // Only show dropdown if user has typed something
-    if (searchQuery.trim().length > 0) {
-      setShowDropdown(true);
-    }
-    setHighlightedIndex(-1);
-  };
-
-  // Keyboard navigation
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showDropdown || filteredCities.length === 0) return;
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setHighlightedIndex((prev) =>
-          prev < filteredCities.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : -1));
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (highlightedIndex >= 0 && highlightedIndex < filteredCities.length) {
-          handleCitySelect(filteredCities[highlightedIndex]);
-        } else if (filteredCities.length === 1) {
-          // Auto-select if only one result
-          handleCitySelect(filteredCities[0]);
-        }
-        break;
-      case 'Escape':
-        e.preventDefault();
-        setShowDropdown(false);
-        setHighlightedIndex(-1);
-        break;
-    }
-  };
-
-  // Scroll highlighted item into view
-  useEffect(() => {
-    if (highlightedIndex >= 0) {
-      const dropdowns = [desktopDropdownRef, tabletDropdownRef, mobileDropdownRef];
-      dropdowns.forEach((ref) => {
-        if (ref.current) {
-          const highlightedElement = ref.current.children[highlightedIndex] as HTMLElement;
-          if (highlightedElement) {
-            highlightedElement.scrollIntoView({
-              block: 'nearest',
-              behavior: 'smooth',
-            });
-          }
-        }
-      });
-    }
-  }, [highlightedIndex]);
-  
   return (
-    <>
-      <style jsx>{`
-        @keyframes dropdown-enter {
-          from {
-            opacity: 0;
-            transform: translateY(-10px) scale(0.95);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        .animate-dropdown-enter {
-          animation: dropdown-enter 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-      `}</style>
-      <div className="w-full max-w-4xl mx-auto px-4">
-        <div ref={containerRef} className="relative shadow-lg border border-gray-200/50 bg-white/95 backdrop-blur-sm rounded-lg">
+    <div className="w-full max-w-4xl mx-auto px-4">
+      <div className="relative shadow-lg border border-gray-200/50 bg-white/95 backdrop-blur-sm rounded-lg">
         {/* Desktop Layout - Hidden on mobile */}
         <div className="hidden lg:flex items-center">
           {/* City Typeahead */}
-          <div className="flex-[2] min-w-0 flex items-center gap-2.5 px-4 py-3 border-r border-gray-200 relative">
-            <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
-            <input
-              ref={desktopInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={handleInputChange}
-              onFocus={handleInputFocus}
-              onKeyDown={handleKeyDown}
-              placeholder="Search city..."
-              className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
-              autoComplete="off"
-            />
-            {showDropdown && (
-              <div
-                ref={desktopDropdownRef}
-                className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-2xl z-50 max-h-[250px] overflow-y-auto animate-dropdown-enter"
-                style={{
-                  boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
-                }}
-              >
-                {error ? (
-                  <div className="px-4 py-3 text-sm text-red-600 bg-red-50/80 backdrop-blur-sm m-2 rounded-lg">
-                    <div className="font-semibold">Error loading cities</div>
-                    <div className="text-xs mt-1">{error}</div>
-                  </div>
-                ) : isLoadingCities ? (
-                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
-                      Loading cities...
+          <Popover open={openDesktop} onOpenChange={setOpenDesktop}>
+            <div className="flex-[2] min-w-0 flex items-center gap-2.5 px-4 py-3 border-r border-gray-200 relative">
+              <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+              <PopoverAnchor asChild>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setOpenDesktop(true)}
+                  placeholder="Type to search cities..."
+                  className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
+                  autoComplete="off"
+                />
+              </PopoverAnchor>
+              <ChevronsUpDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
+            </div>
+            <PopoverContent
+              className="w-[400px] p-0"
+              align="start"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+              <Command shouldFilter={false}>
+                <CommandList>
+                  {error ? (
+                    <div className="px-4 py-3 text-sm text-red-600">
+                      <div className="font-semibold">Error loading cities</div>
+                      <div className="text-xs mt-1">{error}</div>
                     </div>
-                  </div>
-                ) : cities.length === 0 ? (
-                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
-                    No cities loaded. Please refresh the page.
-                  </div>
-                ) : filteredCities.length === 0 ? (
-                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
-                    {searchQuery
-                      ? `No city found matching "${searchQuery}".`
-                      : 'Type city name to search...'}
-                  </div>
-                ) : (
-                  filteredCities.map((city, index) => (
-                    <div
-                      key={city.id || index}
-                      onClick={() => handleCitySelect(city)}
-                      onMouseEnter={() => setHighlightedIndex(index)}
-                      className={cn(
-                        "mx-2 my-1 px-3 py-2.5 cursor-pointer flex items-center gap-2.5 text-sm transition-all duration-200 rounded-lg",
-                        highlightedIndex === index
-                          ? "bg-gradient-to-r from-red-50 to-red-100/80 backdrop-blur-sm shadow-md scale-[1.02] border border-red-200/50"
-                          : "hover:bg-gray-50/80 hover:backdrop-blur-sm hover:scale-[1.01]"
-                      )}
-                    >
-                      <Check
-                        className={cn(
-                          "h-4 w-4 text-red-600 flex-shrink-0 transition-all duration-200",
-                          selectedCity?.city === city.city &&
-                          (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
-                            ? "opacity-100 scale-110"
-                            : "opacity-0 scale-90"
-                        )}
-                      />
-                      <MapPin className="h-4 w-4 text-red-600/70 flex-shrink-0" />
-                      <span className="font-medium text-gray-800">{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
+                  ) : isLoadingCities ? (
+                    <div className="px-4 py-3 text-sm text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                        Loading cities...
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
+                  ) : cities.length === 0 ? (
+                    <div className="px-4 py-3 text-sm text-gray-600">
+                      No cities loaded. Please refresh the page.
+                    </div>
+                  ) : filteredCities.length === 0 ? (
+                    <div className="px-4 py-3 text-sm text-gray-600">
+                      {searchQuery ? `No cities found matching "${searchQuery}"` : 'Start typing to search cities...'}
+                    </div>
+                  ) : (
+                    <CommandGroup>
+                      {filteredCities.map((city) => (
+                        <CommandItem
+                          key={city.id || city.city}
+                          value={`${city.city}-${city.stateCode || ''}`}
+                          onSelect={() => handleCitySelect(city)}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <Check
+                            className={cn(
+                              "h-4 w-4 text-red-600",
+                              selectedCity?.city === city.city &&
+                              (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          <MapPin className="h-4 w-4 text-red-600/70" />
+                          <span>{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
 
           {/* Property Type Dropdown */}
           <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
@@ -472,79 +394,77 @@ export default function PropertySearch() {
         {/* Tablet Layout - Hidden on mobile and desktop */}
         <div className="hidden md:flex lg:hidden flex-col">
           {/* City Typeahead */}
-          <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 relative">
-            <MapPin className="h-4 w-4 text-red-600 shrink-0" />
-            <input
-              ref={tabletInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={handleInputChange}
-              onFocus={handleInputFocus}
-              onKeyDown={handleKeyDown}
-              placeholder="Search city..."
-              className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
-              autoComplete="off"
-            />
-            {showDropdown && (
-              <div
-                ref={tabletDropdownRef}
-                className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-2xl z-50 max-h-[250px] overflow-y-auto animate-dropdown-enter"
-                style={{
-                  boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
-                }}
-              >
-                {error ? (
-                  <div className="px-4 py-3 text-sm text-red-600 bg-red-50/80 backdrop-blur-sm m-2 rounded-lg">
-                    <div className="font-semibold">Error loading cities</div>
-                    <div className="text-xs mt-1">{error}</div>
-                  </div>
-                ) : isLoadingCities ? (
-                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
-                      Loading cities...
+          <Popover open={openTablet} onOpenChange={setOpenTablet}>
+            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 relative">
+              <MapPin className="h-4 w-4 text-red-600 shrink-0" />
+              <PopoverAnchor asChild>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setOpenTablet(true)}
+                  placeholder="Type to search cities..."
+                  className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
+                  autoComplete="off"
+                />
+              </PopoverAnchor>
+              <ChevronsUpDown className="h-4 w-4 text-gray-400 shrink-0" />
+            </div>
+            <PopoverContent
+              className="w-[calc(100vw-2rem)] max-w-md p-0"
+              align="start"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+              <Command shouldFilter={false}>
+                <CommandList>
+                  {error ? (
+                    <div className="px-4 py-3 text-sm text-red-600">
+                      <div className="font-semibold">Error loading cities</div>
+                      <div className="text-xs mt-1">{error}</div>
                     </div>
-                  </div>
-                ) : cities.length === 0 ? (
-                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
-                    No cities loaded. Please refresh the page.
-                  </div>
-                ) : filteredCities.length === 0 ? (
-                  <div className="px-4 py-3 text-sm text-gray-600 m-2">
-                    {searchQuery
-                      ? `No city found matching "${searchQuery}".`
-                      : 'Type city name to search...'}
-                  </div>
-                ) : (
-                  filteredCities.map((city, index) => (
-                    <div
-                      key={city.id || index}
-                      onClick={() => handleCitySelect(city)}
-                      onMouseEnter={() => setHighlightedIndex(index)}
-                      className={cn(
-                        "mx-2 my-1 px-3 py-2.5 cursor-pointer flex items-center gap-2.5 text-sm transition-all duration-200 rounded-lg",
-                        highlightedIndex === index
-                          ? "bg-gradient-to-r from-red-50 to-red-100/80 backdrop-blur-sm shadow-md scale-[1.02] border border-red-200/50"
-                          : "hover:bg-gray-50/80 hover:backdrop-blur-sm hover:scale-[1.01]"
-                      )}
-                    >
-                      <Check
-                        className={cn(
-                          "h-4 w-4 text-red-600 flex-shrink-0 transition-all duration-200",
-                          selectedCity?.city === city.city &&
-                          (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
-                            ? "opacity-100 scale-110"
-                            : "opacity-0 scale-90"
-                        )}
-                      />
-                      <MapPin className="h-4 w-4 text-red-600/70 flex-shrink-0" />
-                      <span className="font-medium text-gray-800">{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
+                  ) : isLoadingCities ? (
+                    <div className="px-4 py-3 text-sm text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                        Loading cities...
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
+                  ) : cities.length === 0 ? (
+                    <div className="px-4 py-3 text-sm text-gray-600">
+                      No cities loaded. Please refresh the page.
+                    </div>
+                  ) : filteredCities.length === 0 ? (
+                    <div className="px-4 py-3 text-sm text-gray-600">
+                      {searchQuery ? `No cities found matching "${searchQuery}"` : 'Start typing to search cities...'}
+                    </div>
+                  ) : (
+                    <CommandGroup>
+                      {filteredCities.map((city) => (
+                        <CommandItem
+                          key={city.id || city.city}
+                          value={`${city.city}-${city.stateCode || ''}`}
+                          onSelect={() => handleCitySelect(city)}
+                          className="flex items-center gap-2 cursor-pointer"
+                        >
+                          <Check
+                            className={cn(
+                              "h-4 w-4 text-red-600",
+                              selectedCity?.city === city.city &&
+                              (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          <MapPin className="h-4 w-4 text-red-600/70" />
+                          <span>{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
 
           {/* Filters and Search Row */}
           <div className="flex items-center">
@@ -593,79 +513,79 @@ export default function PropertySearch() {
         {/* Mobile Layout - Visible only on mobile */}
         <div className="md:hidden">
           {/* City Typeahead */}
-          <div className="flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 relative">
-            <MapPin className="h-4 w-4 text-red-600 shrink-0" />
-            <input
-              ref={mobileInputRef}
-              type="text"
-              value={searchQuery}
-              onChange={handleInputChange}
-              onFocus={handleInputFocus}
-              onKeyDown={handleKeyDown}
-              placeholder="Search city..."
-              className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
-              autoComplete="off"
-            />
-            {showDropdown && (
-              <div
-                ref={mobileDropdownRef}
-                className="absolute top-full left-0 right-0 mt-2 bg-white/95 backdrop-blur-xl border border-white/60 rounded-xl shadow-2xl z-50 max-h-[250px] overflow-y-auto animate-dropdown-enter"
-                style={{
-                  boxShadow: '0 20px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset'
-                }}
-              >
-                {error ? (
-                  <div className="px-3.5 py-3 text-xs text-red-600 bg-red-50/80 backdrop-blur-sm m-2 rounded-lg">
-                    <div className="font-semibold">Error loading cities</div>
-                    <div className="text-[10px] mt-1">{error}</div>
-                  </div>
-                ) : isLoadingCities ? (
-                  <div className="px-3.5 py-3 text-xs text-gray-600 m-2">
-                    <div className="flex items-center gap-2">
-                      <div className="animate-spin h-3 w-3 border-2 border-red-500 border-t-transparent rounded-full"></div>
-                      Loading cities...
+          <Popover open={openMobile} onOpenChange={setOpenMobile}>
+            <div className="flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 relative">
+              <MapPin className="h-4 w-4 text-red-600 shrink-0" />
+              <PopoverAnchor asChild>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setOpenMobile(true)}
+                  placeholder="Type to search..."
+                  className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
+                  autoComplete="off"
+                />
+              </PopoverAnchor>
+              <ChevronsUpDown className="h-4 w-4 text-gray-400 shrink-0" />
+            </div>
+            <PopoverContent
+              className="w-[calc(100vw-2rem)] p-0"
+              align="start"
+              onOpenAutoFocus={(e) => e.preventDefault()}
+            >
+              <Command shouldFilter={false}>
+                <CommandList>
+                  {error ? (
+                    <div className="px-3.5 py-3 text-xs text-red-600">
+                      <div className="font-semibold">Error loading cities</div>
+                      <div className="text-[10px] mt-1">{error}</div>
                     </div>
-                  </div>
-                ) : cities.length === 0 ? (
-                  <div className="px-3.5 py-3 text-xs text-gray-600 m-2">
-                    No cities loaded. Refresh page.
-                  </div>
-                ) : filteredCities.length === 0 ? (
-                  <div className="px-3.5 py-3 text-xs text-gray-600 m-2">
-                    {searchQuery
-                      ? `No city found matching "${searchQuery}".`
-                      : 'Type to search...'}
-                  </div>
-                ) : (
-                  filteredCities.map((city, index) => (
-                    <div
-                      key={city.id || index}
-                      onClick={() => handleCitySelect(city)}
-                      onMouseEnter={() => setHighlightedIndex(index)}
-                      className={cn(
-                        "mx-2 my-1 px-3 py-2.5 cursor-pointer flex items-center gap-2 text-xs transition-all duration-200 rounded-lg",
-                        highlightedIndex === index
-                          ? "bg-gradient-to-r from-red-50 to-red-100/80 backdrop-blur-sm shadow-md scale-[1.02] border border-red-200/50"
-                          : "hover:bg-gray-50/80 hover:backdrop-blur-sm hover:scale-[1.01]"
-                      )}
-                    >
-                      <Check
-                        className={cn(
-                          "h-3.5 w-3.5 text-red-600 flex-shrink-0 transition-all duration-200",
-                          selectedCity?.city === city.city &&
-                          (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
-                            ? "opacity-100 scale-110"
-                            : "opacity-0 scale-90"
-                        )}
-                      />
-                      <MapPin className="h-3.5 w-3.5 text-red-600/70 flex-shrink-0" />
-                      <span className="font-medium text-gray-800">{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
+                  ) : isLoadingCities ? (
+                    <div className="px-3.5 py-3 text-xs text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <div className="animate-spin h-3 w-3 border-2 border-red-500 border-t-transparent rounded-full"></div>
+                        Loading cities...
+                      </div>
                     </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
+                  ) : cities.length === 0 ? (
+                    <div className="px-3.5 py-3 text-xs text-gray-600">
+                      No cities loaded. Refresh page.
+                    </div>
+                  ) : filteredCities.length === 0 ? (
+                    <div className="px-3.5 py-3 text-xs text-gray-600">
+                      {searchQuery ? `No cities found matching "${searchQuery}"` : 'Start typing to search...'}
+                    </div>
+                  ) : (
+                    <CommandGroup>
+                      {filteredCities.map((city) => (
+                        <CommandItem
+                          key={city.id || city.city}
+                          value={`${city.city}-${city.stateCode || ''}`}
+                          onSelect={() => handleCitySelect(city)}
+                          className="flex items-center gap-2 text-xs cursor-pointer"
+                        >
+                          <Check
+                            className={cn(
+                              "h-3.5 w-3.5 text-red-600",
+                              selectedCity?.city === city.city &&
+                              (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          <MapPin className="h-3.5 w-3.5 text-red-600/70" />
+                          <span className="font-medium text-gray-800">
+                            {city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}
+                          </span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
 
           {/* Filters Row */}
           <div className="grid grid-cols-2 border-b border-gray-200">
@@ -713,6 +633,5 @@ export default function PropertySearch() {
         </div>
       </div>
     </div>
-    </>
   );
 }
