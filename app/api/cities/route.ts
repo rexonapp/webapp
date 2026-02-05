@@ -19,19 +19,27 @@ const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('🔍 Cities API called at:', new Date().toISOString());
+
     if (!API_KEY) {
+      console.error(' CSC_API_KEY is not set in environment variables');
       throw new Error("CSC_API_KEY is not set in environment variables");
     }
 
     // Check if cache is valid
     const now = Date.now();
     if (citiesCache && cacheTimestamp && (now - cacheTimestamp) < CACHE_DURATION) {
-      console.log(`Returning ${citiesCache.length} cities from cache`);
+      const cacheAge = Math.floor((now - cacheTimestamp) / (60 * 1000)); // in minutes
+      console.log(`s Returning ${citiesCache.length} cities from server cache (age: ${cacheAge} minutes)`);
       return NextResponse.json(citiesCache);
     }
 
-    console.log('Cache miss or expired, fetching cities from API...');
+    console.log('⚠️ Cache miss or expired, fetching cities from CountryStateCity API...');
+    console.log(` Fetching cities for ${INDIAN_STATES.length} Indian states...`);
+
     const allCities: { id?: string; city: string; stateCode: string; latitude?: number; longitude?: number }[] = [];
+    let successfulStates = 0;
+    let failedStates = 0;
 
     // Fetch cities for each state to get proper state codes and geocodes (with batching to avoid rate limits)
     for (let i = 0; i < INDIAN_STATES.length; i++) {
@@ -43,11 +51,13 @@ export async function GET(request: NextRequest) {
             headers: {
               "X-CSCAPI-KEY": API_KEY,
             },
+            timeout: 10000, // 10 second timeout per request
           }
         );
 
         const stateCities: { id?: string; name?: string; latitude?: string; longitude?: string }[] = response.data;
-        console.log(`✅ Fetched ${stateCities.length} cities for state: ${stateCode}`);
+        console.log(`✅ [${i + 1}/${INDIAN_STATES.length}] Fetched ${stateCities.length} cities for state: ${stateCode}`);
+        successfulStates++;
 
         // Map cities with their state code and geocodes
         stateCities.forEach(item => {
@@ -68,26 +78,49 @@ export async function GET(request: NextRequest) {
 
         // Add a small delay to avoid rate limiting (every 10 requests)
         if ((i + 1) % 10 === 0) {
+          console.log(`⏳ Rate limit pause after ${i + 1} requests...`);
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
-      } catch (stateError) {
-        console.warn(`Failed to fetch cities for state ${stateCode}:`, stateError);
+      } catch (stateError: any) {
+        failedStates++;
+        console.error(`❌ [${i + 1}/${INDIAN_STATES.length}] Failed to fetch cities for state ${stateCode}:`,
+          stateError.message || stateError.response?.status || stateError);
         // Continue with other states
       }
     }
 
-    // Update cache
-    citiesCache = allCities;
-    cacheTimestamp = Date.now();
+    console.log(`📊 Summary: ${successfulStates} successful, ${failedStates} failed out of ${INDIAN_STATES.length} states`);
 
-    // Count cities with valid geocodes
-    const citiesWithGeocodes = allCities.filter(c => c.latitude && c.longitude).length;
-    console.log(`✅ Fetched ${allCities.length} cities from API with state codes (${citiesWithGeocodes} with geocodes)`);
-    return NextResponse.json(allCities);
+    // Only update cache if we got at least some cities
+    if (allCities.length > 0) {
+      citiesCache = allCities;
+      cacheTimestamp = Date.now();
+
+      // Count cities with valid geocodes
+      const citiesWithGeocodes = allCities.filter(c => c.latitude && c.longitude).length;
+      console.log(`✅ Successfully fetched ${allCities.length} total cities with state codes (${citiesWithGeocodes} with geocodes)`);
+      console.log(`💾 Cached ${allCities.length} cities in server memory for ${CACHE_DURATION / (60 * 60 * 1000)} hours`);
+      return NextResponse.json(allCities);
+    } else {
+      console.error('❌ No cities were fetched from any state');
+      throw new Error('Failed to fetch cities from any state');
+    }
   } catch (error: any) {
-    console.error("Cities API error:", error.message || error);
+    console.error("❌ Cities API error:", error.message || error);
+    console.error("❌ Full error:", error);
+
+    // If we have cached data (even expired), return it instead of erroring out
+    if (citiesCache && citiesCache.length > 0) {
+      console.log(`⚠️ Returning ${citiesCache.length} cities from expired cache due to error`);
+      return NextResponse.json(citiesCache);
+    }
+
     return NextResponse.json(
-      { error: "Failed to load cities" },
+      {
+        error: "Failed to load cities",
+        message: error.message || "Unknown error occurred",
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
   }

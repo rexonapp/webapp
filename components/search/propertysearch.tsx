@@ -77,12 +77,38 @@ export default function PropertySearch() {
   ];
   
 
-  // Fetch cities from API on component mount
+  // Fetch cities from API on component mount with localStorage caching
   useEffect(() => {
+    const CACHE_KEY = 'cities_cache';
+    const CACHE_EXPIRY_KEY = 'cities_cache_expiry';
+    const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+
     const fetchCities = async () => {
       try {
         setIsLoadingCities(true);
         setError(null);
+
+        // Try to load from localStorage first
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        const cacheExpiry = localStorage.getItem(CACHE_EXPIRY_KEY);
+
+        if (cachedData && cacheExpiry) {
+          const now = Date.now();
+          const expiryTime = parseInt(cacheExpiry, 10);
+
+          // If cache is still valid, use it immediately
+          if (now < expiryTime) {
+            const parsedData = JSON.parse(cachedData);
+            if (Array.isArray(parsedData) && parsedData.length > 0) {
+              setCities(parsedData);
+              setIsLoadingCities(false);
+              console.log(`✅ Loaded ${parsedData.length} cities from localStorage cache`);
+              return; // Use cached data, don't fetch from API
+            }
+          }
+        }
+
+        // Fetch from API if no valid cache
         const res = await fetch("/api/cities");
 
         if (!res.ok) {
@@ -96,12 +122,36 @@ export default function PropertySearch() {
           throw new Error('Invalid data format');
         }
 
+        // Store in localStorage for future use
+        if (data.length > 0) {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+          localStorage.setItem(CACHE_EXPIRY_KEY, (Date.now() + CACHE_DURATION).toString());
+          console.log(`✅ Loaded ${data.length} cities from API and cached in localStorage`);
+        }
+
         setCities(data);
-        console.log(`✅ Loaded ${data.length} cities successfully`);
       } catch (error) {
         console.error("❌ Error fetching cities:", error);
+
+        // Try to fallback to localStorage even if expired
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        if (cachedData) {
+          try {
+            const parsedData = JSON.parse(cachedData);
+            if (Array.isArray(parsedData) && parsedData.length > 0) {
+              setCities(parsedData);
+              setError('Using cached cities data. Some information may be outdated.');
+              console.log(`⚠️ API failed, using ${parsedData.length} cities from expired localStorage cache`);
+              return;
+            }
+          } catch (parseError) {
+            console.error("Failed to parse cached data:", parseError);
+          }
+        }
+
+        // If no cache available, show error
         setError('Unable to load cities. Please refresh the page.');
-        setCities([]); // Prevent breaking the site
+        setCities([]);
       } finally {
         setIsLoadingCities(false);
       }
