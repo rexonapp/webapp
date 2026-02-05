@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Building2, UserCheck, Users, Clock, TrendingUp, ArrowUpRight, ArrowRight, Activity, Sparkles } from 'lucide-react';
