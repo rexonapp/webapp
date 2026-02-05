@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import axios from "axios";
 
 // CountryStateCity API for India
-const API_KEY = process.env.CSC_API_KEY; // Store your key in .env.local
+// Clean the API key by removing quotes and whitespace that might cause header issues
+const API_KEY = process.env.CSC_API_KEY?.trim().replace(/^["']|["']$/g, ''); // Store your key in .env.local
 
 // State codes for all Indian states
 const INDIAN_STATES = [
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
         );
 
         const stateCities: { id?: string; name?: string; latitude?: string; longitude?: string }[] = response.data;
-        console.log(`✅ [${i + 1}/${INDIAN_STATES.length}] Fetched ${stateCities.length} cities for state: ${stateCode}`);
+        console.log(`s [${i + 1}/${INDIAN_STATES.length}] Fetched ${stateCities.length} cities for state: ${stateCode}`);
         successfulStates++;
 
         // Map cities with their state code and geocodes
@@ -83,13 +84,13 @@ export async function GET(request: NextRequest) {
         }
       } catch (stateError: any) {
         failedStates++;
-        console.error(`❌ [${i + 1}/${INDIAN_STATES.length}] Failed to fetch cities for state ${stateCode}:`,
+        console.error(` [${i + 1}/${INDIAN_STATES.length}] Failed to fetch cities for state ${stateCode}:`,
           stateError.message || stateError.response?.status || stateError);
         // Continue with other states
       }
     }
 
-    console.log(`📊 Summary: ${successfulStates} successful, ${failedStates} failed out of ${INDIAN_STATES.length} states`);
+    console.log(` Summary: ${successfulStates} successful, ${failedStates} failed out of ${INDIAN_STATES.length} states`);
 
     // Only update cache if we got at least some cities
     if (allCities.length > 0) {
@@ -98,16 +99,16 @@ export async function GET(request: NextRequest) {
 
       // Count cities with valid geocodes
       const citiesWithGeocodes = allCities.filter(c => c.latitude && c.longitude).length;
-      console.log(`✅ Successfully fetched ${allCities.length} total cities with state codes (${citiesWithGeocodes} with geocodes)`);
-      console.log(`💾 Cached ${allCities.length} cities in server memory for ${CACHE_DURATION / (60 * 60 * 1000)} hours`);
+      console.log(` Successfully fetched ${allCities.length} total cities with state codes (${citiesWithGeocodes} with geocodes)`);
+      console.log(` Cached ${allCities.length} cities in server memory for ${CACHE_DURATION / (60 * 60 * 1000)} hours`);
       return NextResponse.json(allCities);
     } else {
-      console.error('❌ No cities were fetched from any state');
+      console.error(' No cities were fetched from any state');
       throw new Error('Failed to fetch cities from any state');
     }
   } catch (error: any) {
-    console.error("❌ Cities API error:", error.message || error);
-    console.error("❌ Full error:", error);
+    console.error("Cities API error:", error.message || error);
+    console.error("s Full error:", error);
 
     // If we have cached data (even expired), return it instead of erroring out
     if (citiesCache && citiesCache.length > 0) {
