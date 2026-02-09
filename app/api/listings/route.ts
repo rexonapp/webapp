@@ -9,13 +9,12 @@ export async function GET(request: NextRequest) {
 
     if (!session || !session.userId) {
       return NextResponse.json(
-        { error: 'Unauthorized. Please sign in.' },
+        { error: 'Unauthorized. Please sign in.', success: false },
         { status: 401 }
       );
     }
 
     // Optimized query - fetch only necessary fields for listing display
-    // Excludes large text fields and media to improve speed
     const warehousesResult = await query(
       `SELECT
         id,
@@ -85,16 +84,25 @@ export async function GET(request: NextRequest) {
       properties: properties,
     }, {
       headers: {
-        'Cache-Control': 'no-store, must-revalidate',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       }
     });
 
   } catch (error) {
     console.error('Fetch listings error:', error);
+    
+    // Provide more specific error details in development
+    const errorMessage = process.env.NODE_ENV === 'development' && error instanceof Error
+      ? error.message
+      : 'Failed to fetch listings. Please try again.';
+    
     return NextResponse.json(
       {
-        error: 'Failed to fetch listings. Please try again.',
-        success: false
+        error: errorMessage,
+        success: false,
+        properties: [] // Return empty array so client can handle gracefully
       },
       { status: 500 }
     );

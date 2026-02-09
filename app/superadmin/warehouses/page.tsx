@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, Filter, Eye, CheckCircle, XCircle, Clock, MapPin, MoreVertical } from 'lucide-react';
 import GlassCard from '@/components/superadmin/GlassCard';
+import Loading from '../loading';
 
 interface Warehouse {
   id: string;
@@ -108,20 +109,7 @@ export default function WarehousesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative">
-          <div className="absolute inset-0 bg-cyan-500 rounded-full blur-xl animate-pulse"></div>
-            <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-cyan-600 border-r-cyan-600"></div>
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-semibold bg-cyan-500 bg-clip-text text-transparent">
-              Loading warehouses...
-            </p>
-            <p className="text-sm text-gray-500 mt-1">Please wait</p>
-          </div>
-        </div>
-      </div>
+      <Loading/>
     );
   }
 
@@ -131,7 +119,7 @@ export default function WarehousesPage() {
       <GlassCard className="p-6" gradient="amber">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text ">
               Warehouse Management
             </h2>
             <p className="text-sm text-gray-600 mt-1 font-medium">Review and approve warehouse listings</p>
@@ -146,14 +134,14 @@ export default function WarehousesPage() {
 
         <div className="pt-0">
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
+            <div className="relative flex-1 max-w-xl">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
               <Input
                 type="text"
                 placeholder="Search warehouses by title or location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 bg-white/50 border-white/60 focus:bg-white focus:border-amber-400 transition-all"
+                className="pl-9 bg-white/50 border focus:bg-white focus:border-amber-400 transition-all"
               />
             </div>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -173,12 +161,12 @@ export default function WarehousesPage() {
       </GlassCard>
 
       {/* Warehouses Table */}
-      <GlassCard className="p-0" gradient="rose">
+      <GlassCard className="p-0" >
         <div className="p-0">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-b border-white/40 bg-gradient-to-r from-amber-50/50 via-orange-50/50 to-rose-50/50">
+                <TableRow className="border-b border-white/40 ">
                   <TableHead className="font-bold text-gray-700">Property</TableHead>
                   <TableHead className="font-bold text-gray-700">Location</TableHead>
                   <TableHead className="font-bold text-gray-700">Type & Size</TableHead>
@@ -193,11 +181,11 @@ export default function WarehousesPage() {
                   filteredWarehouses.map((warehouse) => (
                     <TableRow
                       key={warehouse.id}
-                      className="border-b border-white/30 hover:bg-white/40 transition-all duration-300 group"
+                      className="border-b border-white/30 hover:bg-blue-100/80 transition-colors duration-150 group"
                     >
                       <TableCell>
                         <div>
-                          <p className="font-medium text-gray-900">{warehouse.title}</p>
+                          <p className="font-medium text-gray-900 group-hover:text-blue-700 transition-colors">{warehouse.title}</p>
                           <p className="text-xs text-gray-500">{warehouse.property_name}</p>
                         </div>
                       </TableCell>

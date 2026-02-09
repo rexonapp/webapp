@@ -8,7 +8,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Home, Users, Settings, LogOut, Bell, Search, Building2, UserCheck, Menu, Warehouse, User, PanelLeftClose, PanelLeft } from 'lucide-react';
+import { Home, Users, Settings, LogOut, Bell, Search, Building2, User2Icon, UserCheck, Menu, Warehouse, User, PanelLeftClose, PanelLeft } from 'lucide-react';
+import Loading from './loading';
 
 interface User {
   id: string;
@@ -69,20 +70,7 @@ export default function SuperAdminLayout({
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/20">
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 rounded-full blur-xl animate-pulse"></div>
-            <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-blue-600 border-r-cyan-600"></div>
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-semibold bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 bg-clip-text text-transparent">
-              Loading...
-            </p>
-            <p className="text-sm text-gray-500 mt-1">Please wait</p>
-          </div>
-        </div>
-      </div>
+      <Loading/>
     );
   }
 
@@ -116,9 +104,8 @@ export default function SuperAdminLayout({
                 {sidebarOpen ? (
                   <div className="flex items-center gap-3 group">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 rounded-xl blur-md group-hover:blur-lg transition-all opacity-50" />
-                      <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 flex items-center justify-center shadow-lg transition-all">
-                        <Building2 className="w-6 h-6 text-white" />
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 flex items-center justify-center shadow-lg transition-all">
+                        <User2Icon className="w-6 h-6 text-white" />
                       </div>
                     </div>
                     <div className="overflow-hidden">
@@ -130,9 +117,8 @@ export default function SuperAdminLayout({
                   </div>
                 ) : (
                   <div className="relative group mx-auto">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 rounded-xl blur-md group-hover:blur-lg transition-all opacity-50" />
-                    <div className="relative w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 flex items-center justify-center shadow-lg transition-all">
-                      <Building2 className="w-6 h-6 text-white" />
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 flex items-center justify-center shadow-lg transition-all">
+                      <User2Icon className="w-6 h-6 text-white" />
                     </div>
                   </div>
                 )}
@@ -196,9 +182,8 @@ export default function SuperAdminLayout({
                     }`}
                   >
                     <div className="relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-full blur-sm group-hover:blur-md transition-all opacity-30" />
-                      <Avatar className="w-10 h-10 relative ring-2 ring-blue-200 group-hover:ring-cyan-400 transition-all">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white text-sm font-bold">
+                      <Avatar className="w-10 h-10 relative ring-2 ring-blue-200 group-hover:ring-blue-400 transition-all">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-sm font-bold">
                           {user.first_name?.[0]}{user.last_name?.[0]}
                         </AvatarFallback>
                       </Avatar>
@@ -287,9 +272,8 @@ export default function SuperAdminLayout({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative rounded-full hover:bg-blue-50 transition-all group">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-full blur-sm group-hover:blur-md transition-all opacity-30" />
-                      <Avatar className="w-9 h-9 relative ring-2 ring-blue-200 group-hover:ring-cyan-400 transition-all">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white text-sm font-bold">
+                      <Avatar className="w-9 h-9 relative ring-2 ring-blue-200 group-hover:ring-blue-400 transition-all">
+                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-sm font-bold">
                           {user.first_name?.[0]}{user.last_name?.[0]}
                         </AvatarFallback>
                       </Avatar>
@@ -299,7 +283,7 @@ export default function SuperAdminLayout({
                     <div className="px-3 py-3 border-b border-blue-100">
                       <div className="flex items-center gap-3">
                         <Avatar className="w-12 h-12 ring-2 ring-blue-200">
-                          <AvatarFallback className="bg-gradient-to-br from-blue-600 to-cyan-600 text-white font-bold">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white font-bold">
                             {user.first_name?.[0]}{user.last_name?.[0]}
                           </AvatarFallback>
                         </Avatar>

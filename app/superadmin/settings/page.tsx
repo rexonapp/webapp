@@ -160,7 +160,6 @@ export default function SettingsPage() {
               key={section.title}
               className="p-6"
               gradient={gradient}
-              // style={{ animation: `slideUp 0.6s ease-out ${0.1 * (sectionIdx + 1)}s backwards` }}
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className={iconClasses[gradient]}>
@@ -175,10 +174,10 @@ export default function SettingsPage() {
                 {section.settings.map((setting) => (
                   <div
                     key={setting.id}
-                    className="flex items-center justify-between p-5 rounded-xl bg-white/40 hover:bg-white/60 border border-white/40 hover:border-white/60 shadow-sm hover:shadow-md transition-all duration-300 group"
+                    className="flex items-center justify-between p-5 rounded-xl bg-white/40 hover:bg-blue-100/60 border border-white/40 hover:border-blue-200 shadow-sm transition-colors duration-150 group"
                   >
                     <div className="flex-1">
-                      <p className="font-bold text-gray-900 group-hover:scale-105 transition-transform">{setting.label}</p>
+                      <p className="font-bold text-gray-900">{setting.label}</p>
                       <p className="text-sm text-gray-600 mt-1 font-medium">{setting.description}</p>
                     </div>
 
@@ -211,11 +210,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Role Management Section */}
-      <GlassCard
-        className="p-6"
-        gradient="blue"
-        // style={{ animation: 'slideUp 0.6s ease-out 0.5s backwards' }}
-      >
+      <GlassCard className="p-6" gradient="blue">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 rounded-xl bg-blue-500/10 ring-4 ring-blue-500/10">
             <Shield className="w-6 h-6 text-blue-600" />
@@ -245,26 +240,26 @@ export default function SettingsPage() {
                 { name: 'Create Listings', superadmin: true, admin: true, manager: true, user: true },
                 { name: 'System Settings', superadmin: true, admin: false, manager: false, user: false },
               ].map((perm, idx) => (
-                <TableRow key={idx} className="border-b border-white/30 hover:bg-white/40 transition-all duration-300 group">
+                <TableRow key={idx} className="border-b border-white/30 hover:bg-blue-100/80 transition-colors duration-150 group">
                   <TableCell className="font-bold text-gray-900">{perm.name}</TableCell>
                   <TableCell className="text-center">
                     {perm.superadmin && (
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 mx-auto shadow-lg shadow-cyan-500/50 group-hover:scale-125 transition-transform"></div>
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 mx-auto shadow-lg shadow-blue-500/50"></div>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
                     {perm.admin && (
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 mx-auto shadow-lg shadow-cyan-500/50 group-hover:scale-125 transition-transform"></div>
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 mx-auto shadow-lg shadow-blue-500/50"></div>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
                     {perm.manager && (
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 mx-auto shadow-lg shadow-cyan-500/50 group-hover:scale-125 transition-transform"></div>
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 mx-auto shadow-lg shadow-blue-500/50"></div>
                     )}
                   </TableCell>
                   <TableCell className="text-center">
                     {perm.user && (
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 mx-auto shadow-lg shadow-cyan-500/50 group-hover:scale-125 transition-transform"></div>
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 mx-auto shadow-lg shadow-blue-500/50"></div>
                     )}
                   </TableCell>
                 </TableRow>
@@ -273,19 +268,6 @@ export default function SettingsPage() {
           </Table>
         </div>
       </GlassCard>
-
-      <style jsx>{`
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }

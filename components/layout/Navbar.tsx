@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, Home, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus, Settings } from 'lucide-react'
+import { Menu, X, Home, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus, Settings, User2Icon } from 'lucide-react'
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -347,7 +347,7 @@ export default function Navbar() {
                         </button>
                         {currentUser?.role === 'superadmin' && (
                           <button onClick={()=>router.push('/superadmin/home')} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <Building2 className="h-4 w-4 text-gray-500" />
+                            <User2Icon className="h-4 w-4 text-gray-500" />
                             <span className="font-medium">Superadmin</span>
                           </button>
                         )}

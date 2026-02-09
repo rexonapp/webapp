@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Building2, UserCheck, Users, Clock, TrendingUp, ArrowUpRight, ArrowRight, Activity, Sparkles } from 'lucide-react';
 import StatCard from '@/components/superadmin/StatCard';
 import GlassCard from '@/components/superadmin/GlassCard';
+import Loading from '../loading';
 
 interface Stats {
   totalWarehouses: number;
@@ -94,21 +95,7 @@ export default function SuperAdminHome() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 rounded-full blur-xl animate-pulse"></div>
-            <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-blue-600 border-r-indigo-600"></div>
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-semibold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-              Loading dashboard...
-            </p>
-            <p className="text-sm text-gray-500 mt-1">Please wait</p>
-          </div>
-        </div>
-      </div>
-    );
+      <Loading/>)
   }
 
   return (

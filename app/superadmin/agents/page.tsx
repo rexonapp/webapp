@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, Filter, Eye, CheckCircle, XCircle, UserCheck, MoreVertical, FileText } from 'lucide-react';
 import GlassCard from '@/components/superadmin/GlassCard';
+import Loading from '../loading';
 
 interface Agent {
   id: string;
@@ -105,20 +106,7 @@ export default function AgentsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-cyan-500 rounded-full blur-xl animate-pulse"></div>
-            <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-cyan-600 border-r-cyan-600"></div>
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-semibold bg-cyan-500 bg-clip-text text-transparent">
-              Loading agents...
-            </p>
-            <p className="text-sm text-gray-500 mt-1">Please wait</p>
-          </div>
-        </div>
-      </div>
+      <Loading/>
     );
   }
 
@@ -190,20 +178,19 @@ export default function AgentsPage() {
                   filteredAgents.map((agent) => (
                     <TableRow
                       key={agent.id}
-                      className="border-b border-white/30 hover:bg-white/40 transition-all duration-300 group"
+                      className="border-b border-white/30 hover:bg-blue-100/80 transition-colors duration-150 group"
                     >
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-br from-cyan-600 to-teal-600 rounded-full blur-sm group-hover:blur-md transition-all opacity-30" />
-                            <Avatar className="w-10 h-10 relative ring-2 ring-cyan-200 group-hover:ring-cyan-400 transition-all">
-                              <AvatarFallback className="bg-gradient-to-br from-cyan-600 to-teal-600 text-white text-sm font-bold">
+                            <Avatar className="w-10 h-10 relative ring-2 ring-blue-200 group-hover:ring-blue-400 transition-all">
+                              <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-sm font-bold">
                                 {agent.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                               </AvatarFallback>
                             </Avatar>
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-900 group-hover:text-cyan-700 transition-colors">{agent.full_name}</p>
+                            <p className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">{agent.full_name}</p>
                             <p className="text-xs text-gray-500 font-medium">{agent.city}</p>
                           </div>
                         </div>

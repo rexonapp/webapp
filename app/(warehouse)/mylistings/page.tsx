@@ -1,4 +1,6 @@
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 import { cookies } from 'next/headers';
 import ListingsComponent from './Listing';
 
@@ -36,19 +38,34 @@ interface Property {
 async function getListings(): Promise<{ properties: Property[]; error?: string }> {
   try {
     const cookieStore = await cookies();
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
     
-    const response = await fetch(`${baseUrl}/api/listings`, {
+    // Use absolute URL for production, relative for development
+    const isProduction = process.env.NODE_ENV === 'production';
+    const baseUrl = isProduction 
+      ? (process.env.NEXT_PUBLIC_URL || process.env.NEXT_PUBLIC_URL 
+          ? `https://${process.env.NEXT_PUBLIC_URL}` 
+          : 'http://localhost:3000')
+      : 'http://localhost:3000';
+    
+    const url = `${baseUrl}/api/listings`;
+    
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         Cookie: cookieStore.toString(),
       },
       cache: 'no-store',
+      // Add timeout to prevent hanging
+      signal: AbortSignal.timeout(10000), // 10 second timeout
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch properties');
+      // Handle different error status codes
+      if (response.status === 401) {
+        return { properties: [], error: 'Please sign in to view your listings' };
+      }
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const data = await response.json();
@@ -60,9 +77,18 @@ async function getListings(): Promise<{ properties: Property[]; error?: string }
     }
   } catch (error) {
     console.error('Error fetching listings:', error);
+    
+    // Provide more specific error messages
+    if (error instanceof Error) {
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        return { properties: [], error: 'Request timed out. Please refresh the page.' };
+      }
+      return { properties: [], error: error.message };
+    }
+    
     return { 
       properties: [], 
-      error: error instanceof Error ? error.message : 'An error occurred while fetching listings'
+      error: 'Unable to load listings. Please try again.'
     };
   }
 }

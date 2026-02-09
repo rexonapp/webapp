@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { Building2, MapPin, IndianRupee, Calendar, AlertCircle, Loader2, RefreshCw, Filter, X, Search, SlidersHorizontal, TrendingUp, CheckCircle, Clock } from 'lucide-react';
+import { Building2, MapPin, IndianRupee, Calendar, AlertCircle, RefreshCw, Filter, X, Search, SlidersHorizontal, TrendingUp, CheckCircle, Clock } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -41,6 +41,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Property {
   id: number;
@@ -96,9 +97,10 @@ interface ListingsComponentProps {
 const ITEMS_PER_PAGE = 10;
 
 export default function ListingsComponent({ initialProperties, initialError }: ListingsComponentProps) {
+  const router = useRouter();
   const [properties, setProperties] = useState<Property[]>(initialProperties);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>(initialProperties);
-  const [loading, setLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(initialError || null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -125,35 +127,12 @@ export default function ListingsComponent({ initialProperties, initialError }: L
   const uniqueCities = Array.from(new Set(properties.map(p => p.city).filter(Boolean)));
   const uniqueStates = Array.from(new Set(properties.map(p => p.state).filter(Boolean)));
 
-  const fetchProperties = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await fetch('/api/listings', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch properties');
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        setProperties(data.properties || []);
-        setFilteredProperties(data.properties || []);
-      } else {
-        throw new Error(data.error || 'Failed to load properties');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    // Use router.refresh() to trigger server-side re-fetch
+    router.refresh();
+    // Reset refreshing state after a delay
+    setTimeout(() => setIsRefreshing(false), 1000);
   };
 
   // Apply filters whenever filters or properties change
@@ -315,10 +294,17 @@ export default function ListingsComponent({ initialProperties, initialError }: L
             <AlertCircle className="h-5 w-5" />
             <AlertDescription className="text-base">{error}</AlertDescription>
           </Alert>
-          <Button onClick={fetchProperties} className="bg-red-600 hover:bg-red-700 shadow-md">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Try Again
-          </Button>
+          <div className="flex gap-3">
+            <Button onClick={handleRefresh} className="bg-red-600 hover:bg-red-700 shadow-md">
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Refreshing...' : 'Try Again'}
+            </Button>
+            <Link href="/">
+              <Button variant="outline" className="border-slate-300">
+                Go to Home
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -346,13 +332,13 @@ export default function ListingsComponent({ initialProperties, initialError }: L
             </div>
             <div className="flex items-center gap-3">
               <Button
-                onClick={fetchProperties}
-                disabled={loading}
+                onClick={handleRefresh}
+                disabled={isRefreshing}
                 variant="outline"
                 className="border-slate-300 hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 h-11 px-6"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                {loading ? 'Refreshing...' : 'Refresh'}
+                <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </Button>
               <Link href="/property">
                 <Button className="bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6">
@@ -363,6 +349,16 @@ export default function ListingsComponent({ initialProperties, initialError }: L
             </div>
           </div>
         </div>
+
+        {/* Error Alert (if there's an error but still have properties) */}
+        {error && properties.length > 0 && (
+          <Alert variant="destructive" className="border-amber-200 bg-amber-50">
+            <AlertCircle className="h-5 w-5 text-amber-600" />
+            <AlertDescription className="text-base text-amber-800">
+              {error} - Showing cached data
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -873,7 +869,7 @@ export default function ListingsComponent({ initialProperties, initialError }: L
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {currentProperties.map((property, index) => (
+                    {currentProperties.map((property) => (
                       <TableRow 
                         key={property.id} 
                         className="hover:bg-slate-50 transition-colors border-b border-slate-100"

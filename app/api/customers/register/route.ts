@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getSession } from '@/lib/session';
+import { sendWelcomeEmail } from '@/lib/sendemail';
 
 export async function POST(request: NextRequest) {
   try {
@@ -93,6 +94,16 @@ export async function POST(request: NextRequest) {
         true // is_active
       ]
     );
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail({
+      fullName,
+      email,
+      city,
+    }).catch(error => {
+      // Log error but don't fail the registration
+      console.error('Failed to send welcome email:', error);
+    });
 
     return NextResponse.json({
       success: true,

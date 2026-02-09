@@ -123,6 +123,7 @@ function PropertyCard({ property }: { property: Property }) {
                 onError={() => setImageError(true)}
                 priority={currentImageIndex === 0}
                 quality={95}
+                unoptimized
               />
 
               {/* Gradient Overlay for better text visibility */}
@@ -197,7 +198,7 @@ function PropertyCard({ property }: { property: Property }) {
           </div>
         </div>
 
-        {/* Glassmorphic Content Section - 40% with unlimited space */}
+        {/* Glassmorphic Content Section */}
         <div className="flex-1 flex flex-col bg-gradient-to-br from-white/60 to-white/40 backdrop-blur-lg border-t border-white/60">
           <CardHeader className="pb-1.5 pt-3 px-4">
             <CardTitle className="text-sm font-bold text-slate-900 line-clamp-1 leading-tight mb-1">
@@ -265,6 +266,18 @@ function PropertyCard({ property }: { property: Property }) {
   );
 }
 
+// Simple Loading Spinner Component
+function LoadingSpinner() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="text-center space-y-4">
+        <Loader2 className="h-12 w-12 animate-spin text-red-600 mx-auto" />
+        <p className="text-lg font-medium text-slate-700">Loading properties...</p>
+      </div>
+    </div>
+  );
+}
+
 // Inner component that uses useSearchParams
 function SearchResults() {
   const searchParams = useSearchParams();
@@ -293,7 +306,11 @@ function SearchResults() {
         const response = await fetch(`/api/warehouse/search?${params.toString()}`);
 
         if (!response.ok) {
-          throw new Error('Failed to fetch properties');
+          // Silently handle errors - show empty results instead of error message
+          console.error('Failed to fetch properties:', response.statusText);
+          setProperties([]);
+          setLoading(false);
+          return;
         }
 
         const data = await response.json();
@@ -301,10 +318,14 @@ function SearchResults() {
         if (data.success) {
           setProperties(data.properties || []);
         } else {
-          throw new Error(data.error || 'Failed to load properties');
+          // Silently handle API errors
+          console.error('API error:', data.error);
+          setProperties([]);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        // Silently handle network errors - show empty results
+        console.error('Network error:', err);
+        setProperties([]);
       } finally {
         setLoading(false);
       }
@@ -324,32 +345,10 @@ function SearchResults() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 flex items-center justify-center">
-        <div className="text-center space-y-4 bg-white/60 backdrop-blur-lg rounded-2xl p-12 border border-white/60 shadow-2xl">
-          <Loader2 className="h-16 w-16 animate-spin text-red-600 mx-auto" />
-          <p className="text-xl font-semibold text-slate-700">Searching properties...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <Alert variant="destructive" className="bg-red-50/80 backdrop-blur-sm border-red-200">
-            <AlertDescription className="text-base">{error}</AlertDescription>
-          </Alert>
-          <Link href="/">
-            <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg">
-              Back to Home
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  // Removed error UI - errors now show empty results
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50/30 to-pink-50/20 py-8 px-4 sm:px-6 lg:px-8">
@@ -359,7 +358,7 @@ function SearchResults() {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                {properties.length} Properties Found
+                {properties.length} {properties.length === 1 ? 'Property' : 'Properties'} Found
               </h1>
               {(city || propertyType) && (
                 <p className="text-base text-slate-600 mt-2 font-medium">
@@ -388,7 +387,7 @@ function SearchResults() {
               <div className="bg-white/40 backdrop-blur-md p-10 rounded-2xl inline-block border border-white/60 shadow-lg">
                 <Building2 className="h-16 w-16 text-slate-400 mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-slate-900 mb-3">No properties found</h3>
-                <p className="text-slate-600 mb-6 text-lg">Try adjusting your search filters</p>
+                <p className="text-slate-600 mb-6 text-lg">Try adjusting your search filters or search in a different location</p>
                 <Link href="/">
                   <Button className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-lg text-base px-8 py-6">
                     New Search
@@ -469,15 +468,7 @@ function SearchResults() {
 
 export default function SearchPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4 flex items-center justify-center">
-          <div className="bg-white/60 backdrop-blur-lg rounded-2xl p-12 border border-white/60 shadow-2xl">
-            <Loader2 className="h-16 w-16 animate-spin text-red-600 mx-auto" />
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<LoadingSpinner />}>
       <SearchResults />
     </Suspense>
   );

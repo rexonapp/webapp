@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Filter, MoreVertical, Trash2, Shield, UserPlus, CheckCircle2, XCircle } from 'lucide-react';
 import GlassCard from '@/components/superadmin/GlassCard';
+import Loading from '../loading';
 
 interface User {
   id: string;
@@ -122,20 +123,7 @@ export default function UsersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <div className="flex flex-col items-center gap-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-indigo-600 to-violet-600 rounded-full blur-xl animate-pulse"></div>
-            <div className="relative animate-spin rounded-full h-16 w-16 border-4 border-transparent border-t-blue-600 border-r-indigo-600"></div>
-          </div>
-          <div className="text-center">
-            <p className="text-lg font-semibold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-              Loading users...
-            </p>
-            <p className="text-sm text-gray-500 mt-1">Please wait</p>
-          </div>
-        </div>
-      </div>
+      <Loading/>
     );
   }
 
@@ -208,14 +196,13 @@ export default function UsersPage() {
                   filteredUsers.map((user) => (
                     <TableRow
                       key={user.id}
-                      className="border-b border-white/30 hover:bg-white/40 transition-all duration-300 group"
+                      className="border-b border-white/30 hover:bg-blue-100/80 transition-colors duration-150 group"
                     >
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full blur-sm group-hover:blur-md transition-all opacity-30" />
                             <Avatar className="w-10 h-10 relative ring-2 ring-blue-200 group-hover:ring-blue-400 transition-all">
-                              <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white text-sm font-bold">
+                              <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-sm font-bold">
                                 {user.first_name[0]}{user.last_name[0]}
                               </AvatarFallback>
                             </Avatar>
