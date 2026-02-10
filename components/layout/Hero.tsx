@@ -28,11 +28,16 @@ const CINEMATIC_PRESETS = [
 
 export default function HeroWithBanner() {
   const [bannerImages, setBannerImages] = useState<string[]>(DEFAULT_IMAGES);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
+  const heroRef = useRef<HTMLElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>(0);
   const router = useRouter();
+
+  // Track current slide and visibility in refs to avoid unnecessary React re-renders
+  const currentSlideRef = useRef(0);
+  const isHeroVisibleRef = useRef(true);
+  const lastFrameTimeRef = useRef(0);
 
   const transitionStartTime = useRef<number>(0);
   const isTransitioning = useRef(false);
@@ -135,7 +140,8 @@ export default function HeroWithBanner() {
     ctx.imageSmoothingQuality = 'high';
 
     const resizeCanvas = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x for performance
+      // Slightly lower DPR cap to reduce fill rate cost
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       const width = window.innerWidth;
       const height = window.innerHeight;
 
@@ -144,6 +150,8 @@ export default function HeroWithBanner() {
       canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
+      // Reset transform before applying new scale to avoid accumulation
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
       ctx.scale(dpr, dpr);
@@ -156,14 +164,29 @@ export default function HeroWithBanner() {
       if (!ctx || loadedImages.length === 0) return;
 
       const now = Date.now();
-      const currentImg = loadedImages[currentSlide];
+
+      // Throttle to ~30fps to reduce CPU/GPU load
+      if (now - lastFrameTimeRef.current < 33) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTimeRef.current = now;
+      const currentIndex = currentSlideRef.current;
+      const currentImg = loadedImages[currentIndex];
       const nextImg = loadedImages[targetSlide.current];
 
       const slideProgress = Math.min((now - slideStartTime.current) / 10000, 1);
       const easeProgress = slideProgress; // Linear for video-like feel
 
-      const canvasWidth = canvas.width / (Math.min(window.devicePixelRatio || 1, 2));
-      const canvasHeight = canvas.height / (Math.min(window.devicePixelRatio || 1, 2));
+      // If hero is not visible or tab is hidden, skip heavy drawing work
+      if (!isHeroVisibleRef.current || typeof document !== 'undefined' && document.visibilityState === 'hidden') {
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
+      const effectiveDpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const canvasWidth = canvas.width / effectiveDpr;
+      const canvasHeight = canvas.height / effectiveDpr;
 
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
@@ -172,17 +195,17 @@ export default function HeroWithBanner() {
         const transitionProgress = Math.min((now - transitionStartTime.current) / transitionDuration, 1);
         const fadeProgress = transitionProgress; // Linear fade for video-like feel
 
-        drawImageWithCinematicMovement(ctx, canvasWidth, canvasHeight, currentImg, currentSlide, easeProgress, 1 - fadeProgress);
+        drawImageWithCinematicMovement(ctx, canvasWidth, canvasHeight, currentImg, currentIndex, easeProgress, 1 - fadeProgress);
 
         drawImageWithCinematicMovement(ctx, canvasWidth, canvasHeight, nextImg, targetSlide.current, 0, fadeProgress);
 
         if (transitionProgress >= 1) {
           isTransitioning.current = false;
-          setCurrentSlide(targetSlide.current);
+          currentSlideRef.current = targetSlide.current;
           slideStartTime.current = now;
         }
       } else {
-        drawImageWithCinematicMovement(ctx, canvasWidth, canvasHeight, currentImg, currentSlide, easeProgress, 1);
+        drawImageWithCinematicMovement(ctx, canvasWidth, canvasHeight, currentImg, currentIndex, easeProgress, 1);
       }
 
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -192,7 +215,7 @@ export default function HeroWithBanner() {
 
     const slideInterval = setInterval(() => {
       if (!isTransitioning.current) {
-        const nextIndex = (currentSlide + 1) % loadedImages.length;
+        const nextIndex = (currentSlideRef.current + 1) % loadedImages.length;
         startTransition(nextIndex);
       }
     }, 10000);
@@ -204,7 +227,29 @@ export default function HeroWithBanner() {
       }
       clearInterval(slideInterval);
     };
-  }, [loadedImages, currentSlide]);
+  }, [loadedImages]);
+
+  // Track when the hero is actually visible in the viewport, to avoid heavy work when scrolled away
+  useEffect(() => {
+    if (!heroRef.current) return;
+
+    const element = heroRef.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        isHeroVisibleRef.current = entry.isIntersecting;
+      },
+      {
+        threshold: 0.1
+      }
+    );
+
+    observer.observe(element);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   const drawImageWithCinematicMovement = (
     ctx: CanvasRenderingContext2D,
@@ -296,24 +341,35 @@ export default function HeroWithBanner() {
   };
 
   return (
-    <section className="relative w-full h-screen min-h-[600px] max-h-[1080px] overflow-hidden">
+    <section
+      ref={heroRef}
+      className="relative w-full h-screen min-h-[600px] max-h-[1080px] overflow-hidden"
+    >
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full object-cover"
         style={{ display: 'block' }}
       />
 
-      <div className="absolute inset-0 z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/35"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
-        <div className="absolute top-0 left-0 right-0 h-1/4 bg-gradient-to-b from-white/5 to-transparent"></div>
+      <div className="absolute inset-0 z-10 pointer-events-none">
+        {/* Global vertical darkening for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-black/45"></div>
+
+        {/* Stronger bottom fade so cards and lower text always read well */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/60 via-black/40 to-transparent"></div>
+
+        {/* Subtle top fade to keep navbar area readable on bright skies */}
+        <div className="absolute top-0 left-0 right-0 h-1/4 bg-gradient-to-b from-black/35 via-black/20 to-transparent"></div>
+
+        {/* Focused center vignette behind headline + search for busy images */}
+        <div className="absolute inset-x-[5%] top-[10%] bottom-[30%] bg-gradient-radial from-black/55 via-black/40 to-transparent opacity-95" />
       </div>
 
       <div className="absolute inset-0 z-20 flex flex-col justify-start items-center px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 md:pt-12 lg:pt-10">
         <div className="w-full max-w-7xl mx-auto space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-5">
 
           <div className="text-center space-y-1.5 sm:space-y-2 md:space-y-2.5 animate-cinematic-entry">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-xl border border-white/25 shadow-2xl mb-2 sm:mb-3 hover:bg-white/20 hover:border-white/35 transition-all duration-300">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 shadow-xl mb-2 sm:mb-3 hover:bg-white/15 hover:border-white/30 transition-all duration-300">
               <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-red-400 animate-pulse" />
               <span className="text-xs sm:text-sm font-medium text-white tracking-wide">
                 India's Most Advanced Property Platform
@@ -332,19 +388,19 @@ export default function HeroWithBanner() {
           {/* Search Section with responsive spacing */}
           <div className="w-full max-w-4xl mx-auto animate-slide-up-delayed-1 mt-1 py-3.5 sm:py-5 md:py-6 lg:py-[7.5rem]">
             <div className="relative">
-              <div className="absolute -inset-2 bg-gradient-to-r from-red-500/20 via-red-400/30 to-red-500/20 blur-2xl opacity-60 rounded-3xl"></div>
+              <div className="absolute -inset-2 bg-gradient-to-r from-red-500/20 via-red-400/30 to-red-500/20 blur-xl opacity-60 rounded-3xl"></div>
               <div className="relative">
                 <PropertySearch />
               </div>
             </div>
           </div>
 
-          {/* Cards Section with responsive spacing matching search dropdown clearance */}
-          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-3 animate-slide-up-delayed-2 py-3.5 sm:py-5 md:py-6 lg:py-[7.5rem] px-2 sm:px-0">
+          {/* Cards Section with tighter top spacing on large screens */}
+          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-3 animate-slide-up-delayed-2 py-3.5 sm:py-5 md:py-6 lg:pt-6 lg:pb-10 px-2 sm:px-0">
 
             <Card
               onClick={() => router.push('/property')}
-              className="group relative bg-white/10 backdrop-blur-2xl border border-red-300 shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer overflow-hidden hover:bg-white/20 hover:border-white/40 transform hover:-translate-y-2 hover:scale-[1.03]"
+              className="group relative bg-white/15 backdrop-blur-md border border-red-300 shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/25 hover:border-white/40 transform hover:-translate-y-1.5 hover:scale-[1.02]"
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-red-500/0 to-red-500/0 group-hover:from-red-500/25 group-hover:to-red-500/25 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               {/* Glossy top shine */}
@@ -374,7 +430,7 @@ export default function HeroWithBanner() {
 
             <Card
               onClick={() => router.push('/agent/join')}
-              className="group relative bg-white/10 backdrop-blur-2xl border border-red-300 shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer overflow-hidden hover:bg-white/20 hover:border-white/40 transform hover:-translate-y-2 hover:scale-[1.03]"
+              className="group relative bg-white/15 backdrop-blur-md border border-red-300 shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/25 hover:border-white/40 transform hover:-translate-y-1.5 hover:scale-[1.02]"
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-red-500/0 to-red-500/0 group-hover:from-red-500/25 group-hover:to-red-500/25 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               {/* Glossy top shine */}
@@ -404,7 +460,7 @@ export default function HeroWithBanner() {
 
             <Card
               onClick={() => router.push('/customer')}
-              className="group relative bg-white/10 backdrop-blur-2xl border border-red-300 shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer overflow-hidden hover:bg-white/20 hover:border-white/40 transform hover:-translate-y-2 hover:scale-[1.03] sm:col-span-2 lg:col-span-1"
+              className="group relative bg-white/15 backdrop-blur-md border border-red-300 shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/25 hover:border-white/40 transform hover:-translate-y-1.5 hover:scale-[1.02] sm:col-span-2 lg:col-span-1"
             >
               <div className="absolute -inset-1 bg-gradient-to-r from-red-500/0 to-red-500/0 group-hover:from-red-500/25 group-hover:to-red-500/25 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
               {/* Glossy top shine */}
@@ -440,9 +496,9 @@ export default function HeroWithBanner() {
         className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 group cursor-pointer"
         aria-label="Scroll to next section"
       >
-        <div className="flex flex-col items-center gap-2 animate-bounce-slow">
-          <div className="w-12 h-12 rounded-full bg-white/15 backdrop-blur-xl border-2 border-white/35 flex items-center justify-center group-hover:bg-white/25 group-hover:border-white/50 transition-all duration-300 group-hover:scale-110 shadow-2xl">
-            <ChevronDown className="w-6 h-6 text-white animate-arrow-pulse drop-shadow-lg" />
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-12 h-12 rounded-full bg-white/15 border-2 border-white/35 flex items-center justify-center group-hover:bg-white/25 group-hover:border-white/50 transition-all duration-300 group-hover:scale-110 shadow-xl">
+            <ChevronDown className="w-6 h-6 text-white drop-shadow-lg" />
           </div>
           <span className="text-xs text-white/90 font-medium tracking-wide opacity-0 group-hover:opacity-100 transition-opacity duration-300 drop-shadow-md">
             Scroll Down
@@ -526,11 +582,7 @@ export default function HeroWithBanner() {
           transform: translateZ(0);
         }
 
-        /* Enhanced glassmorphism */
-        .backdrop-blur-2xl {
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-        }
+        /* (Glassmorphism blur on hero cards was reduced/removed for scroll performance) */
       `}</style>
     </section>
   );

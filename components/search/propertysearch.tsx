@@ -272,12 +272,12 @@ export default function PropertySearch() {
     <div className="w-full max-w-4xl mx-auto px-4">
       <div className="relative shadow-lg border border-gray-200/50 bg-white/95 backdrop-blur-sm rounded-lg">
         {/* Desktop Layout - Hidden on mobile */}
-        <div className="hidden lg:flex items-center">
+        <div className="hidden lg:flex items-stretch h-14">
           {/* City Typeahead */}
           <Popover open={openDesktop} onOpenChange={setOpenDesktop}>
-            <div className="flex-[2] min-w-0 flex items-center gap-2.5 px-4 py-3 border-r border-gray-200 relative">
-              <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
-              <PopoverAnchor asChild>
+            <PopoverAnchor asChild>
+              <div className="flex-[2] min-w-0 flex items-center gap-2.5 px-4 border-r border-gray-200 relative h-full">
+                <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -287,12 +287,13 @@ export default function PropertySearch() {
                   className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
                   autoComplete="off"
                 />
-              </PopoverAnchor>
-              <ChevronsUpDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
-            </div>
+                <ChevronsUpDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
+              </div>
+            </PopoverAnchor>
             <PopoverContent
               className="w-[400px] p-0"
               align="start"
+              sideOffset={4}
               onOpenAutoFocus={(e) => e.preventDefault()}
             >
               <Command shouldFilter={false}>
@@ -347,15 +348,21 @@ export default function PropertySearch() {
           </Popover>
 
           {/* Property Type Dropdown */}
-          <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
+          <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 border-r border-gray-200 h-full">
             <Building2 className="h-4 w-4 text-red-600 flex-shrink-0" />
             <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
-              <SelectTrigger className="flex-1 min-w-0 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0 [&>span]:truncate">
+              <SelectTrigger className="flex-1 min-w-0 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:truncate">
                 <SelectValue placeholder="Property Type" className="text-gray-500" />
               </SelectTrigger>
-              <SelectContent className="max-h-[250px]">
+              {/* Position dropdown so its left edge starts roughly under the Property Type icon on desktop */}
+              <SelectContent
+                position="popper"
+                align="start"
+                sideOffset={4}
+                className="max-h-[250px] -translate-x-10 mt-1.5"
+              >
                 {propertyTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id} className="text-sm">
+                  <SelectItem key={type.id} value={type.id} className="text-sm ">
                     {type.label}
                   </SelectItem>
                 ))}
@@ -364,13 +371,19 @@ export default function PropertySearch() {
           </div>
 
           {/* Distance Dropdown */}
-          <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
+          <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 border-r border-gray-200 h-full">
             <Ruler className="h-4 w-4 text-red-600 flex-shrink-0" />
             <Select value={selectedDistance} onValueChange={setSelectedDistance}>
-              <SelectTrigger className="flex-1 min-w-0 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0 [&>span]:truncate">
+              <SelectTrigger className="flex-1 min-w-0 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:truncate">
                 <SelectValue placeholder="Distance" className="text-gray-500" />
               </SelectTrigger>
-              <SelectContent className="max-h-[250px]">
+              {/* Position dropdown so its left edge starts roughly under the Distance icon on desktop */}
+              <SelectContent
+                position="popper"
+                align="start"
+                sideOffset={4}
+                className="max-h-[250px] -translate-x-10 mt-1.5"
+              >
                 {distanceOptions.map((distance) => (
                   <SelectItem key={distance.id} value={distance.id} className="text-sm">
                     {distance.label}
@@ -383,7 +396,7 @@ export default function PropertySearch() {
           {/* Search Button */}
           <Button
             onClick={handleSearch}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 h-auto rounded-none rounded-r-lg font-medium text-sm shadow-none flex items-center justify-center gap-2 transition-colors"
+            className="bg-red-600 hover:bg-red-700 text-white px-6 !h-full rounded-none rounded-r-lg font-medium text-sm shadow-none flex items-center justify-center gap-2 transition-colors"
             aria-label="Search properties"
           >
             <Search className="h-4 w-4" />
@@ -395,9 +408,9 @@ export default function PropertySearch() {
         <div className="hidden md:flex lg:hidden flex-col">
           {/* City Typeahead */}
           <Popover open={openTablet} onOpenChange={setOpenTablet}>
-            <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 relative">
-              <MapPin className="h-4 w-4 text-red-600 shrink-0" />
-              <PopoverAnchor asChild>
+            <PopoverAnchor asChild>
+              <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 relative">
+                <MapPin className="h-4 w-4 text-red-600 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -407,12 +420,13 @@ export default function PropertySearch() {
                   className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
                   autoComplete="off"
                 />
-              </PopoverAnchor>
-              <ChevronsUpDown className="h-4 w-4 text-gray-400 shrink-0" />
-            </div>
+                <ChevronsUpDown className="h-4 w-4 text-gray-400 shrink-0" />
+              </div>
+            </PopoverAnchor>
             <PopoverContent
               className="w-[calc(100vw-2rem)] max-w-md p-0"
               align="start"
+              sideOffset={4}
               onOpenAutoFocus={(e) => e.preventDefault()}
             >
               <Command shouldFilter={false}>
@@ -471,7 +485,7 @@ export default function PropertySearch() {
             <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
               <Building2 className="h-4 w-4 text-red-600 shrink-0" />
               <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
-                <SelectTrigger className="flex-1 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
+                <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
                   <SelectValue placeholder="Property Type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -487,7 +501,7 @@ export default function PropertySearch() {
             <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
               <Ruler className="h-4 w-4 text-red-600 shrink-0" />
               <Select value={selectedDistance} onValueChange={setSelectedDistance}>
-                <SelectTrigger className="flex-1 border-0 p-0 h-auto text-sm font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
+                <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
                   <SelectValue placeholder="Distance" />
                 </SelectTrigger>
                 <SelectContent>
@@ -514,9 +528,9 @@ export default function PropertySearch() {
         <div className="md:hidden">
           {/* City Typeahead */}
           <Popover open={openMobile} onOpenChange={setOpenMobile}>
-            <div className="flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 relative">
-              <MapPin className="h-4 w-4 text-red-600 shrink-0" />
-              <PopoverAnchor asChild>
+            <PopoverAnchor asChild>
+              <div className="flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 relative">
+                <MapPin className="h-4 w-4 text-red-600 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -526,12 +540,13 @@ export default function PropertySearch() {
                   className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
                   autoComplete="off"
                 />
-              </PopoverAnchor>
-              <ChevronsUpDown className="h-4 w-4 text-gray-400 shrink-0" />
-            </div>
+                <ChevronsUpDown className="h-4 w-4 text-gray-400 shrink-0" />
+              </div>
+            </PopoverAnchor>
             <PopoverContent
-              className="w-[calc(100vw-2rem)] p-0"
+              className="w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] p-0"
               align="start"
+              sideOffset={4}
               onOpenAutoFocus={(e) => e.preventDefault()}
             >
               <Command shouldFilter={false}>
@@ -592,10 +607,16 @@ export default function PropertySearch() {
             <div className="flex items-center gap-1.5 px-3 py-3 border-r border-gray-200">
               <Building2 className="h-3.5 w-3.5 text-red-600 shrink-0" />
               <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
-                <SelectTrigger className="flex-1 border-0 p-0 h-auto text-xs font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
+                <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-xs font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
                   <SelectValue placeholder="Type" />
                 </SelectTrigger>
-                <SelectContent>
+                {/* Mobile: position dropdown so it starts under the Type icon */}
+                <SelectContent
+                  position="popper"
+                  align="start"
+                  sideOffset={4}
+                  className="max-h-[250px] -translate-x-6"
+                >
                   {propertyTypes.map((type) => (
                     <SelectItem key={type.id} value={type.id} className="text-xs">
                       {type.label}
@@ -608,10 +629,16 @@ export default function PropertySearch() {
             <div className="flex items-center gap-1.5 px-3 py-3">
               <Ruler className="h-3.5 w-3.5 text-red-600 shrink-0" />
               <Select value={selectedDistance} onValueChange={setSelectedDistance}>
-                <SelectTrigger className="flex-1 border-0 p-0 h-auto text-xs font-normal bg-transparent focus:ring-0 focus:ring-offset-0">
+                <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-xs font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
                   <SelectValue placeholder="Distance" />
                 </SelectTrigger>
-                <SelectContent>
+                {/* Mobile: position dropdown so it starts under the Distance icon */}
+                <SelectContent
+                  position="popper"
+                  align="start"
+                  sideOffset={4}
+                  className="max-h-[250px] -translate-x-6"
+                >
                   {distanceOptions.map((distance) => (
                     <SelectItem key={distance.id} value={distance.id} className="text-xs">
                       {distance.label}
