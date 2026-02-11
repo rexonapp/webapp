@@ -121,28 +121,27 @@ export default function PropertySearch() {
     }
   }, []);
 
-  // Debounced search effect
+  // Debounced search effect - ALWAYS triggers on EVERY searchQuery change
+  // This ensures API calls work in ALL scenarios:
+  // 1. Initial typing
+  // 2. Deleting letters after selection
+  // 3. Select-all and delete
+  // 4. Re-typing after selection
+  // 5. Letter-by-letter changes
   useEffect(() => {
     // Clear existing timer
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
     }
 
-    // Don't search if the query matches selected city
-    if (selectedCity) {
-      const currentDisplay = selectedCity.stateCode
-        ? `${selectedCity.city}, ${selectedCity.stateCode}`
-        : selectedCity.city;
-      if (searchQuery === currentDisplay) {
-        return;
-      }
-    }
-
     // Set new timer for debounced search
     debounceTimer.current = setTimeout(() => {
       if (searchQuery.trim().length >= 1) {
+        // ALWAYS fetch cities on ANY non-empty search query
+        // No conditions, no blocks - just fetch!
         fetchCities(searchQuery);
       } else {
+        // Clear cities when search is completely empty
         setCities([]);
       }
     }, 300); // 300ms debounce
@@ -153,7 +152,7 @@ export default function PropertySearch() {
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [searchQuery, selectedCity, fetchCities]);
+  }, [searchQuery, fetchCities]); // ONLY depends on searchQuery - nothing else!
 
   const handleSearch = () => {
     // Build query parameters
@@ -203,15 +202,21 @@ export default function PropertySearch() {
     setOpenMobile(false);
   };
 
-  // Clear selected city when user types something different
+  // Clear selected city when user modifies the search query
+  // This runs AFTER the search query changes
   useEffect(() => {
     if (selectedCity && searchQuery) {
       const currentDisplay = selectedCity.stateCode
         ? `${selectedCity.city}, ${selectedCity.stateCode}`
         : selectedCity.city;
+      
+      // If user types anything different from selected city, clear selection
       if (searchQuery !== currentDisplay) {
         setSelectedCity(null);
       }
+    } else if (selectedCity && !searchQuery) {
+      // If search query is empty but we have a selected city, clear it
+      setSelectedCity(null);
     }
   }, [searchQuery, selectedCity]);
 
