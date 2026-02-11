@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { MapPin, Search, Building2, Ruler, Check, ChevronsUpDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -81,122 +81,79 @@ export default function PropertySearch() {
     { id: '5000', label: '5000 metres or less', value: 5000 },
     { id: '10000', label: '10000 metres or above', value: 10000 }
   ];
-  
 
-  // Fetch cities from API on component mount with localStorage caching
-  useEffect(() => {
-    const CACHE_KEY = 'cities_cache';
-    const CACHE_EXPIRY_KEY = 'cities_cache_expiry';
-    const CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+  // Debounce timer ref
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-    const fetchCities = async () => {
-      try {
-        setIsLoadingCities(true);
-        setError(null);
+  // Fetch cities from API based on search query with debouncing
+  const fetchCities = useCallback(async (query: string) => {
+    // Don't search if query is too short
+    if (query.trim().length < 1) {
+      setCities([]);
+      return;
+    }
 
-        // Try to load from localStorage first
-        const cachedData = localStorage.getItem(CACHE_KEY);
-        const cacheExpiry = localStorage.getItem(CACHE_EXPIRY_KEY);
+    try {
+      setIsLoadingCities(true);
+      setError(null);
 
-        if (cachedData && cacheExpiry) {
-          const now = Date.now();
-          const expiryTime = parseInt(cacheExpiry, 10);
+      const res = await fetch(`/api/cities?search=${encodeURIComponent(query)}`);
 
-          // If cache is still valid, use it immediately
-          if (now < expiryTime) {
-            const parsedData = JSON.parse(cachedData);
-            if (Array.isArray(parsedData) && parsedData.length > 0) {
-              setCities(parsedData);
-              setIsLoadingCities(false);
-              console.log(`✅ Loaded ${parsedData.length} cities from localStorage cache`);
-              return; // Use cached data, don't fetch from API
-            }
-          }
-        }
-
-        // Fetch from API if no valid cache
-        const res = await fetch("/api/cities");
-
-        if (!res.ok) {
-          throw new Error('Failed to fetch cities');
-        }
-
-        const data = await res.json();
-
-        // Validate data structure
-        if (!Array.isArray(data)) {
-          throw new Error('Invalid data format');
-        }
-
-        // Store in localStorage for future use
-        if (data.length > 0) {
-          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-          localStorage.setItem(CACHE_EXPIRY_KEY, (Date.now() + CACHE_DURATION).toString());
-          console.log(`✅ Loaded ${data.length} cities from API and cached in localStorage`);
-        }
-
-        setCities(data);
-      } catch (error) {
-        console.error("❌ Error fetching cities:", error);
-
-        // Try to fallback to localStorage even if expired
-        const cachedData = localStorage.getItem(CACHE_KEY);
-        if (cachedData) {
-          try {
-            const parsedData = JSON.parse(cachedData);
-            if (Array.isArray(parsedData) && parsedData.length > 0) {
-              setCities(parsedData);
-              setError('Using cached cities data. Some information may be outdated.');
-              console.log(`⚠️ API failed, using ${parsedData.length} cities from expired localStorage cache`);
-              return;
-            }
-          } catch (parseError) {
-            console.error("Failed to parse cached data:", parseError);
-          }
-        }
-
-        // If no cache available, show error
-        setError('Unable to load cities. Please refresh the page.');
-        setCities([]);
-      } finally {
-        setIsLoadingCities(false);
+      if (!res.ok) {
+        throw new Error('Failed to fetch cities');
       }
-    };
 
-    fetchCities();
+      const data = await res.json();
+
+      // Validate data structure
+      if (!Array.isArray(data)) {
+        throw new Error('Invalid data format');
+      }
+
+      setCities(data);
+      console.log(`✅ Loaded ${data.length} cities matching "${query}"`);
+    } catch (error) {
+      console.error("❌ Error fetching cities:", error);
+      setError('Unable to load cities. Please try again.');
+      setCities([]);
+    } finally {
+      setIsLoadingCities(false);
+    }
   }, []);
 
-  // Filter cities based on search query with limit to prevent performance issues
-  const filteredCities = useMemo(() => {
-    if (!cities || cities.length === 0) {
-      return [];
+  // Debounced search effect
+  useEffect(() => {
+    // Clear existing timer
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
     }
 
-    const query = searchQuery.toLowerCase().trim();
-
-    // If no query, return top 50 cities
-    if (!query) {
-      return cities.slice(0, 50);
+    // Don't search if the query matches selected city
+    if (selectedCity) {
+      const currentDisplay = selectedCity.stateCode
+        ? `${selectedCity.city}, ${selectedCity.stateCode}`
+        : selectedCity.city;
+      if (searchQuery === currentDisplay) {
+        return;
+      }
     }
 
-    const filtered = cities
-      .filter((city) => {
-        // Skip invalid cities
-        if (!city || !city.city) return false;
+    // Set new timer for debounced search
+    debounceTimer.current = setTimeout(() => {
+      if (searchQuery.trim().length >= 1) {
+        fetchCities(searchQuery);
+      } else {
+        setCities([]);
+      }
+    }, 300); // 300ms debounce
 
-        // Safe toLowerCase with null checks
-        const cityName = city.city?.toLowerCase() || '';
-        const stateCode = city.stateCode?.toLowerCase() || '';
-
-        return (
-          cityName.includes(query) ||
-          (stateCode && stateCode.includes(query))
-        );
-      })
-      .slice(0, 50); // Limit to 50 results for performance
-
-    return filtered;
-  }, [cities, searchQuery]);
+    // Cleanup
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, [searchQuery, selectedCity, fetchCities]);
 
   const handleSearch = () => {
     // Build query parameters
@@ -277,7 +234,7 @@ export default function PropertySearch() {
           <Popover open={openDesktop} onOpenChange={setOpenDesktop}>
             <PopoverAnchor asChild>
               <div className="flex-[2] min-w-0 flex items-center gap-2.5 px-4 border-r border-gray-200 relative h-full">
-                <MapPin className="h-4 w-4 text-red-600 flex-shrink-0" />
+                <MapPin className="h-4 w-4 text-blue-800 flex-shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -299,28 +256,28 @@ export default function PropertySearch() {
               <Command shouldFilter={false}>
                 <CommandList>
                   {error ? (
-                    <div className="px-4 py-3 text-sm text-red-600">
+                    <div className="px-4 py-3 text-sm text-orange-600">
                       <div className="font-semibold">Error loading cities</div>
                       <div className="text-xs mt-1">{error}</div>
                     </div>
                   ) : isLoadingCities ? (
                     <div className="px-4 py-3 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
-                        <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
-                        Loading cities...
+                        <div className="animate-spin h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                        Searching cities...
                       </div>
+                    </div>
+                  ) : searchQuery.trim().length < 1 ? (
+                    <div className="px-4 py-3 text-sm text-gray-600">
+                      Start typing to search cities...
                     </div>
                   ) : cities.length === 0 ? (
                     <div className="px-4 py-3 text-sm text-gray-600">
-                      No cities loaded. Please refresh the page.
-                    </div>
-                  ) : filteredCities.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-gray-600">
-                      {searchQuery ? `No cities found matching "${searchQuery}"` : 'Start typing to search cities...'}
+                      No cities found matching "{searchQuery}"
                     </div>
                   ) : (
                     <CommandGroup>
-                      {filteredCities.map((city) => (
+                      {cities.map((city) => (
                         <CommandItem
                           key={city.id || city.city}
                           value={`${city.city}-${city.stateCode || ''}`}
@@ -329,14 +286,14 @@ export default function PropertySearch() {
                         >
                           <Check
                             className={cn(
-                              "h-4 w-4 text-red-600",
+                              "h-4 w-4 text-orange-600",
                               selectedCity?.city === city.city &&
                               (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
                                 ? "opacity-100"
                                 : "opacity-0"
                             )}
                           />
-                          <MapPin className="h-4 w-4 text-red-600/70" />
+                          <MapPin className="h-4 w-4 text-blue-800/70" />
                           <span>{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
                         </CommandItem>
                       ))}
@@ -349,7 +306,7 @@ export default function PropertySearch() {
 
           {/* Property Type Dropdown */}
           <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 border-r border-gray-200 h-full">
-            <Building2 className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <Building2 className="h-4 w-4 text-blue-800 flex-shrink-0" />
             <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
               <SelectTrigger className="flex-1 min-w-0 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:truncate">
                 <SelectValue placeholder="Property Type" className="text-gray-500" />
@@ -372,7 +329,7 @@ export default function PropertySearch() {
 
           {/* Distance Dropdown */}
           <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 border-r border-gray-200 h-full">
-            <Ruler className="h-4 w-4 text-red-600 flex-shrink-0" />
+            <Ruler className="h-4 w-4 text-blue-800 flex-shrink-0" />
             <Select value={selectedDistance} onValueChange={setSelectedDistance}>
               <SelectTrigger className="flex-1 min-w-0 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:truncate">
                 <SelectValue placeholder="Distance" className="text-gray-500" />
@@ -396,7 +353,7 @@ export default function PropertySearch() {
           {/* Search Button */}
           <Button
             onClick={handleSearch}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 !h-full rounded-none rounded-r-lg font-medium text-sm shadow-none flex items-center justify-center gap-2 transition-colors"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-6 !h-full rounded-none rounded-r-lg font-medium text-sm shadow-none flex items-center justify-center gap-2 transition-colors"
             aria-label="Search properties"
           >
             <Search className="h-4 w-4" />
@@ -410,7 +367,7 @@ export default function PropertySearch() {
           <Popover open={openTablet} onOpenChange={setOpenTablet}>
             <PopoverAnchor asChild>
               <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 relative">
-                <MapPin className="h-4 w-4 text-red-600 shrink-0" />
+                <MapPin className="h-4 w-4 text-blue-800 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -432,28 +389,28 @@ export default function PropertySearch() {
               <Command shouldFilter={false}>
                 <CommandList>
                   {error ? (
-                    <div className="px-4 py-3 text-sm text-red-600">
+                    <div className="px-4 py-3 text-sm text-orange-600">
                       <div className="font-semibold">Error loading cities</div>
                       <div className="text-xs mt-1">{error}</div>
                     </div>
                   ) : isLoadingCities ? (
                     <div className="px-4 py-3 text-sm text-gray-600">
                       <div className="flex items-center gap-2">
-                        <div className="animate-spin h-4 w-4 border-2 border-red-500 border-t-transparent rounded-full"></div>
-                        Loading cities...
+                        <div className="animate-spin h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                        Searching cities...
                       </div>
+                    </div>
+                  ) : searchQuery.trim().length < 1 ? (
+                    <div className="px-4 py-3 text-sm text-gray-600">
+                      Start typing to search cities...
                     </div>
                   ) : cities.length === 0 ? (
                     <div className="px-4 py-3 text-sm text-gray-600">
-                      No cities loaded. Please refresh the page.
-                    </div>
-                  ) : filteredCities.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-gray-600">
-                      {searchQuery ? `No cities found matching "${searchQuery}"` : 'Start typing to search cities...'}
+                      No cities found matching "{searchQuery}"
                     </div>
                   ) : (
                     <CommandGroup>
-                      {filteredCities.map((city) => (
+                      {cities.map((city) => (
                         <CommandItem
                           key={city.id || city.city}
                           value={`${city.city}-${city.stateCode || ''}`}
@@ -462,14 +419,14 @@ export default function PropertySearch() {
                         >
                           <Check
                             className={cn(
-                              "h-4 w-4 text-red-600",
+                              "h-4 w-4 text-orange-600",
                               selectedCity?.city === city.city &&
                               (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
                                 ? "opacity-100"
                                 : "opacity-0"
                             )}
                           />
-                          <MapPin className="h-4 w-4 text-red-600/70" />
+                          <MapPin className="h-4 w-4 text-blue-800/70" />
                           <span>{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
                         </CommandItem>
                       ))}
@@ -483,7 +440,7 @@ export default function PropertySearch() {
           {/* Filters and Search Row */}
           <div className="flex items-center">
             <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
-              <Building2 className="h-4 w-4 text-red-600 shrink-0" />
+              <Building2 className="h-4 w-4 text-blue-800 shrink-0" />
               <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
                 <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
                   <SelectValue placeholder="Property Type" />
@@ -499,7 +456,7 @@ export default function PropertySearch() {
             </div>
 
             <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
-              <Ruler className="h-4 w-4 text-red-600 shrink-0" />
+              <Ruler className="h-4 w-4 text-blue-800 shrink-0" />
               <Select value={selectedDistance} onValueChange={setSelectedDistance}>
                 <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
                   <SelectValue placeholder="Distance" />
@@ -516,7 +473,7 @@ export default function PropertySearch() {
 
             <Button
               onClick={handleSearch}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-none rounded-br-lg font-medium text-sm shadow-none flex items-center justify-center gap-2"
+              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-none rounded-br-lg font-medium text-sm shadow-none flex items-center justify-center gap-2"
             >
               <Search className="h-4 w-4" />
               <span>Search</span>
@@ -530,7 +487,7 @@ export default function PropertySearch() {
           <Popover open={openMobile} onOpenChange={setOpenMobile}>
             <PopoverAnchor asChild>
               <div className="flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 relative">
-                <MapPin className="h-4 w-4 text-red-600 shrink-0" />
+                <MapPin className="h-4 w-4 text-blue-800 shrink-0" />
                 <input
                   type="text"
                   value={searchQuery}
@@ -552,28 +509,28 @@ export default function PropertySearch() {
               <Command shouldFilter={false}>
                 <CommandList>
                   {error ? (
-                    <div className="px-3.5 py-3 text-xs text-red-600">
+                    <div className="px-3.5 py-3 text-xs text-orange-600">
                       <div className="font-semibold">Error loading cities</div>
                       <div className="text-[10px] mt-1">{error}</div>
                     </div>
                   ) : isLoadingCities ? (
                     <div className="px-3.5 py-3 text-xs text-gray-600">
                       <div className="flex items-center gap-2">
-                        <div className="animate-spin h-3 w-3 border-2 border-red-500 border-t-transparent rounded-full"></div>
-                        Loading cities...
+                        <div className="animate-spin h-3 w-3 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                        Searching...
                       </div>
+                    </div>
+                  ) : searchQuery.trim().length < 1 ? (
+                    <div className="px-3.5 py-3 text-xs text-gray-600">
+                      Start typing to search...
                     </div>
                   ) : cities.length === 0 ? (
                     <div className="px-3.5 py-3 text-xs text-gray-600">
-                      No cities loaded. Refresh page.
-                    </div>
-                  ) : filteredCities.length === 0 ? (
-                    <div className="px-3.5 py-3 text-xs text-gray-600">
-                      {searchQuery ? `No cities found matching "${searchQuery}"` : 'Start typing to search...'}
+                      No cities found matching "{searchQuery}"
                     </div>
                   ) : (
                     <CommandGroup>
-                      {filteredCities.map((city) => (
+                      {cities.map((city) => (
                         <CommandItem
                           key={city.id || city.city}
                           value={`${city.city}-${city.stateCode || ''}`}
@@ -582,14 +539,14 @@ export default function PropertySearch() {
                         >
                           <Check
                             className={cn(
-                              "h-3.5 w-3.5 text-red-600",
+                              "h-3.5 w-3.5 text-orange-600",
                               selectedCity?.city === city.city &&
                               (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
                                 ? "opacity-100"
                                 : "opacity-0"
                             )}
                           />
-                          <MapPin className="h-3.5 w-3.5 text-red-600/70" />
+                          <MapPin className="h-3.5 w-3.5 text-blue-800/70" />
                           <span className="font-medium text-gray-800">
                             {city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}
                           </span>
@@ -605,7 +562,7 @@ export default function PropertySearch() {
           {/* Filters Row */}
           <div className="grid grid-cols-2 border-b border-gray-200">
             <div className="flex items-center gap-1.5 px-3 py-3 border-r border-gray-200">
-              <Building2 className="h-3.5 w-3.5 text-red-600 shrink-0" />
+              <Building2 className="h-3.5 w-3.5 text-blue-800 shrink-0" />
               <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
                 <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-xs font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
                   <SelectValue placeholder="Type" />
@@ -627,7 +584,7 @@ export default function PropertySearch() {
             </div>
 
             <div className="flex items-center gap-1.5 px-3 py-3">
-              <Ruler className="h-3.5 w-3.5 text-red-600 shrink-0" />
+              <Ruler className="h-3.5 w-3.5 text-blue-800 shrink-0" />
               <Select value={selectedDistance} onValueChange={setSelectedDistance}>
                 <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-xs font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
                   <SelectValue placeholder="Distance" />
@@ -652,7 +609,7 @@ export default function PropertySearch() {
           {/* Mobile Search Button */}
           <Button
             onClick={handleSearch}
-            className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-none rounded-b-lg font-medium text-sm shadow-none flex items-center justify-center gap-2"
+            className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-none rounded-b-lg font-medium text-sm shadow-none flex items-center justify-center gap-2"
           >
             <Search className="h-4 w-4" />
             <span>Search Properties</span>

@@ -237,16 +237,16 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-transparent shadow-sm  sticky top-0 z-50 backdrop-blur-sm">
+      <nav className="bg-white/95 shadow-md sticky top-0 z-50 backdrop-blur-lg border-b border-blue-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex items-center space-x-2 flex-shrink-0">
-              <div className="bg-gradient-to-br from-red-600 to-red-700 p-2 rounded-lg shadow-sm">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-xl shadow-lg">
                 <Home className="h-5 w-5 text-white" />
               </div>
               <Link href={'/'}>
-              <span className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent tracking-tight">
+              <span className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent tracking-tight">
                 Rexon
               </span>
               </Link>
@@ -254,25 +254,25 @@ export default function Navbar() {
             
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-1">
-              <button className="flex items-center space-x-1 px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="flex items-center space-x-1 px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
                 <span>Buy</span>
                 <ChevronDown className="h-4 w-4" />
               </button>
               
-              <button className="flex items-center space-x-1 px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="flex items-center space-x-1 px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
                 <span>Rent</span>
                 <ChevronDown className="h-4 w-4" />
               </button>
               
-              <button className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
                 Sell
               </button>
               
-              <button className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
                 About
               </button>
               
-              <button className="px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors">
+              <button className="px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
                 Contact
               </button>
             </div>
@@ -281,7 +281,7 @@ export default function Navbar() {
             <div className="flex items-center space-x-3">
               {/* Agent Join Button - Desktop */}
               <Link href='/agent/join'>
-              <button className="hidden md:flex items-center space-x-2 px-4 py-2 text-gray-700 hover:text-red-600 font-medium rounded-lg hover:bg-gray-50 transition-colors border border-gray-200 hover:border-red-200">
+              <button className="hidden md:flex items-center space-x-2 px-4 py-2 text-blue-700 hover:text-orange-600 font-medium rounded-lg hover:bg-blue-50 transition-colors border-2 border-blue-200 hover:border-orange-300">
                 <span>Join as Agent</span>
               </button>
               </Link>
@@ -289,7 +289,7 @@ export default function Navbar() {
               {/* List Property Button - Only when logged in */}
               {currentUser && (
                 <Link href='/property'>
-                <button className="hidden md:flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm">
+                <button className="hidden md:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all font-medium shadow-lg hover:shadow-orange-500/50">
                   <Plus className="h-4 w-4" />
                   <span>List Property</span>
                 </button>
@@ -304,29 +304,29 @@ export default function Navbar() {
                     className="flex items-center space-x-3 focus:outline-none group"
                     aria-label="User menu"
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-semibold text-sm shadow-md group-hover:shadow-lg transition-all ring-2 ring-white">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-semibold text-sm shadow-lg group-hover:shadow-blue-500/50 transition-all ring-2 ring-blue-200 group-hover:ring-orange-300">
                       {getUserInitials()}
                     </div>
-                    <ChevronDown className="h-4 w-4 text-gray-500 hidden md:block group-hover:text-gray-700 transition-colors" />
+                    <ChevronDown className="h-4 w-4 text-slate-500 hidden md:block group-hover:text-blue-700 transition-colors" />
                   </button>
 
                   {showProfileMenu && (
-                    <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-xl border border-gray-200 overflow-hidden z-50">
+                    <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border-2 border-blue-100 overflow-hidden z-50">
                       {/* Profile Header */}
-                      <div className="p-4 bg-gradient-to-br from-gray-50 to-white border-b border-gray-100">
+                      <div className="p-4 bg-gradient-to-br from-blue-50 to-orange-50/30 border-b-2 border-blue-100">
                         <div className="flex items-start space-x-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-bold shadow-md flex-shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0">
                             {getUserInitials()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">
+                            <p className="text-sm font-semibold text-blue-900 truncate">
                               {getUserFullName()}
                             </p>
-                            <p className="text-xs text-gray-600 truncate mt-0.5">
+                            <p className="text-xs text-slate-600 truncate mt-0.5">
                               {currentUser.email}
                             </p>
                             {currentUser.authProvider && currentUser.authProvider !== 'email' && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 mt-1">
                                 {currentUser.authProvider.charAt(0).toUpperCase() + currentUser.authProvider.slice(1)}
                               </span>
                             )}
@@ -336,18 +336,18 @@ export default function Navbar() {
 
                       {/* Menu Items */}
                       <div className="py-2">
-                        <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                          <UserCircle className="h-4 w-4 text-gray-500" />
+                        <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                          <UserCircle className="h-4 w-4 text-blue-600" />
                           <span className="font-medium">My Profile</span>
                         </button>
                         
-                        <button onClick={()=>router.push('/mylistings')} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                          <Building2 className="h-4 w-4 text-gray-500" />
+                        <button onClick={()=>router.push('/mylistings')} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                          <Building2 className="h-4 w-4 text-blue-600" />
                           <span className="font-medium">My Properties</span>
                         </button>
                         {currentUser?.role === 'superadmin' && (
-                          <button onClick={()=>router.push('/superadmin/home')} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
-                            <User2Icon className="h-4 w-4 text-gray-500" />
+                          <button onClick={()=>router.push('/superadmin/home')} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                            <User2Icon className="h-4 w-4 text-blue-600" />
                             <span className="font-medium">Superadmin</span>
                           </button>
                         )}
@@ -356,21 +356,20 @@ export default function Navbar() {
                             setShowProfileMenu(false);
                             router.push('/settings/banner/upload');
                           }} 
-                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
                         >
-                          
-                          <Settings className="h-4 w-4 text-gray-500" />
-                          <span className="font-medium">settings</span>
+                          <Settings className="h-4 w-4 text-blue-600" />
+                          <span className="font-medium">Settings</span>
                         </button>
                         
-                        <div className="border-t border-gray-100 my-2"></div>
+                        <div className="border-t-2 border-blue-100 my-2"></div>
                         
                         <button
                           onClick={handleSignOut}
-                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-orange-600 hover:bg-orange-50 transition-colors font-medium"
                         >
                           <LogOut className="h-4 w-4" />
-                          <span className="font-medium">Sign Out</span>
+                          <span>Sign Out</span>
                         </button>
                       </div>
                     </div>
@@ -379,7 +378,7 @@ export default function Navbar() {
               ) : (
                 <button 
                   onClick={() => openAuthModal('signin')}
-                  className="flex items-center space-x-2 bg-red-600 text-white px-5 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium shadow-sm"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-lg hover:shadow-blue-500/50"
                 >
                   <User className="h-4 w-4" />
                   <span>Sign In</span>
@@ -388,7 +387,7 @@ export default function Navbar() {
               
               {/* Mobile Menu Button */}
               <button 
-                className="lg:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="lg:hidden p-2 text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle mobile menu"
               >
@@ -400,31 +399,31 @@ export default function Navbar() {
         
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-gray-200 bg-white">
+          <div className="lg:hidden border-t-2 border-blue-100 bg-white">
             <div className="px-4 py-4 space-y-1">
-              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
                 Buy
               </button>
-              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
                 Rent
               </button>
-              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
                 Sell
               </button>
-              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
                 About
               </button>
-              <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium transition-colors">
+              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
                 Contact
               </button>
               
               <div className="pt-2 pb-1 space-y-2">
-                <button className="block w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium border border-gray-200 transition-colors">
+                <button className="block w-full text-left px-4 py-3 text-blue-700 hover:bg-blue-50 rounded-lg font-medium border-2 border-blue-200 transition-colors">
                   Join as Agent
                 </button>
                 
                 {currentUser && (
-                  <button className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors">
+                  <button className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 font-medium transition-all shadow-lg">
                     <Plus className="h-4 w-4" />
                     <span>List Property</span>
                   </button>
@@ -439,19 +438,19 @@ export default function Navbar() {
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-blue-900/60 backdrop-blur-sm"
             onClick={() => setShowAuthModal(false)}
             aria-hidden="true"
           />
           
           <div 
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border-2 border-blue-100"
             role="dialog"
             aria-modal="true"
           >
             <button
               onClick={() => setShowAuthModal(false)}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-all z-10"
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-all z-10"
               aria-label="Close modal"
             >
               <X className="h-5 w-5" />
@@ -460,19 +459,19 @@ export default function Navbar() {
             <div className="p-8">
               {/* Modal Header */}
               <div className="text-center mb-8">
-                <div className="bg-gradient-to-br from-red-600 to-red-700 p-3 rounded-xl inline-block mb-4 shadow-md">
+                <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-3 rounded-xl inline-block mb-4 shadow-lg">
                   <Home className="h-8 w-8 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent mb-2">
                   {authMode === 'signin' ? 'Welcome Back' : 'Create Account'}
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-slate-600">
                   {authMode === 'signin' ? 'Sign in to continue to Rexon' : 'Sign up to get started with Rexon'}
                 </p>
               </div>
 
               {/* Toggle Tabs */}
-              <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
+              <div className="flex bg-blue-50 rounded-lg p-1 mb-6 border-2 border-blue-100">
                 <button
                   onClick={() => {
                     setAuthMode('signin')
@@ -480,8 +479,8 @@ export default function Navbar() {
                   }}
                   className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all ${
                     authMode === 'signin'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                      : 'text-slate-600 hover:text-blue-700'
                   }`}
                 >
                   Sign In
@@ -493,8 +492,8 @@ export default function Navbar() {
                   }}
                   className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all ${
                     authMode === 'signup'
-                      ? 'bg-white text-gray-900 shadow-sm'
-                      : 'text-gray-600 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
+                      : 'text-slate-600 hover:text-blue-700'
                   }`}
                 >
                   Sign Up
@@ -503,9 +502,9 @@ export default function Navbar() {
 
               {/* Error Message */}
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-2">
-                  <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-red-700">{error}</p>
+                <div className="mb-4 p-3 bg-orange-50 border-2 border-orange-200 rounded-lg flex items-start space-x-2">
+                  <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-orange-700 font-medium">{error}</p>
                 </div>
               )}
               
@@ -514,7 +513,7 @@ export default function Navbar() {
                 <button 
                   onClick={handleGoogleSignIn}
                   disabled={loading}
-                  className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -528,7 +527,7 @@ export default function Navbar() {
                 <button 
                   onClick={handleMicrosoftSignIn}
                   disabled={loading}
-                  className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50 transition-all font-medium text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
                 >
                   <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#00A4EF">
                     <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
@@ -540,10 +539,10 @@ export default function Navbar() {
               {/* Divider */}
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
+                  <div className="w-full border-t-2 border-blue-100"></div>
                 </div>
                 <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500 font-medium">Or continue with email</span>
+                  <span className="px-4 bg-white text-slate-500 font-medium">Or continue with email</span>
                 </div>
               </div>
               
@@ -551,11 +550,11 @@ export default function Navbar() {
               {authMode === 'signin' && (
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="signin-email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="signin-email" className="block text-sm font-medium text-slate-700 mb-2">
                       Email Address
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
                       <input
                         id="signin-email"
                         type="email"
@@ -563,17 +562,17 @@ export default function Navbar() {
                         onChange={(e) => setSignInData({...signInData, email: e.target.value})}
                         placeholder="you@example.com"
                         required
-                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all"
+                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
                       />
                     </div>
                   </div>
                   
                   <div>
-                    <label htmlFor="signin-password" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="signin-password" className="block text-sm font-medium text-slate-700 mb-2">
                       Password
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
                       <input
                         id="signin-password"
                         type="password"
@@ -581,7 +580,7 @@ export default function Navbar() {
                         onChange={(e) => setSignInData({...signInData, password: e.target.value})}
                         placeholder="••••••••"
                         required
-                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all"
+                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
                       />
                     </div>
                   </div>
@@ -593,11 +592,11 @@ export default function Navbar() {
                         type="checkbox" 
                         checked={signInData.rememberMe}
                         onChange={(e) => setSignInData({...signInData, rememberMe: e.target.checked})}
-                        className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500 cursor-pointer" 
+                        className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500 cursor-pointer" 
                       />
-                      <span className="text-gray-700">Remember me</span>
+                      <span className="text-slate-700">Remember me</span>
                     </label>
-                    <button className="text-red-600 hover:text-red-700 font-medium hover:underline">
+                    <button className="text-orange-600 hover:text-orange-700 font-medium hover:underline">
                       Forgot password?
                     </button>
                   </div>
@@ -605,7 +604,7 @@ export default function Navbar() {
                   <button
                     onClick={handleEmailSignIn}
                     disabled={loading}
-                    className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-all font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-medium shadow-lg hover:shadow-orange-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? 'Signing In...' : 'Sign In'}
                   </button>
@@ -617,11 +616,11 @@ export default function Navbar() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="firstName" className="block text-sm font-medium text-slate-700 mb-2">
                         First Name
                       </label>
                       <div className="relative">
-                        <UserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                        <UserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
                         <input
                           id="firstName"
                           type="text"
@@ -629,13 +628,13 @@ export default function Navbar() {
                           onChange={(e) => setSignUpData({...signUpData, firstName: e.target.value})}
                           placeholder="John"
                           required
-                          className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all"
+                          className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
                         />
                       </div>
                     </div>
                     
                     <div>
-                      <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="lastName" className="block text-sm font-medium text-slate-700 mb-2">
                         Last Name
                       </label>
                       <input
@@ -645,17 +644,17 @@ export default function Navbar() {
                         onChange={(e) => setSignUpData({...signUpData, lastName: e.target.value})}
                         placeholder="Doe"
                         required
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all"
+                        className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
                       />
                     </div>
                   </div>
                   
                   <div>
-                    <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="signup-email" className="block text-sm font-medium text-slate-700 mb-2">
                       Email Address
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
                       <input
                         id="signup-email"
                         type="email"
@@ -663,34 +662,34 @@ export default function Navbar() {
                         onChange={(e) => setSignUpData({...signUpData, email: e.target.value})}
                         placeholder="you@example.com"
                         required
-                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all"
+                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
                       />
                     </div>
                   </div>
                   
                   <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
                       Phone Number (Optional)
                     </label>
                     <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
                       <input
                         id="phone"
                         type="tel"
                         value={signUpData.phone}
                         onChange={(e) => setSignUpData({...signUpData, phone: e.target.value})}
                         placeholder="+91 98765 43210"
-                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all"
+                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
                       />
                     </div>
                   </div>
                   
                   <div>
-                    <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="signup-password" className="block text-sm font-medium text-slate-700 mb-2">
                       Password
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
                       <input
                         id="signup-password"
                         type="password"
@@ -699,16 +698,16 @@ export default function Navbar() {
                         placeholder="••••••••"
                         required
                         minLength={8}
-                        className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all"
+                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
                       />
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">Must be at least 8 characters</p>
+                    <p className="text-xs text-slate-500 mt-1">Must be at least 8 characters</p>
                   </div>
                   
                   <button
                     onClick={handleEmailSignUp}
                     disabled={loading}
-                    className="w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 active:bg-red-800 transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 transition-all font-medium shadow-lg hover:shadow-orange-500/50 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? 'Creating Account...' : 'Create Account'}
                   </button>
