@@ -36,6 +36,7 @@
     "@radix-ui/react-tooltip": "^1.2.8",
     "@react-email/components": "^1.0.7",
     "@react-email/render": "^2.0.4",
+    "@react-google-maps/api": "^2.20.8",
     "@sendgrid/mail": "^8.1.6",
     "axios": "^1.13.4",
     "bcryptjs": "^3.0.3",

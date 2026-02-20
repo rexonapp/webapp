@@ -162,11 +162,6 @@ export default function WarehouseUploadForm() {
         if (parseFloat(value) <= 0) return 'Price must be greater than 0';
         break;
 
-      // case 'address':
-      //   if (!value || value.trim() === '') return 'Address is required';
-      //   if (value.length < 10) return 'Address must be at least 10 characters';
-      //   break;
-
       case 'city':
         if (!value || value.trim() === '') return 'City is required';
         break;
@@ -175,16 +170,16 @@ export default function WarehouseUploadForm() {
         if (!value) return 'State is required';
         break;
 
-        case 'pincode':
-          if (value) {
-            if (!/^\d+$/.test(value)) {
-              return 'Pincode must contain only numbers';
-            }
-            if (value.length !== 6) {
-              return 'Pincode must be exactly 6 digits';
-            }
+      case 'pincode':
+        if (value) {
+          if (!/^\d+$/.test(value)) {
+            return 'Pincode must contain only numbers';
           }
-          break;
+          if (value.length !== 6) {
+            return 'Pincode must be exactly 6 digits';
+          }
+        }
+        break;
 
       case 'contactPersonPhone':
         if (value && !/^[6-9]\d{9}$/.test(value.replace(/\s/g, ''))) {
@@ -209,25 +204,24 @@ export default function WarehouseUploadForm() {
 
   const handleFieldChange = (name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
-
-    // Mark field as touched
     setTouchedFields(prev => new Set(prev).add(name));
-
-    // Validate field
     const error = validateField(name, value);
-    setFieldErrors(prev => ({
-      ...prev,
-      [name]: error
-    }));
+    setFieldErrors(prev => ({ ...prev, [name]: error }));
   };
 
   const handleFieldBlur = (name: string) => {
     setTouchedFields(prev => new Set(prev).add(name));
     const error = validateField(name, formData[name as keyof WarehouseFormData]);
-    setFieldErrors(prev => ({
-      ...prev,
-      [name]: error
-    }));
+    setFieldErrors(prev => ({ ...prev, [name]: error }));
+  };
+
+  // ─── Address change: also trigger map open hint ───────────────────────────────
+  const handleAddressChange = (value: string) => {
+    handleFieldChange('address', value);
+    // Auto-open map when user starts typing an address (only open, never close)
+    if (value.length >= 5 && !showMap) {
+      setShowMap(true);
+    }
   };
 
   const toggleAmenity = (amenity: string) => {
@@ -243,7 +237,6 @@ export default function WarehouseUploadForm() {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
-    // Clear previous image errors
     setFieldErrors(prev => ({ ...prev, images: undefined }));
     setTouchedFields(prev => new Set(prev).add('images'));
 
@@ -253,7 +246,6 @@ export default function WarehouseUploadForm() {
       return;
     }
 
-    // Accept common image formats: jpg, jpeg, png, webp, gif
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     const imageFiles = files.filter(file => allowedTypes.includes(file.type.toLowerCase()));
 
@@ -267,10 +259,7 @@ export default function WarehouseUploadForm() {
 
     const oversized = imageFiles.filter(file => file.size > MAX_IMAGE_SIZE);
     if (oversized.length > 0) {
-      setFieldErrors(prev => ({
-        ...prev,
-        images: 'Some images exceed 5MB limit'
-      }));
+      setFieldErrors(prev => ({ ...prev, images: 'Some images exceed 5MB limit' }));
       return;
     }
 
@@ -278,7 +267,6 @@ export default function WarehouseUploadForm() {
     setImagePreviews(prev => [...prev, ...previews]);
     setFormData(prev => ({ ...prev, images: [...prev.images, ...imageFiles] }));
 
-    // Clear error if images are now valid
     if ([...formData.images, ...imageFiles].length > 0) {
       setFieldErrors(prev => ({ ...prev, images: undefined }));
     }
@@ -288,7 +276,6 @@ export default function WarehouseUploadForm() {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
-    // Clear previous video errors
     setFieldErrors(prev => ({ ...prev, videos: undefined }));
     setTouchedFields(prev => new Set(prev).add('videos'));
 
@@ -314,26 +301,17 @@ export default function WarehouseUploadForm() {
     const previews = videoFiles.map(file => URL.createObjectURL(file));
     setVideoPreviews(prev => [...prev, ...previews]);
     setFormData(prev => ({ ...prev, videos: [...prev.videos, ...videoFiles] }));
-
-    // Clear error
     setFieldErrors(prev => ({ ...prev, videos: undefined }));
   };
 
-  const confirmDeleteImage = (index: number) => {
-    setImageToDelete(index);
-  };
+  const confirmDeleteImage = (index: number) => setImageToDelete(index);
 
   const removeImage = (index: number) => {
     URL.revokeObjectURL(imagePreviews[index]);
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
     const updatedImages = formData.images.filter((_, i) => i !== index);
-    setFormData(prev => ({
-      ...prev,
-      images: updatedImages
-    }));
+    setFormData(prev => ({ ...prev, images: updatedImages }));
     setImageToDelete(null);
-
-    // Validate images after removal
     setTouchedFields(prev => new Set(prev).add('images'));
     if (updatedImages.length === 0) {
       setFieldErrors(prev => ({ ...prev, images: 'At least one property image is required' }));
@@ -345,10 +323,7 @@ export default function WarehouseUploadForm() {
   const removeVideo = (index: number) => {
     URL.revokeObjectURL(videoPreviews[index]);
     setVideoPreviews(prev => prev.filter((_, i) => i !== index));
-    setFormData(prev => ({
-      ...prev,
-      videos: prev.videos.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => ({ ...prev, videos: prev.videos.filter((_, i) => i !== index) }));
   };
 
   const openGallery = (index: number) => {
@@ -356,75 +331,51 @@ export default function WarehouseUploadForm() {
     setShowImageGallery(true);
   };
 
-  const goToNextImage = () => {
-    setSelectedImageIndex((prev) => (prev + 1) % imagePreviews.length);
-  };
-
-  const goToPreviousImage = () => {
-    setSelectedImageIndex((prev) => (prev - 1 + imagePreviews.length) % imagePreviews.length);
-  };
+  const goToNextImage = () => setSelectedImageIndex((prev) => (prev + 1) % imagePreviews.length);
+  const goToPreviousImage = () => setSelectedImageIndex((prev) => (prev - 1 + imagePreviews.length) % imagePreviews.length);
 
   const validateForm = (): boolean => {
     const errors: FieldErrors = {};
     const requiredFields = [
-      'title',
-      'propertyType',
-      'totalArea',
-      'availableFrom',
-      'pricePerSqFt',
-      'address',
-      'city',
-      'state'
+      'title', 'propertyType', 'totalArea', 'availableFrom',
+      'pricePerSqFt', 'address', 'city', 'state'
     ];
 
-    // Validate all required fields
     requiredFields.forEach(field => {
       const error = validateField(field, formData[field as keyof WarehouseFormData]);
-      if (error) {
-        errors[field as keyof FieldErrors] = error;
-      }
+      if (error) errors[field as keyof FieldErrors] = error;
     });
 
-    // Validate optional fields that have values
     if (formData.pincode) {
       const error = validateField('pincode', formData.pincode);
       if (error) errors.pincode = error;
     }
-
     if (formData.contactPersonPhone) {
       const error = validateField('contactPersonPhone', formData.contactPersonPhone);
       if (error) errors.contactPersonPhone = error;
     }
-
     if (formData.contactPersonEmail) {
       const error = validateField('contactPersonEmail', formData.contactPersonEmail);
       if (error) errors.contactPersonEmail = error;
     }
 
-    // Validate images
     const imageError = validateField('images', formData.images);
     if (imageError) errors.images = imageError;
 
-    // Set all errors and mark all fields as touched
     setFieldErrors(errors);
     const allFields = new Set([...requiredFields, 'pincode', 'contactPersonPhone', 'contactPersonEmail', 'images']);
     setTouchedFields(allFields);
 
     return Object.keys(errors).length === 0;
   };
+
   const handleLocationSelect = (lat: string, lng: string) => {
-    setFormData(prev => ({
-      ...prev,
-      latitude: lat,
-      longitude: lng,
-    }));
+    setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
   };
 
   const handleSubmit = async () => {
     if (!validateForm()) {
       toast.error('Please fill in all required fields correctly');
-
-      // Scroll to first error
       const firstErrorField = document.querySelector('.border-red-500');
       if (firstErrorField) {
         firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -440,13 +391,9 @@ export default function WarehouseUploadForm() {
       
       Object.entries(formData).forEach(([key, value]) => {
         if (key === 'images') {
-          formData.images.forEach(file => {
-            uploadFormData.append('images', file);
-          });
+          formData.images.forEach(file => uploadFormData.append('images', file));
         } else if (key === 'videos') {
-          formData.videos.forEach(file => {
-            uploadFormData.append('videos', file);
-          });
+          formData.videos.forEach(file => uploadFormData.append('videos', file));
         } else if (key === 'amenities') {
           uploadFormData.append('amenities', JSON.stringify(value));
         } else {
@@ -471,15 +418,12 @@ export default function WarehouseUploadForm() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Upload failed');
-      }
+      if (!response.ok) throw new Error(data.error || 'Upload failed');
 
       toast.success('Property listed successfully!', {
         description: 'Your property has been submitted for review.',
       });
 
-      // Reset form after successful upload
       setTimeout(() => {
         window.location.href = '/mylistings';
       }, 2000);
@@ -493,9 +437,8 @@ export default function WarehouseUploadForm() {
       setUploadProgress(0);
     }
   };
-  const today = new Date().toISOString().split("T")[0];
 
-
+  const today = new Date().toISOString().split('T')[0];
   const visibleImageCount = 3;
   const remainingImages = imagePreviews.length - visibleImageCount;
 
@@ -567,35 +510,35 @@ export default function WarehouseUploadForm() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2 w-full">
-                <Label htmlFor="propertyType" className="text-sm font-semibold">
-                  Property Type <span className="text-red-500">*</span>
-                </Label>
-                <Select
-                  value={formData.propertyType}
-                  onValueChange={(value) => handleFieldChange('propertyType', value)}
-                >
-                  <SelectTrigger
-                    id="propertyType"
-                    className={`w-full h-11 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
-                      touchedFields.has('propertyType') && fieldErrors.propertyType ? 'border-red-500' : ''
-                    }`}
-                  >
-                    <SelectValue placeholder="Select type..." />
-                  </SelectTrigger>
-                  <SelectContent className="max-w-[calc(100vw-2rem)]">
-                    {PROPERTY_TYPES.map(type => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {touchedFields.has('propertyType') && fieldErrors.propertyType && (
-                  <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
-                    <AlertCircle className="h-4 w-4" />
-                    {fieldErrors.propertyType}
-                  </p>
-                )}
-              </div>
+                  <div className="space-y-2 w-full">
+                    <Label htmlFor="propertyType" className="text-sm font-semibold">
+                      Property Type <span className="text-red-500">*</span>
+                    </Label>
+                    <Select
+                      value={formData.propertyType}
+                      onValueChange={(value) => handleFieldChange('propertyType', value)}
+                    >
+                      <SelectTrigger
+                        id="propertyType"
+                        className={`w-full h-11 border-gray-300 focus:border-red-500 focus:ring-red-500 ${
+                          touchedFields.has('propertyType') && fieldErrors.propertyType ? 'border-red-500' : ''
+                        }`}
+                      >
+                        <SelectValue placeholder="Select type..." />
+                      </SelectTrigger>
+                      <SelectContent className="max-w-[calc(100vw-2rem)]">
+                        {PROPERTY_TYPES.map(type => (
+                          <SelectItem key={type} value={type}>{type}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {touchedFields.has('propertyType') && fieldErrors.propertyType && (
+                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                        <AlertCircle className="h-4 w-4" />
+                        {fieldErrors.propertyType}
+                      </p>
+                    )}
+                  </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="totalArea" className="text-sm font-semibold">
@@ -699,7 +642,7 @@ export default function WarehouseUploadForm() {
                       <SelectContent className='max-w-[calc(100vw-2rem)]'>
                         <SelectItem value="rent">For Rent</SelectItem>
                         <SelectItem value="sale">For Sale</SelectItem>
-                        <SelectItem value="sale">For Lease</SelectItem>
+                        <SelectItem value="lease">For Lease</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -761,6 +704,7 @@ export default function WarehouseUploadForm() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
+                {/* Address field — triggers auto-geocoding in MapSelector */}
                 <div className="space-y-2">
                   <Label htmlFor="address" className="text-sm font-semibold">
                     Address <span className="text-red-500">*</span>
@@ -768,7 +712,7 @@ export default function WarehouseUploadForm() {
                   <Textarea
                     id="address"
                     value={formData.address}
-                    onChange={(e) => handleFieldChange('address', e.target.value)}
+                    onChange={(e) => handleAddressChange(e.target.value)}
                     onBlur={() => handleFieldBlur('address')}
                     placeholder="Enter full street address"
                     className={`border-gray-300 focus:border-red-500 focus:ring-red-500 resize-none ${
@@ -878,6 +822,7 @@ export default function WarehouseUploadForm() {
                   </div>
                 </div>
 
+                {/* Lat/Lng fields — auto-populated by geocoding, editable manually */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="latitude" className="text-sm font-semibold">Latitude</Label>
@@ -902,6 +847,7 @@ export default function WarehouseUploadForm() {
                   </div>
                 </div>
 
+                {/* Map toggle button */}
                 <div className="pt-2">
                   <Button
                     type="button"
@@ -913,13 +859,21 @@ export default function WarehouseUploadForm() {
                   </Button>
 
                   {showMap && (
-                    <div className="mt-4 p-8 border rounded-lg bg-gray-50 text-center">
-                      {/* <p className="text-sm text-gray-600">Map component would be rendered here</p> */}
+                    <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+                      {/* 
+                        MapSelector now receives address, city, state so it can
+                        auto-geocode whenever these change (debounced 800 ms).
+                        It still supports click-to-pin and drag-to-adjust.
+                      */}
                       <MapSelector
-                      latitude={formData.latitude}
-                      longitude={formData.longitude}
-                      onLocationSelect={handleLocationSelect}
-                    />                    </div>
+                        latitude={formData.latitude}
+                        longitude={formData.longitude}
+                        address={formData.address}
+                        city={formData.city}
+                        state={formData.state}
+                        onLocationSelect={handleLocationSelect}
+                      />
+                    </div>
                   )}
                 </div>
               </CardContent>
@@ -1047,7 +1001,6 @@ export default function WarehouseUploadForm() {
                       <CardTitle className="text-lg">Property Images</CardTitle>
                       <span className='text-red-600 mx-3'>*</span>
                     </div>
-                    {/* <Badge className="bg-red-600 hover:bg-red-700">Required</Badge> */}
                   </div>
                   <CardDescription className="text-xs">
                     Upload up to {MAX_IMAGES} images (Max 5MB each)
@@ -1324,100 +1277,92 @@ export default function WarehouseUploadForm() {
 
       {/* Image Gallery Modal - View Only */}
       <Dialog open={showImageGallery} onOpenChange={setShowImageGallery}>
-  <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-3xl lg:max-w-5xl xl:max-w-6xl max-h-[95vh] p-0 gap-0 overflow-hidden">
-    <DialogHeader className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-5 md:pt-6 pb-3 sm:pb-4 border-b">
-      <div className="flex items-center justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <DialogTitle className="text-lg sm:text-xl md:text-2xl font-bold truncate">
-            Property Images
-          </DialogTitle>
-          <DialogDescription className="text-xs sm:text-sm text-muted-foreground mt-1">
-            {selectedImageIndex + 1} of {imagePreviews.length}
-          </DialogDescription>
-        </div>
-      </div>
-    </DialogHeader>
-
-    <div className="relative p-3 sm:p-4 md:p-6 overflow-y-auto">
-      {/* Main Image Display - Add group class for hover effect */}
-      <div className="group relative w-full bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg sm:rounded-xl overflow-hidden shadow-2xl flex items-center justify-center">
-        <div 
-          className="w-full h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] flex items-center justify-center"
-          style={{ minHeight: '300px', maxHeight: '800px' }}
-        >
-          <img
-            src={imagePreviews[selectedImageIndex]}
-            alt={`Property ${selectedImageIndex + 1}`}
-            className="max-w-full max-h-full w-auto h-auto object-contain"
-          />
-        </div>
-
-        {/* Navigation Overlay */}
-        {imagePreviews.length > 1 && (
-          <>
-            {/* Previous Button - Always visible on mobile, hover-only on desktop */}
-            <Button
-              type="button"
-              size="icon"
-              variant="secondary"
-              onClick={goToPreviousImage}
-              className="absolute left-2 sm:left-3 md:left-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full bg-white/95 hover:bg-white shadow-2xl border-2 border-gray-200 hover:scale-110 transition-all
-              md:opacity-0 md:group-hover:opacity-100"
-            >
-              <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-gray-700" />
-            </Button>
-
-            {/* Next Button - Always visible on mobile, hover-only on desktop */}
-            <Button
-              type="button"
-              size="icon"
-              variant="secondary"
-              onClick={goToNextImage}
-              className="absolute right-2 sm:right-3 md:right-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full bg-white/95 hover:bg-white shadow-2xl border-2 border-gray-200 hover:scale-110 transition-all
-              md:opacity-0 md:group-hover:opacity-100"
-            >
-              <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-gray-700" />
-            </Button>
-
-            {/* Image Counter Overlay - Always visible on mobile, hover-only on desktop */}
-            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 bg-black/75 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium backdrop-blur-sm transition-opacity
-            md:opacity-0 md:group-hover:opacity-100">
-              {selectedImageIndex + 1} / {imagePreviews.length}
+        <DialogContent className="max-w-[95vw] sm:max-w-[85vw] md:max-w-3xl lg:max-w-5xl xl:max-w-6xl max-h-[95vh] p-0 gap-0 overflow-hidden">
+          <DialogHeader className="px-3 sm:px-4 md:px-6 pt-4 sm:pt-5 md:pt-6 pb-3 sm:pb-4 border-b">
+            <div className="flex items-center justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <DialogTitle className="text-lg sm:text-xl md:text-2xl font-bold truncate">
+                  Property Images
+                </DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm text-muted-foreground mt-1">
+                  {selectedImageIndex + 1} of {imagePreviews.length}
+                </DialogDescription>
+              </div>
             </div>
-          </>
-        )}
-      </div>
+          </DialogHeader>
 
-      {/* Thumbnail Strip - Responsive */}
-      {imagePreviews.length > 1 && (
-        <div className="mt-3 sm:mt-4 md:mt-6">
-          <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 px-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-            {imagePreviews.map((preview, index) => (
-              <button
-                key={index}
-                onClick={() => setSelectedImageIndex(index)}
-                className={`relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-md sm:rounded-lg overflow-hidden transition-all ${
-                  index === selectedImageIndex
-                    ? 'ring-2 sm:ring-4 ring-red-500 scale-105 shadow-lg'
-                    : 'ring-1 sm:ring-2 ring-gray-200 hover:ring-red-300 hover:scale-105'
-                }`}
+          <div className="relative p-3 sm:p-4 md:p-6 overflow-y-auto">
+            <div className="group relative w-full bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg sm:rounded-xl overflow-hidden shadow-2xl flex items-center justify-center">
+              <div 
+                className="w-full h-[50vh] sm:h-[55vh] md:h-[60vh] lg:h-[65vh] flex items-center justify-center"
+                style={{ minHeight: '300px', maxHeight: '800px' }}
               >
                 <img
-                  src={preview}
-                  alt={`Thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  src={imagePreviews[selectedImageIndex]}
+                  alt={`Property ${selectedImageIndex + 1}`}
+                  className="max-w-full max-h-full w-auto h-auto object-contain"
                 />
-                {index === selectedImageIndex && (
-                  <div className="absolute inset-0 bg-red-500/20" />
-                )}
-              </button>
-            ))}
+              </div>
+
+              {imagePreviews.length > 1 && (
+                <>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    onClick={goToPreviousImage}
+                    className="absolute left-2 sm:left-3 md:left-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full bg-white/95 hover:bg-white shadow-2xl border-2 border-gray-200 hover:scale-110 transition-all md:opacity-0 md:group-hover:opacity-100"
+                  >
+                    <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-gray-700" />
+                  </Button>
+
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    onClick={goToNextImage}
+                    className="absolute right-2 sm:right-3 md:right-4 top-1/2 -translate-y-1/2 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 rounded-full bg-white/95 hover:bg-white shadow-2xl border-2 border-gray-200 hover:scale-110 transition-all md:opacity-0 md:group-hover:opacity-100"
+                  >
+                    <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 text-gray-700" />
+                  </Button>
+
+                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 bg-black/75 text-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium backdrop-blur-sm transition-opacity md:opacity-0 md:group-hover:opacity-100">
+                    {selectedImageIndex + 1} / {imagePreviews.length}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {imagePreviews.length > 1 && (
+              <div className="mt-3 sm:mt-4 md:mt-6">
+                <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto pb-2 px-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                  {imagePreviews.map((preview, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-md sm:rounded-lg overflow-hidden transition-all ${
+                        index === selectedImageIndex
+                          ? 'ring-2 sm:ring-4 ring-red-500 scale-105 shadow-lg'
+                          : 'ring-1 sm:ring-2 ring-gray-200 hover:ring-red-300 hover:scale-105'
+                      }`}
+                    >
+                      <img
+                        src={preview}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {index === selectedImageIndex && (
+                        <div className="absolute inset-0 bg-red-500/20" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
-    </div>
-  </DialogContent>
-</Dialog>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={imageToDelete !== null} onOpenChange={() => setImageToDelete(null)}>
         <AlertDialogContent>
@@ -1431,9 +1376,7 @@ export default function WarehouseUploadForm() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
-                if (imageToDelete !== null) {
-                  removeImage(imageToDelete);
-                }
+                if (imageToDelete !== null) removeImage(imageToDelete);
               }}
               className="bg-red-600 hover:bg-red-700"
             >

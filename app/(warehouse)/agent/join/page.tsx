@@ -1,6 +1,6 @@
 'use client'
-import { useState } from 'react';
-import { Upload, X, AlertCircle, User, Mail, Phone, Building2, Award, MapPin, FileText, Briefcase, Eye, Trash2, CalendarIcon } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Upload, X, AlertCircle, User, MapPin, FileText, Briefcase, Eye, Trash2, CalendarIcon, CheckCircle2, Loader2, Globe } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -26,7 +26,6 @@ interface AgentFormData {
 
   // Contact Information
   primaryPhone: string;
-  // secondaryPhone: string;
   email: string;
   whatsappNumber: string;
 
@@ -39,6 +38,7 @@ interface AgentFormData {
 
   // Professional Information
   agencyName: string;
+  domainName: string; // NEW
   licenseNumber: string;
   experienceYears: string;
   specialization: string;
@@ -61,7 +61,6 @@ interface AgentFormData {
 interface FieldErrors {
   fullName?: string;
   primaryPhone?: string;
-  // secondaryPhone?: string;
   email?: string;
   whatsappNumber?: string;
   pincode?: string;
@@ -69,7 +68,11 @@ interface FieldErrors {
   panNumber?: string;
   profileImage?: string;
   documents?: string;
+  domainName?: string; // NEW
 }
+
+// Domain check status type
+type DomainStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
 
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
@@ -91,9 +94,12 @@ const SPECIALIZATIONS = [
 ];
 
 const LANGUAGES = [
-  'Hindi', 'English', 'Tamil', 'Telugu', 'Kannada', 
+  'Hindi', 'English', 'Tamil', 'Telugu', 'Kannada',
   'Malayalam', 'Marathi', 'Bengali', 'Gujarati', 'Punjabi'
 ];
+
+// Replace with your actual platform domain
+const PLATFORM_DOMAIN = 'rexon.com';
 
 export default function AgentRegistrationForm() {
   const router = useRouter();
@@ -102,7 +108,6 @@ export default function AgentRegistrationForm() {
     dateOfBirth: '',
     gender: '',
     primaryPhone: '',
-    // secondaryPhone: '',
     email: '',
     whatsappNumber: '',
     addressLine1: '',
@@ -111,6 +116,7 @@ export default function AgentRegistrationForm() {
     state: '',
     pincode: '',
     agencyName: '',
+    domainName: '', // NEW
     licenseNumber: '',
     experienceYears: '',
     specialization: '',
@@ -123,12 +129,16 @@ export default function AgentRegistrationForm() {
     profileImage: null,
     documents: [],
   });
-  
+
   const [uploading, setUploading] = useState(false);
   const [profilePreview, setProfilePreview] = useState<string>('');
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+
+  // Domain check state
+  const [domainStatus, setDomainStatus] = useState<DomainStatus>('idle');
+  const domainDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const validateField = (name: string, value: any): string | undefined => {
     switch (name) {
@@ -140,10 +150,9 @@ export default function AgentRegistrationForm() {
       case 'primaryPhone':
         if (!value || value.trim() === '') return 'Primary phone is required';
         if (!/^[6-9]\d{9}$/.test(value.replace(/\s/g, ''))) {
-          return 'Enter a valid 10-digit mobile number ';
+          return 'Enter a valid 10-digit mobile number';
         }
         break;
-
 
       case 'email':
         if (!value || value.trim() === '') return 'Email is required';
@@ -160,24 +169,16 @@ export default function AgentRegistrationForm() {
 
       case 'pincode':
         if (value) {
-          if (!/^\d+$/.test(value)) {
-            return 'Pincode must contain only numbers';
-          }
-          if (value.length !== 6) {
-            return 'Pincode must be exactly 6 digits';
-          }
+          if (!/^\d+$/.test(value)) return 'Pincode must contain only numbers';
+          if (value.length !== 6) return 'Pincode must be exactly 6 digits';
         }
         break;
 
       case 'aadharNumber':
         if (value) {
           const cleaned = value.replace(/\s/g, '');
-          if (!/^\d+$/.test(cleaned)) {
-            return 'Aadhar must contain only numbers';
-          }
-          if (cleaned.length !== 12) {
-            return 'Aadhar must be exactly 12 digits';
-          }
+          if (!/^\d+$/.test(cleaned)) return 'Aadhar must contain only numbers';
+          if (cleaned.length !== 12) return 'Aadhar must be exactly 12 digits';
         }
         break;
 
@@ -190,8 +191,17 @@ export default function AgentRegistrationForm() {
         break;
 
       case 'profileImage':
-        if (!formData.profileImage) {
-          return 'Profile photo is required';
+        if (!formData.profileImage) return 'Profile photo is required';
+        break;
+
+      case 'domainName':
+        if (value && !/^[a-z0-9-]+$/.test(value)) {
+          return 'Only lowercase letters, numbers, and hyphens allowed';
+        }
+        if (value && value.length < 3) return 'Domain must be at least 3 characters';
+        if (value && value.length > 50) return 'Domain must be under 50 characters';
+        if (value && (value.startsWith('-') || value.endsWith('-'))) {
+          return 'Domain cannot start or end with a hyphen';
         }
         break;
     }
@@ -200,26 +210,55 @@ export default function AgentRegistrationForm() {
 
   const handleFieldChange = (name: string, value: any) => {
     setFormData(prev => ({ ...prev, [name]: value }));
-
-    // Mark field as touched
     setTouchedFields(prev => new Set(prev).add(name));
-
-    // Validate field
     const error = validateField(name, value);
-    setFieldErrors(prev => ({
-      ...prev,
-      [name]: error
-    }));
+    setFieldErrors(prev => ({ ...prev, [name]: error }));
   };
 
   const handleFieldBlur = (name: string) => {
     setTouchedFields(prev => new Set(prev).add(name));
     const error = validateField(name, formData[name as keyof AgentFormData]);
-    setFieldErrors(prev => ({
-      ...prev,
-      [name]: error
-    }));
+    setFieldErrors(prev => ({ ...prev, [name]: error }));
   };
+
+  // --- Domain handlers (debounced auto-check) ---
+  const handleDomainChange = (value: string) => {
+    const cleaned = value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+    setFormData(prev => ({ ...prev, domainName: cleaned }));
+    setTouchedFields(prev => new Set(prev).add('domainName'));
+
+    const error = validateField('domainName', cleaned);
+    setFieldErrors(prev => ({ ...prev, domainName: error }));
+
+    // Clear previous debounce timer
+    if (domainDebounceRef.current) clearTimeout(domainDebounceRef.current);
+
+    // If empty or has a validation error, reset and don't call API
+    if (!cleaned || cleaned.length < 3 || error) {
+      setDomainStatus(cleaned.length > 0 && cleaned.length < 3 ? 'checking' : 'idle');
+      if (cleaned.length > 0 && cleaned.length < 3) {
+        // Show checking dots immediately so it feels responsive, then reset
+        setDomainStatus('idle');
+      }
+      return;
+    }
+
+    // Show "checking" immediately so user gets instant feedback
+    setDomainStatus('checking');
+
+    // Fire the API call 600ms after user stops typing
+    domainDebounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/agents/check-domain?name=${encodeURIComponent(cleaned)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Check failed');
+        setDomainStatus(data.available ? 'available' : 'taken');
+      } catch {
+        setDomainStatus('error');
+      }
+    }, 600);
+  };
+  // --- End domain handlers ---
 
   const toggleLanguage = (language: string) => {
     setFormData(prev => ({
@@ -234,11 +273,9 @@ export default function AgentRegistrationForm() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Clear previous errors
     setFieldErrors(prev => ({ ...prev, profileImage: undefined }));
     setTouchedFields(prev => new Set(prev).add('profileImage'));
 
-    // Accept common image formats: jpg, jpeg, png, webp, gif
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowedTypes.includes(file.type.toLowerCase())) {
       setFieldErrors(prev => ({
@@ -248,12 +285,9 @@ export default function AgentRegistrationForm() {
       return;
     }
 
-    const maxSize = 2 * 1024 * 1024; // 2MB
+    const maxSize = 2 * 1024 * 1024;
     if (file.size > maxSize) {
-      setFieldErrors(prev => ({
-        ...prev,
-        profileImage: 'Profile image must be less than 2MB'
-      }));
+      setFieldErrors(prev => ({ ...prev, profileImage: 'Profile image must be less than 2MB' }));
       return;
     }
 
@@ -263,15 +297,11 @@ export default function AgentRegistrationForm() {
   };
 
   const removeProfileImage = () => {
-    if (profilePreview) {
-      URL.revokeObjectURL(profilePreview);
-    }
+    if (profilePreview) URL.revokeObjectURL(profilePreview);
     setProfilePreview('');
     setFormData(prev => ({ ...prev, profileImage: null }));
     const input = document.getElementById('profileImage') as HTMLInputElement;
     if (input) input.value = '';
-
-    // Validate after removal
     setTouchedFields(prev => new Set(prev).add('profileImage'));
     setFieldErrors(prev => ({ ...prev, profileImage: 'Profile photo is required' }));
   };
@@ -280,17 +310,13 @@ export default function AgentRegistrationForm() {
     const files = e.target.files ? Array.from(e.target.files) : [];
     if (files.length === 0) return;
 
-    // Clear previous errors
     setFieldErrors(prev => ({ ...prev, documents: undefined }));
     setTouchedFields(prev => new Set(prev).add('documents'));
 
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     const oversized = files.filter(file => file.size > maxSize);
     if (oversized.length > 0) {
-      setFieldErrors(prev => ({
-        ...prev,
-        documents: 'Some files exceed 5MB limit'
-      }));
+      setFieldErrors(prev => ({ ...prev, documents: 'Some files exceed 5MB limit' }));
       return;
     }
 
@@ -309,50 +335,49 @@ export default function AgentRegistrationForm() {
     const errors: FieldErrors = {};
     const requiredFields = ['fullName', 'primaryPhone', 'email'];
 
-    // Validate all required fields
     requiredFields.forEach(field => {
       const error = validateField(field, formData[field as keyof AgentFormData]);
-      if (error) {
-        errors[field as keyof FieldErrors] = error;
-      }
+      if (error) errors[field as keyof FieldErrors] = error;
     });
-
 
     if (formData.whatsappNumber) {
       const error = validateField('whatsappNumber', formData.whatsappNumber);
       if (error) errors.whatsappNumber = error;
     }
-
     if (formData.pincode) {
       const error = validateField('pincode', formData.pincode);
       if (error) errors.pincode = error;
     }
-
     if (formData.aadharNumber) {
       const error = validateField('aadharNumber', formData.aadharNumber);
       if (error) errors.aadharNumber = error;
     }
-
     if (formData.panNumber) {
       const error = validateField('panNumber', formData.panNumber);
       if (error) errors.panNumber = error;
     }
+    if (formData.domainName) {
+      const error = validateField('domainName', formData.domainName);
+      if (error) errors.domainName = error;
+    }
 
-    // Validate profile image
+    // If domain was entered but not checked or is taken, block submission
+    if (formData.domainName && domainStatus !== 'available') {
+      if (domainStatus === 'idle' || domainStatus === 'error') {
+        errors.domainName = 'Please check domain availability first';
+      } else if (domainStatus === 'taken') {
+        errors.domainName = 'This domain is already taken. Please choose another.';
+      }
+    }
+
     const profileImageError = validateField('profileImage', formData.profileImage);
     if (profileImageError) errors.profileImage = profileImageError;
 
-    // Set all errors and mark all fields as touched
     setFieldErrors(errors);
-    const allFields = new Set([
+    setTouchedFields(new Set([
       ...requiredFields,
-      'whatsappNumber',
-      'pincode',
-      'aadharNumber',
-      'panNumber',
-      'profileImage'
-    ]);
-    setTouchedFields(allFields);
+      'whatsappNumber', 'pincode', 'aadharNumber', 'panNumber', 'profileImage', 'domainName'
+    ]));
 
     return Object.keys(errors).length === 0;
   };
@@ -360,8 +385,6 @@ export default function AgentRegistrationForm() {
   const handleSubmit = async () => {
     if (!validateForm()) {
       toast.error('Please fill in all required fields correctly');
-
-      // Scroll to first error
       const firstErrorField = document.querySelector('.border-red-500');
       if (firstErrorField) {
         firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -373,8 +396,7 @@ export default function AgentRegistrationForm() {
 
     try {
       const uploadFormData = new FormData();
-      
-      // Append all form fields
+
       Object.entries(formData).forEach(([key, value]) => {
         if (key === 'profileImage' && value) {
           uploadFormData.append('profileImage', value as File);
@@ -385,7 +407,7 @@ export default function AgentRegistrationForm() {
         } else if (key === 'languagesSpoken' || key === 'serviceAreas') {
           uploadFormData.append(key, JSON.stringify(value));
         } else {
-          uploadFormData.append(key, value.toString());
+          uploadFormData.append(key, value?.toString() ?? '');
         }
       });
 
@@ -396,16 +418,14 @@ export default function AgentRegistrationForm() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
-      }
+      if (!response.ok) throw new Error(data.error || 'Registration failed');
 
       toast.success('Registration submitted successfully!', {
         description: 'We will review your application and get back to you.',
       });
 
       setTimeout(() => {
-        router.push('/agent/dashboard');
+        router.push('/agent/thankyou');
       }, 2000);
 
     } catch (error) {
@@ -434,7 +454,7 @@ export default function AgentRegistrationForm() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Forms */}
           <div className="lg:col-span-2 space-y-6">
-            
+
             {/* Personal Details */}
             <Card>
               <CardHeader>
@@ -485,7 +505,6 @@ export default function AgentRegistrationForm() {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          
                           selected={formData.dateOfBirth ? new Date(formData.dateOfBirth) : undefined}
                           onSelect={(date) => {
                             if (date) {
@@ -497,8 +516,6 @@ export default function AgentRegistrationForm() {
                           }
                           captionLayout="dropdown"
                           className="rounded-lg border"
-
-
                           initialFocus
                         />
                       </PopoverContent>
@@ -506,21 +523,21 @@ export default function AgentRegistrationForm() {
                   </div>
 
                   <div className="space-y-2">
-  <Label htmlFor="gender">Gender</Label>
-  <Select
-    value={formData.gender}
-    onValueChange={(value) => setFormData({ ...formData, gender: value })}
-  >
-    <SelectTrigger id="gender" className="w-full h-12">
-      <SelectValue placeholder="Select gender" />
-    </SelectTrigger>
-    <SelectContent>
-      <SelectItem value="male">Male</SelectItem>
-      <SelectItem value="female">Female</SelectItem>
-      <SelectItem value="other">Other</SelectItem>
-    </SelectContent>
-  </Select>
-</div>
+                    <Label htmlFor="gender">Gender</Label>
+                    <Select
+                      value={formData.gender}
+                      onValueChange={(value) => setFormData({ ...formData, gender: value })}
+                    >
+                      <SelectTrigger id="gender" className="w-full h-12">
+                        <SelectValue placeholder="Select gender" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="male">Male</SelectItem>
+                        <SelectItem value="female">Female</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -635,7 +652,7 @@ export default function AgentRegistrationForm() {
                       value={formData.state}
                       onValueChange={(value) => setFormData({ ...formData, state: value })}
                     >
-                      <SelectTrigger id="state" className=" w-full h-12">
+                      <SelectTrigger id="state" className="w-full h-12">
                         <SelectValue placeholder="Select state" />
                       </SelectTrigger>
                       <SelectContent>
@@ -692,6 +709,93 @@ export default function AgentRegistrationForm() {
                   />
                 </div>
 
+                {/* ── DOMAIN CHECK FIELD ── */}
+                <div className="space-y-2">
+                  <Label htmlFor="domainName">
+                    <span className="flex items-center gap-1.5">
+                      <Globe className="h-4 w-4 text-gray-500" />
+                      Profile Domain
+                      <span className="text-xs text-gray-400 font-normal">(optional)</span>
+                    </span>
+                  </Label>
+                  {/* Input with suffix + inline status icon — no Check button */}
+                  <div className="relative">
+                    <Input
+                      id="domainName"
+                      value={formData.domainName}
+                      onChange={(e) => handleDomainChange(e.target.value)}
+                      placeholder="yourname"
+                      maxLength={50}
+                      className={cn(
+                        'h-11 pl-3',
+                        // Right padding: enough room for suffix text + status icon
+                        'pr-44',
+                        touchedFields.has('domainName') && fieldErrors.domainName
+                          ? 'border-red-500 focus-visible:ring-red-500'
+                          : domainStatus === 'available'
+                          ? 'border-green-500 focus-visible:ring-green-500'
+                          : domainStatus === 'taken'
+                          ? 'border-red-500 focus-visible:ring-red-500'
+                          : ''
+                      )}
+                    />
+                    {/* Suffix domain text */}
+                    <span className="absolute right-9 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium pointer-events-none select-none">
+                      .{PLATFORM_DOMAIN}
+                    </span>
+                    {/* Inline status icon — rightmost */}
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                      {domainStatus === 'checking' && (
+                        <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                      )}
+                      {domainStatus === 'available' && !fieldErrors.domainName && (
+                        <CheckCircle2 className="h-4 w-4 text-green-500" />
+                      )}
+                      {(domainStatus === 'taken' || (touchedFields.has('domainName') && fieldErrors.domainName)) && (
+                        <AlertCircle className="h-4 w-4 text-red-500" />
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Status messages below the input */}
+                  {touchedFields.has('domainName') && fieldErrors.domainName && (
+                    <p className="text-sm text-red-500 flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      {fieldErrors.domainName}
+                    </p>
+                  )}
+                  {!fieldErrors.domainName && domainStatus === 'checking' && formData.domainName.length >= 3 && (
+                    <p className="text-sm text-gray-400 flex items-center gap-1">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Checking availability...
+                    </p>
+                  )}
+                  {!fieldErrors.domainName && domainStatus === 'available' && (
+                    <p className="text-sm text-green-600 flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      <strong>{formData.domainName}.{PLATFORM_DOMAIN}</strong>&nbsp;is available!
+                    </p>
+                  )}
+                  {!fieldErrors.domainName && domainStatus === 'taken' && (
+                    <p className="text-sm text-red-500 flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      <strong>{formData.domainName}.{PLATFORM_DOMAIN}</strong>&nbsp;is already taken. Try another.
+                    </p>
+                  )}
+                  {!fieldErrors.domainName && domainStatus === 'error' && (
+                    <p className="text-sm text-orange-500 flex items-center gap-1">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      Could not check availability. Please try again.
+                    </p>
+                  )}
+                  {domainStatus === 'idle' && !formData.domainName && (
+                    <p className="text-xs text-gray-400">
+                      Your public profile will be at&nbsp;<span className="font-medium">yourname.{PLATFORM_DOMAIN}</span>
+                    </p>
+                  )}
+                </div>
+                {/* ── END DOMAIN CHECK FIELD ── */}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="licenseNumber">License Number</Label>
@@ -717,90 +821,90 @@ export default function AgentRegistrationForm() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <div className="space-y-2">
-    <Label htmlFor="specialization">Specialization</Label>
-    <Select
-      value={formData.specialization}
-      onValueChange={(value) => setFormData({ ...formData, specialization: value })}
-    >
-      <SelectTrigger id="specialization" className="w-full h-12">
-        <SelectValue placeholder="Select specialization" />
-      </SelectTrigger>
-      <SelectContent>
-        {SPECIALIZATIONS.map(spec => (
-          <SelectItem key={spec} value={spec}>{spec}</SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="specialization">Specialization</Label>
+                    <Select
+                      value={formData.specialization}
+                      onValueChange={(value) => setFormData({ ...formData, specialization: value })}
+                    >
+                      <SelectTrigger id="specialization" className="w-full h-12">
+                        <SelectValue placeholder="Select specialization" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SPECIALIZATIONS.map(spec => (
+                          <SelectItem key={spec} value={spec}>{spec}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-  <div className="space-y-2">
-    <Label>Languages Spoken</Label>
-    <Select
-      value="select languages"
-      name='select languages'
-      onValueChange={(value) => {
-        if (value && !formData.languagesSpoken.includes(value)) {
-          setFormData(prev => ({
-            ...prev,
-            languagesSpoken: [...prev.languagesSpoken, value]
-          }));
-        }
-      }}
-    >
-      <SelectTrigger className="w-full h-12">
-        <SelectValue>
-          {formData.languagesSpoken.length > 0 ? (
-            <span className="flex items-center gap-2">
-              <span className="font-medium text-gray-900">
-                {formData.languagesSpoken.length} {formData.languagesSpoken.length === 1 ? 'language' : 'languages'} selected
-              </span>
-              <span className="text-gray-500 text-sm">• Click to select more</span>
-            </span>
-          ) : (
-            <span className="text-gray-500">Select languages...</span>
-          )}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {LANGUAGES.filter(lang => !formData.languagesSpoken.includes(lang)).length > 0 ? (
-          LANGUAGES.filter(lang => !formData.languagesSpoken.includes(lang)).map((language) => (
-            <SelectItem key={language} value={language}>
-              {language}
-            </SelectItem>
-          ))
-        ) : (
-          <div className="px-2 py-6 text-center text-sm text-gray-500">
-            All languages selected
-          </div>
-        )}
-      </SelectContent>
-    </Select>
-  </div>
-</div>
+                  <div className="space-y-2">
+                    <Label>Languages Spoken</Label>
+                    <Select
+                      value="select languages"
+                      name='select languages'
+                      onValueChange={(value) => {
+                        if (value && !formData.languagesSpoken.includes(value)) {
+                          setFormData(prev => ({
+                            ...prev,
+                            languagesSpoken: [...prev.languagesSpoken, value]
+                          }));
+                        }
+                      }}
+                    >
+                      <SelectTrigger className="w-full h-12">
+                        <SelectValue>
+                          {formData.languagesSpoken.length > 0 ? (
+                            <span className="flex items-center gap-2">
+                              <span className="font-medium text-gray-900">
+                                {formData.languagesSpoken.length} {formData.languagesSpoken.length === 1 ? 'language' : 'languages'} selected
+                              </span>
+                              <span className="text-gray-500 text-sm">• Click to select more</span>
+                            </span>
+                          ) : (
+                            <span className="text-gray-500">Select languages...</span>
+                          )}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LANGUAGES.filter(lang => !formData.languagesSpoken.includes(lang)).length > 0 ? (
+                          LANGUAGES.filter(lang => !formData.languagesSpoken.includes(lang)).map((language) => (
+                            <SelectItem key={language} value={language}>
+                              {language}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="px-2 py-6 text-center text-sm text-gray-500">
+                            All languages selected
+                          </div>
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
 
-{formData.languagesSpoken.length > 0 && (
-  <div className="flex flex-wrap gap-2 mt-2">
-    {formData.languagesSpoken.map((language) => (
-      <Badge
-        key={language}
-        variant="secondary"
-        className="bg-red-100 text-red-800 hover:bg-red-200 px-3 py-1.5"
-      >
-        {language}
-        <button
-          type="button"
-          onClick={() => toggleLanguage(language)}
-          className="ml-2 hover:text-red-600"
-        >
-          <X className="h-3 w-3" />
-        </button>
-      </Badge>
-    ))}
-  </div>
-)}
+                {formData.languagesSpoken.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {formData.languagesSpoken.map((language) => (
+                      <Badge
+                        key={language}
+                        variant="secondary"
+                        className="bg-red-100 text-red-800 hover:bg-red-200 px-3 py-1.5"
+                      >
+                        {language}
+                        <button
+                          type="button"
+                          onClick={() => toggleLanguage(language)}
+                          className="ml-2 hover:text-red-600"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="reraRegistration">RERA Registration Number</Label>
@@ -853,8 +957,6 @@ export default function AgentRegistrationForm() {
                   </div>
                 </div>
 
-                
-
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio / About You</Label>
                   <Textarea
@@ -862,7 +964,7 @@ export default function AgentRegistrationForm() {
                     value={formData.bio}
                     onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                     rows={5}
-                    placeholder="Tell clients about your experience, expertise, and approach to real estate. Highlight your achievements, areas of specialization, and what makes you unique..."
+                    placeholder="Tell clients about your experience, expertise, and approach to real estate..."
                     className="resize-none"
                   />
                   <p className="text-xs text-gray-500">This will be displayed on your public agent profile</p>
@@ -877,7 +979,7 @@ export default function AgentRegistrationForm() {
               {/* Profile Photo */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg ">
+                  <CardTitle className="text-lg">
                     <span>Profile Photo</span>
                     <span className='mx-2 text-sm text-red-500'>*</span>
                   </CardTitle>
@@ -938,11 +1040,10 @@ export default function AgentRegistrationForm() {
                   ) : (
                     <div>
                       <Label htmlFor="profileImage" className="block w-full cursor-pointer">
-                        <div className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-red-500 hover:bg-red-50 transition-all ${
-                          touchedFields.has('profileImage') && fieldErrors.profileImage
-                            ? 'border-red-500 bg-red-50'
-                            : 'border-gray-300'
-                        }`}>
+                        <div className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-red-500 hover:bg-red-50 transition-all ${touchedFields.has('profileImage') && fieldErrors.profileImage
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-gray-300'
+                          }`}>
                           <input
                             id="profileImage"
                             type="file"
@@ -979,11 +1080,10 @@ export default function AgentRegistrationForm() {
                 <CardContent>
                   <div>
                     <Label htmlFor="documents" className="block w-full cursor-pointer">
-                      <div className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-red-500 hover:bg-red-50 transition-all ${
-                        touchedFields.has('documents') && fieldErrors.documents
-                          ? 'border-red-500 bg-red-50'
-                          : 'border-gray-300'
-                      }`}>
+                      <div className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-red-500 hover:bg-red-50 transition-all ${touchedFields.has('documents') && fieldErrors.documents
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-300'
+                        }`}>
                         <input
                           id="documents"
                           type="file"
@@ -1078,11 +1178,7 @@ export default function AgentRegistrationForm() {
             )}
           </div>
           <div className="flex justify-end gap-2 mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsImageModalOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setIsImageModalOpen(false)}>
               Close
             </Button>
             <Button

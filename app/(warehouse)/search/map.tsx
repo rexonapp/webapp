@@ -1,10 +1,8 @@
-
-
 'use client'
 
 import { GoogleMap, useLoadScript, Marker, InfoWindow } from '@react-google-maps/api';
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 const containerStyle = {
   width: '100%',
@@ -15,6 +13,14 @@ const defaultCenter = {
   lat: 19.07283,
   lng: 72.88261,
 };
+
+interface PropertyImage {
+  url: string;
+  type: string;
+  order: number;
+  description: string;
+  isMain: boolean;
+}
 
 interface Property {
   ListingId: string;
@@ -30,17 +36,11 @@ interface Property {
   YearBuilt?: number;
   ListAgentFullName?: string;
   PublicRemarks?: string;
-  media?: Array<{
-    url: string;
-    type: string;
-    order: number;
-    description: string;
-    isMain: boolean;
-  }>;
-  [key: string]: any;
+  media?: PropertyImage[];
   Latitude: number;
   Longitude: number;
   ShowMapLink: string;
+  [key: string]: any;
 }
 
 export interface MapBounds {
@@ -53,44 +53,90 @@ export interface MapCenter {
   lng: number;
 }
 
+// Bounds change interface
+interface BoundsChangeData {
+  ne: { lat: number; lng: number };
+  sw: { lat: number; lng: number };
+}
+
 interface MapProps {
   properties?: Property[];
   bounds?: MapBounds;
   center?: MapCenter;
   zoom?: number;
+  onBoundsChange?: (bounds: BoundsChangeData) => void;
 }
 
-const Map = ({ properties = [], bounds, center, zoom }: MapProps) => {
+const Map = ({ properties = [], bounds, center, zoom, onBoundsChange }: MapProps) => {
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY as string,
   });
 
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const boundsChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isUserInteractionRef = useRef(false);
+
+  // Handle bounds change with debouncing
+  const handleBoundsChanged = useCallback(() => {
+    if (!mapRef.current || !onBoundsChange) return;
+
+    // Clear existing timeout
+    if (boundsChangeTimeoutRef.current) {
+      clearTimeout(boundsChangeTimeoutRef.current);
+    }
+
+    // Set new timeout to debounce the bounds change
+    boundsChangeTimeoutRef.current = setTimeout(() => {
+      if (!mapRef.current) return;
+
+      const bounds = mapRef.current.getBounds();
+      if (!bounds) return;
+
+      const ne = bounds.getNorthEast();
+      const sw = bounds.getSouthWest();
+
+      const mapBounds: BoundsChangeData = {
+        ne: { lat: ne.lat(), lng: ne.lng() },
+        sw: { lat: sw.lat(), lng: sw.lng() }
+      };
+
+      onBoundsChange(mapBounds);
+    }, 300); // 300ms debounce for responsive feel
+  }, [onBoundsChange]);
 
   // Update map bounds when bounds prop changes
   useEffect(() => {
     if (mapRef.current && bounds) {
+      isUserInteractionRef.current = false;
       const googleBounds = new google.maps.LatLngBounds(
         new google.maps.LatLng(bounds.bottom_right.lat, bounds.top_left.lng),
         new google.maps.LatLng(bounds.top_left.lat, bounds.bottom_right.lng)
       );
       mapRef.current.fitBounds(googleBounds);
+      
+      setTimeout(() => {
+        isUserInteractionRef.current = true;
+      }, 1000);
     }
   }, [bounds]);
 
   // Update map center/zoom when they change
   useEffect(() => {
     if (mapRef.current && center && zoom) {
+      isUserInteractionRef.current = false;
       mapRef.current.setCenter(center);
       mapRef.current.setZoom(zoom);
+      
+      setTimeout(() => {
+        isUserInteractionRef.current = true;
+      }, 1000);
     }
   }, [center, zoom]);
 
-  const onMapLoad = (map: google.maps.Map) => {
+  const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
 
-    // If bounds are provided, fit to bounds immediately
     if (bounds) {
       const googleBounds = new google.maps.LatLngBounds(
         new google.maps.LatLng(bounds.bottom_right.lat, bounds.top_left.lng),
@@ -98,9 +144,24 @@ const Map = ({ properties = [], bounds, center, zoom }: MapProps) => {
       );
       map.fitBounds(googleBounds);
     }
-  };
 
-  if (!isLoaded) return <div>Loading map...</div>;
+    // Trigger initial bounds change after map loads
+    setTimeout(() => {
+      handleBoundsChanged();
+      isUserInteractionRef.current = true;
+    }, 1000);
+  }, [bounds, handleBoundsChanged]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (boundsChangeTimeoutRef.current) {
+        clearTimeout(boundsChangeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  if (!isLoaded) return <div className="flex items-center justify-center h-full">Loading map...</div>;
 
   const mapCenter = center || defaultCenter;
   const mapZoom = zoom || 11;
@@ -111,16 +172,26 @@ const Map = ({ properties = [], bounds, center, zoom }: MapProps) => {
       center={mapCenter}
       zoom={mapZoom}
       onLoad={onMapLoad}
+      onBoundsChanged={handleBoundsChanged}
+      onZoomChanged={handleBoundsChanged}
+      onDragEnd={handleBoundsChanged}
+      options={{
+        gestureHandling: "greedy",
+        scrollwheel: true,
+        zoomControl: true,
+        mapTypeControl: true,
+        streetViewControl: true,
+        fullscreenControl: true,
+      }}
     >
       {properties.map((property) =>
         property.ShowMapLink === "true" ? (
           <Marker
             key={property.ListingId}
-            position={{ lat: property.Latitude, lng: property.Longitude }}
-            // icon={{
-            //   url: '/icons/round-red-dot.png',
-            //   scaledSize: new window.google.maps.Size(20, 20),
-            // }}
+            position={{
+              lat: Number(property.Latitude),
+              lng: Number(property.Longitude),
+            }}
             onClick={() => setSelectedProperty(property)}
             title={property.UnparsedAddress}
           />
@@ -130,8 +201,8 @@ const Map = ({ properties = [], bounds, center, zoom }: MapProps) => {
       {selectedProperty && (
         <InfoWindow
           position={{
-            lat: selectedProperty.Latitude,
-            lng: selectedProperty.Longitude,
+            lat: Number(selectedProperty.Latitude),
+            lng: Number(selectedProperty.Longitude),
           }}
           onCloseClick={() => setSelectedProperty(null)}
         >
@@ -156,13 +227,11 @@ const Map = ({ properties = [], bounds, center, zoom }: MapProps) => {
               {selectedProperty.City}, {selectedProperty.StateOrProvince}{' '}
               {selectedProperty.PostalCode}
             </p>
-            <p style={{ color: 'red', margin: '4px 0', fontWeight: 'bold' }}>
-              ${selectedProperty.ListPrice.toLocaleString()}
+            <p style={{ color: '#ea580c', margin: '4px 0', fontWeight: 'bold' }}>
+              ₹{selectedProperty.ListPrice.toLocaleString('en-IN')}
             </p>
-            <p style={{ fontSize: '0.8em', color: '#555' }}>
-              {selectedProperty.BedroomsTotal} BEDS &nbsp;&nbsp;
-              {selectedProperty.Bathrooms} BATHS &nbsp;&nbsp;
-              {selectedProperty.LivingArea.toLocaleString()} SF
+            <p style={{ fontSize: '0.8em', color: '#555', margin: '4px 0 0' }}>
+              {selectedProperty.LivingArea.toLocaleString('en-IN')} sqft • {selectedProperty.PropertyType}
             </p>
           </div>
         </InfoWindow>
