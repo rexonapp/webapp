@@ -44,31 +44,31 @@ export default function CustomerOnboardingForm() {
   const validateField = (name: string, value: any): string | undefined => {
     switch (name) {
       case 'fullName':
-        if (!value || value.trim() === '') return 'Full name is required';
+        if (!value || value.trim() === '') return 'Full name is requiorange';
         if (value.length < 3) return 'Name must be at least 3 characters';
         break;
 
       case 'mobileNumber':
-        if (!value || value.trim() === '') return 'Mobile number is required';
+        if (!value || value.trim() === '') return 'Mobile number is requiorange';
         if (!/^[6-9]\d{9}$/.test(value.replace(/\s/g, ''))) {
           return 'Enter a valid 10-digit mobile number';
         }
         break;
 
       case 'email':
-        if (!value || value.trim() === '') return 'Email is required';
+        if (!value || value.trim() === '') return 'Email is requiorange';
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           return 'Enter a valid email address';
         }
         break;
 
       case 'completeAddress':
-        if (!value || value.trim() === '') return 'Complete address is required';
+        if (!value || value.trim() === '') return 'Complete address is requiorange';
         if (value.length < 10) return 'Please provide a complete address';
         break;
 
       case 'city':
-        if (!value || value.trim() === '') return 'City is required';
+        if (!value || value.trim() === '') return 'City is requiorange';
         break;
     }
     return undefined;
@@ -99,10 +99,10 @@ export default function CustomerOnboardingForm() {
 
   const validateForm = (): boolean => {
     const errors: FieldErrors = {};
-    const requiredFields = ['fullName', 'mobileNumber', 'email', 'completeAddress', 'city'];
+    const requiorangeFields = ['fullName', 'mobileNumber', 'email', 'completeAddress', 'city'];
 
-    // Validate all required fields
-    requiredFields.forEach(field => {
+    // Validate all requiorange fields
+    requiorangeFields.forEach(field => {
       const error = validateField(field, formData[field as keyof CustomerFormData]);
       if (error) {
         errors[field as keyof FieldErrors] = error;
@@ -111,7 +111,7 @@ export default function CustomerOnboardingForm() {
 
     // Set all errors and mark all fields as touched
     setFieldErrors(errors);
-    const allFields = new Set(requiredFields);
+    const allFields = new Set(requiorangeFields);
     setTouchedFields(allFields);
 
     return Object.keys(errors).length === 0;
@@ -119,10 +119,10 @@ export default function CustomerOnboardingForm() {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      toast.error('Please fill in all required fields correctly');
+      toast.error('Please fill in all requiorange fields correctly');
 
       // Scroll to first error
-      const firstErrorField = document.querySelector('.border-red-500');
+      const firstErrorField = document.querySelector('.border-orange-500');
       if (firstErrorField) {
         firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -185,8 +185,8 @@ export default function CustomerOnboardingForm() {
         <Card>
           <CardHeader>
             <div className="flex items-center">
-              <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center mr-3">
-                <User className="h-5 w-5 text-red-600" />
+              <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center mr-3">
+                <User className="h-5 w-5 text-orange-600" />
               </div>
               <div>
                 <CardTitle>Customer Onboarding</CardTitle>
@@ -198,7 +198,7 @@ export default function CustomerOnboardingForm() {
             {/* Full Name */}
             <div className="space-y-2">
               <Label htmlFor="fullName">
-                Full Name <span className="text-red-500">*</span>
+                Full Name <span className="text-orange-500">*</span>
               </Label>
               <Input
                 id="fullName"
@@ -206,10 +206,10 @@ export default function CustomerOnboardingForm() {
                 onChange={(e) => handleFieldChange('fullName', e.target.value)}
                 onBlur={() => handleFieldBlur('fullName')}
                 placeholder="e.g., John Doe"
-                className={`h-11 ${touchedFields.has('fullName') && fieldErrors.fullName ? 'border-red-500' : ''}`}
+                className={`h-11 ${touchedFields.has('fullName') && fieldErrors.fullName ? 'border-orange-500' : ''}`}
               />
               {touchedFields.has('fullName') && fieldErrors.fullName && (
-                <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                   <AlertCircle className="h-4 w-4" />
                   {fieldErrors.fullName}
                 </p>
@@ -219,7 +219,7 @@ export default function CustomerOnboardingForm() {
             {/* Email Address */}
             <div className="space-y-2">
               <Label htmlFor="email">
-                Email Address <span className="text-red-500">*</span>
+                Email Address <span className="text-orange-500">*</span>
               </Label>
               <Input
                 id="email"
@@ -228,10 +228,10 @@ export default function CustomerOnboardingForm() {
                 onChange={(e) => handleFieldChange('email', e.target.value)}
                 onBlur={() => handleFieldBlur('email')}
                 placeholder="john@example.com"
-                className={`h-11 ${touchedFields.has('email') && fieldErrors.email ? 'border-red-500' : ''}`}
+                className={`h-11 ${touchedFields.has('email') && fieldErrors.email ? 'border-orange-500' : ''}`}
               />
               {touchedFields.has('email') && fieldErrors.email && (
-                <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                   <AlertCircle className="h-4 w-4" />
                   {fieldErrors.email}
                 </p>
@@ -242,7 +242,7 @@ export default function CustomerOnboardingForm() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="space-y-2">
                 <Label htmlFor="mobileNumber">
-                  Mobile Number <span className="text-red-500">*</span>
+                  Mobile Number <span className="text-orange-500">*</span>
                 </Label>
                 <Input
                   id="mobileNumber"
@@ -254,10 +254,10 @@ export default function CustomerOnboardingForm() {
                   onChange={(e) => handleFieldChange('mobileNumber', e.target.value)}
                   onBlur={() => handleFieldBlur('mobileNumber')}
                   placeholder="+91 98765 43210"
-                  className={`h-11 ${touchedFields.has('mobileNumber') && fieldErrors.mobileNumber ? 'border-red-500' : ''}`}
+                  className={`h-11 ${touchedFields.has('mobileNumber') && fieldErrors.mobileNumber ? 'border-orange-500' : ''}`}
                 />
                 {touchedFields.has('mobileNumber') && fieldErrors.mobileNumber && (
-                  <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                  <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                     <AlertCircle className="h-4 w-4" />
                     {fieldErrors.mobileNumber}
                   </p>
@@ -266,7 +266,7 @@ export default function CustomerOnboardingForm() {
 
               <div className="space-y-2">
                 <Label htmlFor="city">
-                  City <span className="text-red-500">*</span>
+                  City <span className="text-orange-500">*</span>
                 </Label>
                 <Input
                   id="city"
@@ -274,10 +274,10 @@ export default function CustomerOnboardingForm() {
                   onChange={(e) => handleFieldChange('city', e.target.value)}
                   onBlur={() => handleFieldBlur('city')}
                   placeholder="Mumbai"
-                  className={`h-11 ${touchedFields.has('city') && fieldErrors.city ? 'border-red-500' : ''}`}
+                  className={`h-11 ${touchedFields.has('city') && fieldErrors.city ? 'border-orange-500' : ''}`}
                 />
                 {touchedFields.has('city') && fieldErrors.city && (
-                  <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                  <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                     <AlertCircle className="h-4 w-4" />
                     {fieldErrors.city}
                   </p>
@@ -288,7 +288,7 @@ export default function CustomerOnboardingForm() {
             {/* Complete Address */}
             <div className="space-y-2">
               <Label htmlFor="completeAddress">
-                Complete Address <span className="text-red-500">*</span>
+                Complete Address <span className="text-orange-500">*</span>
               </Label>
               <Textarea
                 id="completeAddress"
@@ -297,10 +297,10 @@ export default function CustomerOnboardingForm() {
                 onBlur={() => handleFieldBlur('completeAddress')}
                 rows={4}
                 placeholder="Enter your complete address including street, building name, landmark, area, etc."
-                className={`resize-none ${touchedFields.has('completeAddress') && fieldErrors.completeAddress ? 'border-red-500' : ''}`}
+                className={`resize-none ${touchedFields.has('completeAddress') && fieldErrors.completeAddress ? 'border-orange-500' : ''}`}
               />
               {touchedFields.has('completeAddress') && fieldErrors.completeAddress && (
-                <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                   <AlertCircle className="h-4 w-4" />
                   {fieldErrors.completeAddress}
                 </p>
@@ -312,7 +312,7 @@ export default function CustomerOnboardingForm() {
               <Button
                 onClick={handleSubmit}
                 disabled={uploading}
-                className="sm:flex-1 bg-red-600 hover:bg-red-700 text-white h-11 text-sm font-semibold"
+                className="sm:flex-1 bg-orange-600 hover:bg-orange-700 text-white h-11 text-sm font-semibold"
               >
                 {uploading ? (
                   <>

@@ -143,19 +143,19 @@ export default function AgentRegistrationForm() {
   const validateField = (name: string, value: any): string | undefined => {
     switch (name) {
       case 'fullName':
-        if (!value || value.trim() === '') return 'Full name is required';
+        if (!value || value.trim() === '') return 'Full name is requiorange';
         if (value.length < 3) return 'Name must be at least 3 characters';
         break;
 
       case 'primaryPhone':
-        if (!value || value.trim() === '') return 'Primary phone is required';
+        if (!value || value.trim() === '') return 'Primary phone is requiorange';
         if (!/^[6-9]\d{9}$/.test(value.replace(/\s/g, ''))) {
           return 'Enter a valid 10-digit mobile number';
         }
         break;
 
       case 'email':
-        if (!value || value.trim() === '') return 'Email is required';
+        if (!value || value.trim() === '') return 'Email is requiorange';
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           return 'Enter a valid email address';
         }
@@ -191,7 +191,7 @@ export default function AgentRegistrationForm() {
         break;
 
       case 'profileImage':
-        if (!formData.profileImage) return 'Profile photo is required';
+        if (!formData.profileImage) return 'Profile photo is requiorange';
         break;
 
       case 'domainName':
@@ -303,7 +303,7 @@ export default function AgentRegistrationForm() {
     const input = document.getElementById('profileImage') as HTMLInputElement;
     if (input) input.value = '';
     setTouchedFields(prev => new Set(prev).add('profileImage'));
-    setFieldErrors(prev => ({ ...prev, profileImage: 'Profile photo is required' }));
+    setFieldErrors(prev => ({ ...prev, profileImage: 'Profile photo is requiorange' }));
   };
 
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -333,9 +333,9 @@ export default function AgentRegistrationForm() {
 
   const validateForm = (): boolean => {
     const errors: FieldErrors = {};
-    const requiredFields = ['fullName', 'primaryPhone', 'email'];
+    const requiorangeFields = ['fullName', 'primaryPhone', 'email'];
 
-    requiredFields.forEach(field => {
+    requiorangeFields.forEach(field => {
       const error = validateField(field, formData[field as keyof AgentFormData]);
       if (error) errors[field as keyof FieldErrors] = error;
     });
@@ -361,7 +361,7 @@ export default function AgentRegistrationForm() {
       if (error) errors.domainName = error;
     }
 
-    // If domain was entered but not checked or is taken, block submission
+    // If domain was enteorange but not checked or is taken, block submission
     if (formData.domainName && domainStatus !== 'available') {
       if (domainStatus === 'idle' || domainStatus === 'error') {
         errors.domainName = 'Please check domain availability first';
@@ -375,7 +375,7 @@ export default function AgentRegistrationForm() {
 
     setFieldErrors(errors);
     setTouchedFields(new Set([
-      ...requiredFields,
+      ...requiorangeFields,
       'whatsappNumber', 'pincode', 'aadharNumber', 'panNumber', 'profileImage', 'domainName'
     ]));
 
@@ -384,8 +384,8 @@ export default function AgentRegistrationForm() {
 
   const handleSubmit = async () => {
     if (!validateForm()) {
-      toast.error('Please fill in all required fields correctly');
-      const firstErrorField = document.querySelector('.border-red-500');
+      toast.error('Please fill in all requiorange fields correctly');
+      const firstErrorField = document.querySelector('.border-orange-500');
       if (firstErrorField) {
         firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -459,8 +459,8 @@ export default function AgentRegistrationForm() {
             <Card>
               <CardHeader>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center mr-3">
-                    <User className="h-5 w-5 text-red-600" />
+                  <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center mr-3">
+                    <User className="h-5 w-5 text-orange-600" />
                   </div>
                   <CardTitle>Personal Details</CardTitle>
                 </div>
@@ -468,7 +468,7 @@ export default function AgentRegistrationForm() {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="fullName">
-                    Full Name <span className="text-red-500">*</span>
+                    Full Name <span className="text-orange-500">*</span>
                   </Label>
                   <Input
                     id="fullName"
@@ -476,10 +476,10 @@ export default function AgentRegistrationForm() {
                     onChange={(e) => handleFieldChange('fullName', e.target.value)}
                     onBlur={() => handleFieldBlur('fullName')}
                     placeholder="e.g., John Doe"
-                    className={`h-11 ${touchedFields.has('fullName') && fieldErrors.fullName ? 'border-red-500' : ''}`}
+                    className={`h-11 ${touchedFields.has('fullName') && fieldErrors.fullName ? 'border-orange-500' : ''}`}
                   />
                   {touchedFields.has('fullName') && fieldErrors.fullName && (
-                    <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                       <AlertCircle className="h-4 w-4" />
                       {fieldErrors.fullName}
                     </p>
@@ -543,7 +543,7 @@ export default function AgentRegistrationForm() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="primaryPhone">
-                      Primary Phone <span className="text-red-500">*</span>
+                      Primary Phone <span className="text-orange-500">*</span>
                     </Label>
                     <Input
                       id="primaryPhone"
@@ -555,10 +555,10 @@ export default function AgentRegistrationForm() {
                       onChange={(e) => handleFieldChange('primaryPhone', e.target.value)}
                       onBlur={() => handleFieldBlur('primaryPhone')}
                       placeholder="+91 98765 43210"
-                      className={`h-11 ${touchedFields.has('primaryPhone') && fieldErrors.primaryPhone ? 'border-red-500' : ''}`}
+                      className={`h-11 ${touchedFields.has('primaryPhone') && fieldErrors.primaryPhone ? 'border-orange-500' : ''}`}
                     />
                     {touchedFields.has('primaryPhone') && fieldErrors.primaryPhone && (
-                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4" />
                         {fieldErrors.primaryPhone}
                       </p>
@@ -577,10 +577,10 @@ export default function AgentRegistrationForm() {
                       onChange={(e) => handleFieldChange('whatsappNumber', e.target.value)}
                       onBlur={() => handleFieldBlur('whatsappNumber')}
                       placeholder="+91 98765 43210"
-                      className={`h-11 ${touchedFields.has('whatsappNumber') && fieldErrors.whatsappNumber ? 'border-red-500' : ''}`}
+                      className={`h-11 ${touchedFields.has('whatsappNumber') && fieldErrors.whatsappNumber ? 'border-orange-500' : ''}`}
                     />
                     {touchedFields.has('whatsappNumber') && fieldErrors.whatsappNumber && (
-                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4" />
                         {fieldErrors.whatsappNumber}
                       </p>
@@ -590,7 +590,7 @@ export default function AgentRegistrationForm() {
 
                 <div className="space-y-2">
                   <Label htmlFor="email">
-                    Email Address <span className="text-red-500">*</span>
+                    Email Address <span className="text-orange-500">*</span>
                   </Label>
                   <Input
                     id="email"
@@ -599,10 +599,10 @@ export default function AgentRegistrationForm() {
                     onChange={(e) => handleFieldChange('email', e.target.value)}
                     onBlur={() => handleFieldBlur('email')}
                     placeholder="john@example.com"
-                    className={`h-11 ${touchedFields.has('email') && fieldErrors.email ? 'border-red-500' : ''}`}
+                    className={`h-11 ${touchedFields.has('email') && fieldErrors.email ? 'border-orange-500' : ''}`}
                   />
                   {touchedFields.has('email') && fieldErrors.email && (
-                    <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                       <AlertCircle className="h-4 w-4" />
                       {fieldErrors.email}
                     </p>
@@ -615,8 +615,8 @@ export default function AgentRegistrationForm() {
             <Card>
               <CardHeader>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center mr-3">
-                    <MapPin className="h-5 w-5 text-red-600" />
+                  <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center mr-3">
+                    <MapPin className="h-5 w-5 text-orange-600" />
                   </div>
                   <CardTitle>Address Information</CardTitle>
                 </div>
@@ -674,10 +674,10 @@ export default function AgentRegistrationForm() {
                       onBlur={() => handleFieldBlur('pincode')}
                       placeholder="400001"
                       maxLength={6}
-                      className={`h-11 ${touchedFields.has('pincode') && fieldErrors.pincode ? 'border-red-500' : ''}`}
+                      className={`h-11 ${touchedFields.has('pincode') && fieldErrors.pincode ? 'border-orange-500' : ''}`}
                     />
                     {touchedFields.has('pincode') && fieldErrors.pincode && (
-                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4" />
                         {fieldErrors.pincode}
                       </p>
@@ -691,8 +691,8 @@ export default function AgentRegistrationForm() {
             <Card>
               <CardHeader>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center mr-3">
-                    <Briefcase className="h-5 w-5 text-red-600" />
+                  <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center mr-3">
+                    <Briefcase className="h-5 w-5 text-orange-600" />
                   </div>
                   <CardTitle>Professional Information</CardTitle>
                 </div>
@@ -731,11 +731,11 @@ export default function AgentRegistrationForm() {
                         // Right padding: enough room for suffix text + status icon
                         'pr-44',
                         touchedFields.has('domainName') && fieldErrors.domainName
-                          ? 'border-red-500 focus-visible:ring-red-500'
+                          ? 'border-orange-500 focus-visible:ring-orange-500'
                           : domainStatus === 'available'
                           ? 'border-green-500 focus-visible:ring-green-500'
                           : domainStatus === 'taken'
-                          ? 'border-red-500 focus-visible:ring-red-500'
+                          ? 'border-orange-500 focus-visible:ring-orange-500'
                           : ''
                       )}
                     />
@@ -752,14 +752,14 @@ export default function AgentRegistrationForm() {
                         <CheckCircle2 className="h-4 w-4 text-green-500" />
                       )}
                       {(domainStatus === 'taken' || (touchedFields.has('domainName') && fieldErrors.domainName)) && (
-                        <AlertCircle className="h-4 w-4 text-red-500" />
+                        <AlertCircle className="h-4 w-4 text-orange-500" />
                       )}
                     </span>
                   </div>
 
                   {/* Status messages below the input */}
                   {touchedFields.has('domainName') && fieldErrors.domainName && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
+                    <p className="text-sm text-orange-500 flex items-center gap-1">
                       <AlertCircle className="h-3.5 w-3.5" />
                       {fieldErrors.domainName}
                     </p>
@@ -777,7 +777,7 @@ export default function AgentRegistrationForm() {
                     </p>
                   )}
                   {!fieldErrors.domainName && domainStatus === 'taken' && (
-                    <p className="text-sm text-red-500 flex items-center gap-1">
+                    <p className="text-sm text-orange-500 flex items-center gap-1">
                       <AlertCircle className="h-3.5 w-3.5" />
                       <strong>{formData.domainName}.{PLATFORM_DOMAIN}</strong>&nbsp;is already taken. Try another.
                     </p>
@@ -891,13 +891,13 @@ export default function AgentRegistrationForm() {
                       <Badge
                         key={language}
                         variant="secondary"
-                        className="bg-red-100 text-red-800 hover:bg-red-200 px-3 py-1.5"
+                        className="bg-orange-100 text-orange-800 hover:bg-orange-200 px-3 py-1.5"
                       >
                         {language}
                         <button
                           type="button"
                           onClick={() => toggleLanguage(language)}
-                          className="ml-2 hover:text-red-600"
+                          className="ml-2 hover:text-orange-600"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -927,10 +927,10 @@ export default function AgentRegistrationForm() {
                       onBlur={() => handleFieldBlur('aadharNumber')}
                       placeholder="1234 5678 9012"
                       maxLength={12}
-                      className={`h-11 ${touchedFields.has('aadharNumber') && fieldErrors.aadharNumber ? 'border-red-500' : ''}`}
+                      className={`h-11 ${touchedFields.has('aadharNumber') && fieldErrors.aadharNumber ? 'border-orange-500' : ''}`}
                     />
                     {touchedFields.has('aadharNumber') && fieldErrors.aadharNumber && (
-                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4" />
                         {fieldErrors.aadharNumber}
                       </p>
@@ -946,10 +946,10 @@ export default function AgentRegistrationForm() {
                       onBlur={() => handleFieldBlur('panNumber')}
                       placeholder="ABCDE1234F"
                       maxLength={10}
-                      className={`h-11 ${touchedFields.has('panNumber') && fieldErrors.panNumber ? 'border-red-500' : ''}`}
+                      className={`h-11 ${touchedFields.has('panNumber') && fieldErrors.panNumber ? 'border-orange-500' : ''}`}
                     />
                     {touchedFields.has('panNumber') && fieldErrors.panNumber && (
-                      <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
                         <AlertCircle className="h-4 w-4" />
                         {fieldErrors.panNumber}
                       </p>
@@ -981,7 +981,7 @@ export default function AgentRegistrationForm() {
                 <CardHeader>
                   <CardTitle className="text-lg">
                     <span>Profile Photo</span>
-                    <span className='mx-2 text-sm text-red-500'>*</span>
+                    <span className='mx-2 text-sm text-orange-500'>*</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -1010,7 +1010,7 @@ export default function AgentRegistrationForm() {
                               size="icon"
                               variant="destructive"
                               onClick={removeProfileImage}
-                              className="h-10 w-10 rounded-full bg-red-500 hover:bg-red-600"
+                              className="h-10 w-10 rounded-full bg-orange-500 hover:bg-orange-600"
                               title="Delete image"
                             >
                               <Trash2 className="h-5 w-5" />
@@ -1040,8 +1040,8 @@ export default function AgentRegistrationForm() {
                   ) : (
                     <div>
                       <Label htmlFor="profileImage" className="block w-full cursor-pointer">
-                        <div className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-red-500 hover:bg-red-50 transition-all ${touchedFields.has('profileImage') && fieldErrors.profileImage
-                          ? 'border-red-500 bg-red-50'
+                        <div className={`border-2 border-dashed rounded-lg p-8 text-center hover:border-orange-500 hover:bg-orange-50 transition-all ${touchedFields.has('profileImage') && fieldErrors.profileImage
+                          ? 'border-orange-500 bg-orange-50'
                           : 'border-gray-300'
                           }`}>
                           <input
@@ -1051,15 +1051,15 @@ export default function AgentRegistrationForm() {
                             onChange={handleProfileImageChange}
                             className="hidden"
                           />
-                          <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <User className="h-6 w-6 text-red-600" />
+                          <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <User className="h-6 w-6 text-orange-600" />
                           </div>
                           <p className="text-sm font-medium text-gray-900 mb-1">Upload Photo</p>
                           <p className="text-xs text-gray-500">JPG, JPEG, PNG, WEBP, GIF (MAX. 2MB)</p>
                         </div>
                       </Label>
                       {touchedFields.has('profileImage') && fieldErrors.profileImage && (
-                        <p className="text-sm text-red-500 flex items-center gap-1 mt-2">
+                        <p className="text-sm text-orange-500 flex items-center gap-1 mt-2">
                           <AlertCircle className="h-4 w-4" />
                           {fieldErrors.profileImage}
                         </p>
@@ -1080,8 +1080,8 @@ export default function AgentRegistrationForm() {
                 <CardContent>
                   <div>
                     <Label htmlFor="documents" className="block w-full cursor-pointer">
-                      <div className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-red-500 hover:bg-red-50 transition-all ${touchedFields.has('documents') && fieldErrors.documents
-                        ? 'border-red-500 bg-red-50'
+                      <div className={`border-2 border-dashed rounded-lg p-6 text-center hover:border-orange-500 hover:bg-orange-50 transition-all ${touchedFields.has('documents') && fieldErrors.documents
+                        ? 'border-orange-500 bg-orange-50'
                         : 'border-gray-300'
                         }`}>
                         <input
@@ -1092,15 +1092,15 @@ export default function AgentRegistrationForm() {
                           onChange={handleDocumentChange}
                           className="hidden"
                         />
-                        <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                          <Upload className="h-5 w-5 text-red-600" />
+                        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                          <Upload className="h-5 w-5 text-orange-600" />
                         </div>
                         <p className="text-sm font-medium text-gray-900">Upload Document</p>
                         <p className="text-xs text-gray-500">PDF or JPG (MAX. 5MB)</p>
                       </div>
                     </Label>
                     {touchedFields.has('documents') && fieldErrors.documents && (
-                      <p className="text-sm text-red-500 flex items-center gap-1 mt-2">
+                      <p className="text-sm text-orange-500 flex items-center gap-1 mt-2">
                         <AlertCircle className="h-4 w-4" />
                         {fieldErrors.documents}
                       </p>
@@ -1120,7 +1120,7 @@ export default function AgentRegistrationForm() {
                             size="icon"
                             variant="ghost"
                             onClick={() => removeDocument(index)}
-                            className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600 flex-shrink-0"
+                            className="h-8 w-8 text-orange-500 hover:bg-orange-50 hover:text-orange-600 flex-shrink-0"
                           >
                             <X className="h-4 w-4" />
                           </Button>
@@ -1136,7 +1136,7 @@ export default function AgentRegistrationForm() {
                 <Button
                   onClick={handleSubmit}
                   disabled={uploading}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-base font-bold shadow-md hover:shadow-lg"
+                  className="w-full bg-orange-600 hover:bg-orange-700 text-white py-6 text-base font-bold shadow-md hover:shadow-lg"
                 >
                   {uploading ? (
                     <>
@@ -1188,7 +1188,7 @@ export default function AgentRegistrationForm() {
                 removeProfileImage();
                 setIsImageModalOpen(false);
               }}
-              className="bg-red-500 hover:bg-red-600"
+              className="bg-orange-500 hover:bg-orange-600"
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Photo

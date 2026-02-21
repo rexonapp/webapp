@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 import { getSession } from '@/lib/session';
 
-// Optimized GET endpoint to fetch user's property listings
 export async function GET(request: NextRequest) {
   try {
     const session = await getSession();
@@ -14,7 +13,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Optimized query - fetch only necessary fields for listing display
+    // Validate that userId looks like a UUID before querying
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(String(session.userId))) {
+      console.error('Invalid userId format in session:', session.userId);
+      return NextResponse.json(
+        { error: 'Invalid session. Please sign out and sign in again.', success: false },
+        { status: 401 }
+      );
+    }
+
     const warehousesResult = await query(
       `SELECT
         id,
@@ -45,43 +53,35 @@ export async function GET(request: NextRequest) {
         created_at,
         updated_at
        FROM warehouses
-       WHERE user_id = $1
+       WHERE user_id = $1::uuid
        ORDER BY created_at DESC`,
       [session.userId]
     );
 
-    // Helper function to safely parse amenities
     const parseAmenities = (amenities: any): string[] => {
       if (!amenities) return [];
-
-      // If it's already an array, return it
       if (Array.isArray(amenities)) return amenities;
-
-      // If it's a string, try to parse it
       if (typeof amenities === 'string') {
         try {
           const parsed = JSON.parse(amenities);
           return Array.isArray(parsed) ? parsed : [];
-        } catch (e) {
-          // If parsing fails, return empty array
-          console.warn('Failed to parse amenities:', amenities);
+        } catch {
           return [];
         }
       }
-
       return [];
     };
 
-    // Parse amenities JSON and format response
     const properties = warehousesResult.rows.map(warehouse => ({
       ...warehouse,
+      is_featured: warehouse.is_featured,
       amenities: parseAmenities(warehouse.amenities),
     }));
 
     return NextResponse.json({
       success: true,
       count: properties.length,
-      properties: properties,
+      properties,
     }, {
       headers: {
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -92,18 +92,12 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     console.error('Fetch listings error:', error);
-    
-    // Provide more specific error details in development
     const errorMessage = process.env.NODE_ENV === 'development' && error instanceof Error
       ? error.message
       : 'Failed to fetch listings. Please try again.';
     
     return NextResponse.json(
-      {
-        error: errorMessage,
-        success: false,
-        properties: [] // Return empty array so client can handle gracefully
-      },
+      { error: errorMessage, success: false, properties: [] },
       { status: 500 }
     );
   }

@@ -49,7 +49,6 @@ export default function MapSelector({
     }
 
     if (document.getElementById('google-maps-script')) {
-      // Script tag exists but may not have fired onload yet — poll
       const poll = setInterval(() => {
         if (window.google?.maps) {
           clearInterval(poll);
@@ -93,14 +92,12 @@ export default function MapSelector({
     geocoderRef.current = new window.google.maps.Geocoder();
     mapInstanceRef.current = map;
 
-    // Place initial marker if coords already exist
     if (latitude && longitude) {
       const lat = parseFloat(latitude);
       const lng = parseFloat(longitude);
       if (!isNaN(lat) && !isNaN(lng)) placeOrMoveMarker(lat, lng, map);
     }
 
-    // Click on map to set location
     map.addListener('click', (e: any) => {
       const lat = e.latLng.lat();
       const lng = e.latLng.lng();
@@ -110,7 +107,7 @@ export default function MapSelector({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapLoaded]);
 
-  // ─── Sync external lat/lng → marker (e.g. typed manually) ───────────────────
+  // ─── Sync external lat/lng → marker ─────────────────────────────────────────
   useEffect(() => {
     if (!mapInstanceRef.current || !latitude || !longitude) return;
     const lat = parseFloat(latitude);
@@ -121,7 +118,7 @@ export default function MapSelector({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latitude, longitude]);
 
-  // ─── Debounced geocoding when address / city / state change ─────────────────
+  // ─── Debounced geocoding ─────────────────────────────────────────────────────
   useEffect(() => {
     if (!mapLoaded || !geocoderRef.current) return;
 
@@ -132,7 +129,7 @@ export default function MapSelector({
 
     geocodeTimerRef.current = setTimeout(() => {
       geocodeAddress(fullAddress);
-    }, 800); // 800 ms debounce
+    }, 800);
 
     return () => {
       if (geocodeTimerRef.current) clearTimeout(geocodeTimerRef.current);
@@ -152,12 +149,15 @@ export default function MapSelector({
         draggable: true,
         animation: window.google.maps.Animation.DROP,
         icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 12,
-          fillColor: '#dc2626',
+          // Standard teardrop / pin path (Material Design place icon)
+          path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+          fillColor: '#1D4ED8',   // Tailwind blue-700
           fillOpacity: 1,
           strokeColor: '#ffffff',
-          strokeWeight: 3,
+          strokeWeight: 1.5,
+          scale: 2,
+          // Anchor at the tip of the pin (bottom-centre of the 24×24 viewBox)
+          anchor: new window.google.maps.Point(12, 22),
         },
       });
 
@@ -189,11 +189,9 @@ export default function MapSelector({
         });
       });
 
-    // Try full address first
     let result = await attempt(query, false);
     let usedFallback = false;
 
-    // If failed, try city + state fallback
     if (!result && (city || state)) {
       const fallbackQuery = [city, state, 'India'].filter(Boolean).join(', ');
       result = await attempt(fallbackQuery, true);
@@ -255,11 +253,11 @@ export default function MapSelector({
   if (!GOOGLE_MAPS_API_KEY) {
     return (
       <div className="w-full">
-        <div className="w-full h-96 bg-red-50 rounded-lg flex items-center justify-center border border-red-200">
+        <div className="w-full h-96 bg-orange-50 rounded-lg flex items-center justify-center border border-orange-200">
           <div className="text-center px-4">
-            <AlertCircle className="h-8 w-8 text-red-400 mx-auto mb-2" />
-            <p className="text-sm font-medium text-red-700">Google Maps API key missing</p>
-            <p className="text-xs text-red-500 mt-1">Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in your .env</p>
+            <AlertCircle className="h-8 w-8 text-orange-400 mx-auto mb-2" />
+            <p className="text-sm font-medium text-orange-700">Google Maps API key missing</p>
+            <p className="text-xs text-orange-500 mt-1">Set NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in your .env</p>
           </div>
         </div>
       </div>
@@ -287,7 +285,7 @@ export default function MapSelector({
           type="button"
           onClick={getCurrentLocation}
           disabled={gettingLocation || geocoding}
-          className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {gettingLocation ? (
             <>
@@ -318,7 +316,7 @@ export default function MapSelector({
               ? 'bg-green-50 border-green-200 text-green-700'
               : geocodeStatus === 'fallback'
               ? 'bg-yellow-50 border-yellow-200 text-yellow-700'
-              : 'bg-red-50 border-red-200 text-red-700'
+              : 'bg-orange-50 border-orange-200 text-orange-700'
           }`}
         >
           {geocodeStatus === 'success' && <MapPin className="h-4 w-4 mt-0.5 shrink-0" />}

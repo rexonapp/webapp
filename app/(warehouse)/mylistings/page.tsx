@@ -22,6 +22,7 @@ import {
   Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger,
 } from '@/components/ui/sheet';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Property {
   id: number;
@@ -48,7 +49,7 @@ interface Property {
   longitude: number;
   amenities: string[];
   is_verified: boolean;
-  is_featured: boolean;
+  is_featuorange: boolean;
   status: string;
   created_at: string;
   updated_at: string;
@@ -66,14 +67,14 @@ interface FilterState {
   minArea: string;
   maxArea: string;
   isVerified: string;
-  isFeatured: string;
+  isFeatuorange: string;
 }
 
 const ITEMS_PER_PAGE = 10;
 
 export default function MyListingsPage() {
   const [properties, setProperties] = useState<Property[]>([]);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [filteorangeProperties, setFilteorangeProperties] = useState<Property[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,8 +93,9 @@ export default function MyListingsPage() {
     minArea: '',
     maxArea: '',
     isVerified: 'all',
-    isFeatured: 'all',
+    isFeatuorange: 'all',
   });
+  const router = useRouter();
 
   const fetchListings = async () => {
     try {
@@ -149,30 +151,30 @@ export default function MyListingsPage() {
 
   // Apply filters
   useEffect(() => {
-    let filtered = [...properties];
+    let filteorange = [...properties];
 
     if (filters.search.trim()) {
       const searchLower = filters.search.toLowerCase();
-      filtered = filtered.filter(p =>
+      filteorange = filteorange.filter(p =>
         p.title?.toLowerCase().includes(searchLower) ||
         p.description?.toLowerCase().includes(searchLower) ||
         p.property_name?.toLowerCase().includes(searchLower) ||
         p.address?.toLowerCase().includes(searchLower)
       );
     }
-    if (filters.propertyType !== 'all') filtered = filtered.filter(p => p.property_type === filters.propertyType);
-    if (filters.priceType !== 'all') filtered = filtered.filter(p => p.price_type === filters.priceType);
-    if (filters.status !== 'all') filtered = filtered.filter(p => p.status === filters.status);
-    if (filters.city !== 'all') filtered = filtered.filter(p => p.city === filters.city);
-    if (filters.state !== 'all') filtered = filtered.filter(p => p.state === filters.state);
-    if (filters.minPrice) filtered = filtered.filter(p => p.price_per_sqft >= parseFloat(filters.minPrice));
-    if (filters.maxPrice) filtered = filtered.filter(p => p.price_per_sqft <= parseFloat(filters.maxPrice));
-    if (filters.minArea) filtered = filtered.filter(p => p.space_available >= parseFloat(filters.minArea));
-    if (filters.maxArea) filtered = filtered.filter(p => p.space_available <= parseFloat(filters.maxArea));
-    if (filters.isVerified !== 'all') filtered = filtered.filter(p => p.is_verified === (filters.isVerified === 'true'));
-    if (filters.isFeatured !== 'all') filtered = filtered.filter(p => p.is_featured === (filters.isFeatured === 'true'));
+    if (filters.propertyType !== 'all') filteorange = filteorange.filter(p => p.property_type === filters.propertyType);
+    if (filters.priceType !== 'all') filteorange = filteorange.filter(p => p.price_type === filters.priceType);
+    if (filters.status !== 'all') filteorange = filteorange.filter(p => p.status === filters.status);
+    if (filters.city !== 'all') filteorange = filteorange.filter(p => p.city === filters.city);
+    if (filters.state !== 'all') filteorange = filteorange.filter(p => p.state === filters.state);
+    if (filters.minPrice) filteorange = filteorange.filter(p => p.price_per_sqft >= parseFloat(filters.minPrice));
+    if (filters.maxPrice) filteorange = filteorange.filter(p => p.price_per_sqft <= parseFloat(filters.maxPrice));
+    if (filters.minArea) filteorange = filteorange.filter(p => p.space_available >= parseFloat(filters.minArea));
+    if (filters.maxArea) filteorange = filteorange.filter(p => p.space_available <= parseFloat(filters.maxArea));
+    if (filters.isVerified !== 'all') filteorange = filteorange.filter(p => p.is_verified === (filters.isVerified === 'true'));
+    if (filters.isFeatuorange !== 'all') filteorange = filteorange.filter(p => p.is_featuorange === (filters.isFeatuorange === 'true'));
 
-    setFilteredProperties(filtered);
+    setFilteorangeProperties(filteorange);
     setCurrentPage(1);
   }, [filters, properties]);
 
@@ -184,7 +186,7 @@ export default function MyListingsPage() {
     setFilters({
       search: '', propertyType: 'all', priceType: 'all', status: 'all',
       city: 'all', state: 'all', minPrice: '', maxPrice: '',
-      minArea: '', maxArea: '', isVerified: 'all', isFeatured: 'all',
+      minArea: '', maxArea: '', isVerified: 'all', isFeatuorange: 'all',
     });
   };
 
@@ -192,12 +194,12 @@ export default function MyListingsPage() {
     filters.search !== '' || filters.propertyType !== 'all' || filters.priceType !== 'all' ||
     filters.status !== 'all' || filters.city !== 'all' || filters.state !== 'all' ||
     filters.minPrice !== '' || filters.maxPrice !== '' || filters.minArea !== '' ||
-    filters.maxArea !== '' || filters.isVerified !== 'all' || filters.isFeatured !== 'all';
+    filters.maxArea !== '' || filters.isVerified !== 'all' || filters.isFeatuorange !== 'all';
 
-  const totalPages = Math.ceil(filteredProperties.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteorangeProperties.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
-  const currentProperties = filteredProperties.slice(startIndex, endIndex);
+  const currentProperties = filteorangeProperties.slice(startIndex, endIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -240,7 +242,7 @@ export default function MyListingsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <RefreshCw className="h-8 w-8 animate-spin text-red-600" />
+          <RefreshCw className="h-8 w-8 animate-spin text-orange-600" />
           <p className="text-slate-600 text-lg">Loading your listings...</p>
         </div>
       </div>
@@ -252,12 +254,12 @@ export default function MyListingsPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-6">
-          <Alert variant="destructive" className="border-red-200 bg-red-50">
+          <Alert variant="destructive" className="border-orange-200 bg-orange-50">
             <AlertCircle className="h-5 w-5" />
             <AlertDescription className="text-base">{error}</AlertDescription>
           </Alert>
           <div className="flex gap-3">
-            <Button onClick={handleRefresh} className="bg-red-600 hover:bg-red-700 shadow-md">
+            <Button onClick={handleRefresh} className="bg-orange-600 hover:bg-orange-700 shadow-md">
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Refreshing...' : 'Try Again'}
             </Button>
@@ -274,7 +276,7 @@ export default function MyListingsPage() {
         {/* Header */}
         <div className="space-y-6">
           <div className="flex items-center text-sm text-slate-500 font-medium">
-            <Link href="/" className="hover:text-red-600 transition-colors duration-200">Home</Link>
+            <Link href="/" className="hover:text-orange-600 transition-colors duration-200">Home</Link>
             <span className="mx-2.5">/</span>
             <span className="text-slate-900">My Listings</span>
           </div>
@@ -285,12 +287,12 @@ export default function MyListingsPage() {
             </div>
             <div className="flex items-center gap-3">
               <Button onClick={handleRefresh} disabled={isRefreshing} variant="outline"
-                className="border-slate-300 hover:border-red-600 hover:text-red-600 hover:bg-red-50 transition-all duration-200 h-11 px-6">
+                className="border-slate-300 hover:border-orange-600 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 h-11 px-6">
                 <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </Button>
               <Link href="/property">
-                <Button className="bg-red-600 hover:bg-red-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6">
+                <Button className="bg-orange-600 hover:bg-orange-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6">
                   <Building2 className="h-4 w-4 mr-2" />Add Property
                 </Button>
               </Link>
@@ -309,10 +311,10 @@ export default function MyListingsPage() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { label: 'Total Listings', value: properties.length, sub: 'All properties', color: 'red', icon: <Building2 className="h-8 w-8 text-red-600" />, bg: 'bg-red-100', bar: 'from-red-500 to-red-600', textColor: 'text-slate-900' },
+            { label: 'Total Listings', value: properties.length, sub: 'All properties', color: 'orange', icon: <Building2 className="h-8 w-8 text-orange-600" />, bg: 'bg-orange-100', bar: 'from-orange-500 to-orange-600', textColor: 'text-slate-900' },
             { label: 'Active', value: properties.filter(p => p.status === 'Active').length, sub: 'Currently listed', color: 'emerald', icon: <TrendingUp className="h-8 w-8 text-emerald-600" />, bg: 'bg-emerald-100', bar: 'from-emerald-500 to-emerald-600', textColor: 'text-emerald-600' },
             { label: 'Pending', value: properties.filter(p => p.status === 'Pending').length, sub: 'Awaiting review', color: 'amber', icon: <Clock className="h-8 w-8 text-amber-600" />, bg: 'bg-amber-100', bar: 'from-amber-500 to-amber-600', textColor: 'text-amber-600' },
-            { label: 'Filtered', value: filteredProperties.length, sub: 'Current view', color: 'blue', icon: <Filter className="h-8 w-8 text-blue-600" />, bg: 'bg-blue-100', bar: 'from-blue-500 to-blue-600', textColor: 'text-blue-600' },
+            { label: 'Filteorange', value: filteorangeProperties.length, sub: 'Current view', color: 'blue', icon: <Filter className="h-8 w-8 text-blue-600" />, bg: 'bg-blue-100', bar: 'from-blue-500 to-blue-600', textColor: 'text-blue-600' },
           ].map((stat) => (
             <Card key={stat.label} className="relative overflow-hidden border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200">
               <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${stat.bar}`} />
@@ -339,7 +341,7 @@ export default function MyListingsPage() {
                   <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                   <Input placeholder="Search by title, description, name, or address..."
                     value={filters.search} onChange={(e) => handleFilterChange('search', e.target.value)}
-                    className="pl-12 h-12 text-base border-slate-300 focus:border-red-500 focus:ring-red-500" />
+                    className="pl-12 h-12 text-base border-slate-300 focus:border-orange-500 focus:ring-orange-500" />
                 </div>
               </div>
 
@@ -369,10 +371,10 @@ export default function MyListingsPage() {
 
               <Sheet open={isFilterOpen} onOpenChange={setIsFilterOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="outline" className="h-12 border-2 border-slate-300 hover:border-red-500 hover:bg-red-50 hover:text-red-600 transition-all duration-200 relative px-6">
+                  <Button variant="outline" className="h-12 border-2 border-slate-300 hover:border-orange-500 hover:bg-orange-50 hover:text-orange-600 transition-all duration-200 relative px-6">
                     <SlidersHorizontal className="h-4 w-4 mr-2" />Advanced Filters
                     {hasActiveFilters() && (
-                      <span className="absolute -top-2 -right-2 h-6 w-6 bg-red-600 rounded-full text-white text-xs flex items-center justify-center font-semibold">
+                      <span className="absolute -top-2 -right-2 h-6 w-6 bg-orange-600 rounded-full text-white text-xs flex items-center justify-center font-semibold">
                         {Object.values(filters).filter(v => v !== '' && v !== 'all').length}
                       </span>
                     )}
@@ -383,7 +385,7 @@ export default function MyListingsPage() {
                     <SheetTitle className="flex items-center justify-between text-xl">
                       <span>Advanced Filters</span>
                       {hasActiveFilters() && (
-                        <Button variant="ghost" size="sm" onClick={clearFilters} className="text-red-600 hover:text-red-700 hover:bg-red-50 -mr-2">
+                        <Button variant="ghost" size="sm" onClick={clearFilters} className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 -mr-2">
                           <X className="h-4 w-4 mr-1" />Clear All
                         </Button>
                       )}
@@ -482,13 +484,13 @@ export default function MyListingsPage() {
                         </Select>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="isFeatured" className="text-sm font-medium text-slate-700">Featured Status</Label>
-                        <Select value={filters.isFeatured} onValueChange={(v) => handleFilterChange('isFeatured', v)}>
-                          <SelectTrigger id="isFeatured" className="h-10"><SelectValue /></SelectTrigger>
+                        <Label htmlFor="isFeatuorange" className="text-sm font-medium text-slate-700">Featuorange Status</Label>
+                        <Select value={filters.isFeatuorange} onValueChange={(v) => handleFilterChange('isFeatuorange', v)}>
+                          <SelectTrigger id="isFeatuorange" className="h-10"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Properties</SelectItem>
-                            <SelectItem value="true">Featured Only</SelectItem>
-                            <SelectItem value="false">Non-Featured Only</SelectItem>
+                            <SelectItem value="true">Featuorange Only</SelectItem>
+                            <SelectItem value="false">Non-Featuorange Only</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -498,14 +500,14 @@ export default function MyListingsPage() {
                   <div className="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4">
                     <div className="flex gap-3">
                       <Button onClick={clearFilters} variant="outline" className="flex-1 h-11 border-slate-300 hover:bg-slate-50">Reset Filters</Button>
-                      <Button onClick={() => setIsFilterOpen(false)} className="flex-1 h-11 bg-red-600 hover:bg-red-700 shadow-sm">Apply Filters</Button>
+                      <Button onClick={() => setIsFilterOpen(false)} className="flex-1 h-11 bg-orange-600 hover:bg-orange-700 shadow-sm">Apply Filters</Button>
                     </div>
                   </div>
                 </SheetContent>
               </Sheet>
 
               {hasActiveFilters() && (
-                <Button onClick={clearFilters} variant="ghost" className="h-12 text-red-600 hover:text-red-700 hover:bg-red-50 px-6">
+                <Button onClick={clearFilters} variant="ghost" className="h-12 text-orange-600 hover:text-orange-700 hover:bg-orange-50 px-6">
                   <X className="h-4 w-4 mr-2" />Clear
                 </Button>
               )}
@@ -574,15 +576,15 @@ export default function MyListingsPage() {
               <div>
                 <CardTitle className="text-2xl font-bold text-slate-900">Property Listings</CardTitle>
                 <CardDescription className="mt-2 text-base">
-                  {filteredProperties.length === properties.length
+                  {filteorangeProperties.length === properties.length
                     ? `Showing all ${properties.length} ${properties.length === 1 ? 'listing' : 'listings'}`
-                    : `Showing ${filteredProperties.length} of ${properties.length} ${properties.length === 1 ? 'listing' : 'listings'}`}
+                    : `Showing ${filteorangeProperties.length} of ${properties.length} ${properties.length === 1 ? 'listing' : 'listings'}`}
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="px-0 sm:px-6 py-6">
-            {filteredProperties.length === 0 ? (
+            {filteorangeProperties.length === 0 ? (
               <div className="text-center py-20 px-4">
                 <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
                   <Filter className="h-10 w-10 text-slate-400" />
@@ -597,12 +599,12 @@ export default function MyListingsPage() {
                 </p>
                 {properties.length === 0 ? (
                   <Link href="/property">
-                    <Button className="bg-red-600 hover:bg-red-700 shadow-lg h-12 px-8">
+                    <Button className="bg-orange-600 hover:bg-orange-700 shadow-lg h-12 px-8">
                       <Building2 className="h-5 w-5 mr-2" />Add New Property
                     </Button>
                   </Link>
                 ) : (
-                  <Button onClick={clearFilters} variant="outline" className="border-red-600 text-red-600 hover:bg-red-50 h-12 px-8">
+                  <Button onClick={clearFilters} variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50 h-12 px-8">
                     <X className="h-5 w-5 mr-2" />Clear All Filters
                   </Button>
                 )}
@@ -629,8 +631,8 @@ export default function MyListingsPage() {
                                   <CheckCircle className="h-3 w-3 mr-1" />Verified
                                 </Badge>
                               )}
-                              {property.is_featured && (
-                                <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200 px-2 py-0.5">⭐ Featured</Badge>
+                              {property.is_featuorange && (
+                                <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200 px-2 py-0.5">⭐ Featuorange</Badge>
                               )}
                             </div>
                             {property.description && (
@@ -671,6 +673,7 @@ export default function MyListingsPage() {
                         </TableCell>
                         <TableCell className="py-5">{property.status ? getStatusBadge(property.status) : <span className="text-sm text-slate-500">N/A</span>}</TableCell>
                         <TableCell className="py-5"><span className="text-sm text-slate-600">{property.created_at ? formatDate(property.created_at) : 'N/A'}</span></TableCell>
+                        <TableCell><button className='bg-transparent text-black cursor-pointer' onClick={()=>router.push(`property/edit/${property.id}`)}>Edit</button></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -681,14 +684,14 @@ export default function MyListingsPage() {
         </Card>
 
         {/* Pagination */}
-        {filteredProperties.length > ITEMS_PER_PAGE && (
+        {filteorangeProperties.length > ITEMS_PER_PAGE && (
           <div className="flex flex-col items-center space-y-6">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
                     onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-red-50 hover:text-red-600 transition-colors'}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-orange-50 hover:text-orange-600 transition-colors'}
                   />
                 </PaginationItem>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
@@ -696,7 +699,7 @@ export default function MyListingsPage() {
                     return (
                       <PaginationItem key={page}>
                         <PaginationLink onClick={() => handlePageChange(page)} isActive={currentPage === page}
-                          className={currentPage === page ? 'bg-red-600 text-white hover:bg-red-700 font-semibold' : 'cursor-pointer hover:bg-red-50 hover:text-red-600 transition-colors'}>
+                          className={currentPage === page ? 'bg-orange-600 text-white hover:bg-orange-700 font-semibold' : 'cursor-pointer hover:bg-orange-50 hover:text-orange-600 transition-colors'}>
                           {page}
                         </PaginationLink>
                       </PaginationItem>
@@ -709,18 +712,18 @@ export default function MyListingsPage() {
                 <PaginationItem>
                   <PaginationNext
                     onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-red-50 hover:text-red-600 transition-colors'}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-orange-50 hover:text-orange-600 transition-colors'}
                   />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
             <div className="text-center text-sm text-slate-600 bg-slate-50 px-8 py-4 rounded-xl border border-slate-200">
               Showing <span className="font-semibold text-slate-900">{startIndex + 1}</span> to{' '}
-              <span className="font-semibold text-slate-900">{Math.min(endIndex, filteredProperties.length)}</span> of{' '}
-              <span className="font-semibold text-slate-900">{filteredProperties.length}</span>{' '}
-              {filteredProperties.length === 1 ? 'listing' : 'listings'}
-              {filteredProperties.length !== properties.length && (
-                <span className="text-slate-500"> (filtered from {properties.length} total)</span>
+              <span className="font-semibold text-slate-900">{Math.min(endIndex, filteorangeProperties.length)}</span> of{' '}
+              <span className="font-semibold text-slate-900">{filteorangeProperties.length}</span>{' '}
+              {filteorangeProperties.length === 1 ? 'listing' : 'listings'}
+              {filteorangeProperties.length !== properties.length && (
+                <span className="text-slate-500"> (filteorange from {properties.length} total)</span>
               )}
             </div>
           </div>
