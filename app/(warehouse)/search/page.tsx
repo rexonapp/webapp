@@ -594,12 +594,54 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
     }
   }, [hasImages, property.images]);
 
-  const handleSave = useCallback((e: React.MouseEvent) => {
+  // const handleSave = useCallback((e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   setIsSaved(!isSaved);
+  // }, [isSaved]);
+
+
+  const handleSave = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsSaved(!isSaved);
-  }, [isSaved]);
-
+  
+    try {
+      if (!isSaved) {
+        // SAVE (POST)
+        await fetch("/api/leads/favorite", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            propertyId: property.id,
+            priceAtFavorite: property.price_per_sqft || null,
+          }),
+        });
+  
+        setIsSaved(true);
+  
+      } else {
+        // UNSAVE (DELETE → is_active = false)
+        await fetch("/api/leads/favorite", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            propertyId: property.id,
+          }),
+        });
+  
+        setIsSaved(false);
+      }
+  
+    } catch (error) {
+      console.error("Favorite error:", error);
+    }
+  
+  }, [isSaved, property.id, property.price_per_sqft]);
+  
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
     onHover?.(property);
@@ -788,6 +830,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const hasImages = property.images && property.images.length > 0;
   const currentImage = hasImages ? property.images![currentImageIndex] : null;

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus, Settings } from 'lucide-react'
+import { Menu, X, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus, Settings, Heart } from 'lucide-react'
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -321,7 +321,15 @@ export default function Navbar() {
                           <Building2 className="h-4 w-4 text-blue-600" />
                           <span className="font-medium">My Properties</span>
                         </button>
-                        
+                        <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                          <Link href="/myfavorites">
+                            <div className="flex items-center gap-3 py-2 hover:bg-gray-100 cursor-pointer">
+                            <Heart className="h-4 w-4 text-red-600" />
+                            <span className="font-medium">My Favorites</span>
+                            </div>
+                          </Link>
+                        </button>
+
                         <button 
                           onClick={() => {
                             setShowProfileMenu(false);
