@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     const normalizedEmail = msEmail.toLowerCase();
 
     const msUserResult = await query(
-      'SELECT id, first_name, last_name, email, auth_provider, microsoft_id, role FROM users WHERE microsoft_id = $1',
+      'SELECT id, first_name, last_name, email, auth_provider, microsoft_id FROM leads WHERE microsoft_id = $1',
       [msUser.id]
     );
 
@@ -81,13 +81,13 @@ export async function GET(request: NextRequest) {
       user = msUserResult.rows[0];
       
       await query(
-        'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
+        'UPDATE leads SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
         [user.id]
       );
     } else {
       // User doesn't exist by Microsoft ID, check if email exists
       const emailCheckResult = await query(
-        'SELECT id, first_name, last_name, email, auth_provider, microsoft_id, role FROM users WHERE email = $1',
+        'SELECT id, first_name, last_name, email, auth_provider, microsoft_id FROM s WHERE email = $1',
         [normalizedEmail]
       );
 
@@ -98,7 +98,7 @@ export async function GET(request: NextRequest) {
         if (existingUser.auth_provider === 'email') {
           // User registered with email/password, link Microsoft account
           await query(
-            'UPDATE users SET microsoft_id = $1, auth_provider = $2, is_verified = true, last_login = CURRENT_TIMESTAMP WHERE id = $3',
+            'UPDATE leads SET microsoft_id = $1, auth_provider = $2, is_verified = true, last_login = CURRENT_TIMESTAMP WHERE id = $3',
             [msUser.id, 'microsoft', existingUser.id]
           );
           
@@ -120,9 +120,9 @@ export async function GET(request: NextRequest) {
       } else {
         // New user - create account
         const insertResult = await query(
-          `INSERT INTO users (first_name, last_name, email, microsoft_id, auth_provider, is_verified, created_at, last_login)
+          `INSERT INTO leads (first_name, last_name, email, microsoft_id, auth_provider, is_verified, created_at, last_login)
            VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-           RETURNING id, first_name, last_name, email, auth_provider, microsoft_id, role`,
+           RETURNING id, first_name, last_name, email, auth_provider, microsoft_id`,
           [
             msUser.givenName || '',
             msUser.surname || '',
@@ -144,7 +144,6 @@ export async function GET(request: NextRequest) {
       firstName: user.first_name,
       lastName: user.last_name,
       authProvider: user.auth_provider,
-      role: user.role || 'customer',
     });
 
     return NextResponse.redirect(new URL('/', request.url));

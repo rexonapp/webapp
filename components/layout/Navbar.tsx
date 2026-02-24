@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, Home, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus, Settings, User2Icon } from 'lucide-react'
+import { Menu, X, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus, Settings } from 'lucide-react'
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -241,41 +241,17 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-2 flex-shrink-0">
-              <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-2 rounded-xl shadow-lg">
-                <Home className="h-5 w-5 text-white" />
-              </div>
+            <div className="flex items-center flex-shrink-0">
               <Link href={'/'}>
-              <span className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent tracking-tight">
-                Rexon
-              </span>
+                <img
+                  src="/rexon-logo.png"
+                  alt="Rexon"
+                  className="h-24 w-auto object-contain"
+                />
               </Link>
             </div>
             
-            {/* Desktop Navigation */}
-            <div className="hidden lg:flex items-center space-x-1">
-              <button className="flex items-center space-x-1 px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
-                <span>Buy</span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              
-              <button className="flex items-center space-x-1 px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
-                <span>Rent</span>
-                <ChevronDown className="h-4 w-4" />
-              </button>
-              
-              <button className="px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
-                Sell
-              </button>
-              
-              <button className="px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
-                About
-              </button>
-              
-              <button className="px-4 py-2 text-slate-700 hover:text-orange-600 font-medium rounded-lg hover:bg-orange-50 transition-colors">
-                Contact
-              </button>
-            </div>
+      
             
             {/* Right Side Actions */}
             <div className="flex items-center space-x-3">
@@ -396,22 +372,6 @@ export default function Navbar() {
         {mobileMenuOpen && (
           <div className="lg:hidden border-t-2 border-blue-100 bg-white">
             <div className="px-4 py-4 space-y-1">
-              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
-                Buy
-              </button>
-              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
-                Rent
-              </button>
-              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
-                Sell
-              </button>
-              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
-                About
-              </button>
-              <button className="block w-full text-left px-4 py-3 text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg font-medium transition-colors">
-                Contact
-              </button>
-              
               <div className="pt-2 pb-1 space-y-2">
                 <button className="block w-full text-left px-4 py-3 text-blue-700 hover:bg-blue-50 rounded-lg font-medium border-2 border-blue-200 transition-colors">
                   Join as Agent
@@ -433,10 +393,10 @@ export default function Navbar() {
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div 
-  className="absolute inset-0 backdrop-blur-sm"
-  onClick={() => setShowAuthModal(false)}
-  aria-hidden="true"
-/>
+            className="absolute inset-0 backdrop-blur-sm"
+            onClick={() => setShowAuthModal(false)}
+            aria-hidden="true"
+          />
           
           <div 
             className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border-2 border-blue-100"
@@ -454,8 +414,12 @@ export default function Navbar() {
             <div className="p-8">
               {/* Modal Header */}
               <div className="text-center mb-8">
-                <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-3 rounded-xl inline-block mb-4 shadow-lg">
-                  <Home className="h-8 w-8 text-white" />
+                <div className="flex justify-center mb-4">
+                  <img
+                    src="/rexon-logo.png"
+                    alt="Rexon"
+                    className="h-12 w-auto object-contain"
+                  />
                 </div>
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent mb-2">
                   {authMode === 'signin' ? 'Welcome Back' : 'Create Account'}

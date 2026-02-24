@@ -40,11 +40,11 @@ interface PropertyType {
   label: string;
 }
 
-interface Distance {
-  id: string;
-  label: string;
-  value: number; // in metres
-}
+// interface Distance {
+//   id: string;
+//   label: string;
+//   value: number; // in metres
+// }
 
 export default function PropertySearch() {
   const [openDesktop, setOpenDesktop] = useState(false);
@@ -53,7 +53,7 @@ export default function PropertySearch() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<City | null>(null);
   const [selectedPropertyType, setSelectedPropertyType] = useState('');
-  const [selectedDistance, setSelectedDistance] = useState('');
+  // const [selectedDistance, setSelectedDistance] = useState('');
   const router = useRouter();
   const [cities, setCities] = useState<City[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
@@ -62,6 +62,7 @@ export default function PropertySearch() {
   // Property types for commercial real estate
   const propertyTypes: PropertyType[] = [
     { id: 'warehouse', label: 'Warehouse' },
+    {id:'farm land', label:'Farm Land'},
     { id: 'factory', label: 'Factory' },
     { id: 'industrial-shed', label: 'Industrial Shed' },
     { id: 'cold-storage', label: 'Cold Storage' },
@@ -74,13 +75,13 @@ export default function PropertySearch() {
   ];
 
   // Distance options in metres
-  const distanceOptions: Distance[] = [
-    { id: '500', label: '500 metres or less', value: 500 },
-    { id: '1000', label: '1000 metres or less', value: 1000 },
-    { id: '2000', label: '2000 metres or less', value: 2000 },
-    { id: '5000', label: '5000 metres or less', value: 5000 },
-    { id: '10000', label: '10000 metres or above', value: 10000 }
-  ];
+  // const distanceOptions: Distance[] = [
+  //   { id: '500', label: '500 metres or less', value: 500 },
+  //   { id: '1000', label: '1000 metres or less', value: 1000 },
+  //   { id: '2000', label: '2000 metres or less', value: 2000 },
+  //   { id: '5000', label: '5000 metres or less', value: 5000 },
+  //   { id: '10000', label: '10000 metres or above', value: 10000 }
+  // ];
 
   // Debounce timer ref
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -175,9 +176,9 @@ export default function PropertySearch() {
       params.append('type', selectedPropertyType);
     }
 
-    if (selectedDistance) {
-      params.append('distance', selectedDistance);
-    }
+    // if (selectedDistance) {
+    //   params.append('distance', selectedDistance);
+    // }
 
     // Navigate to search results page with all filters
     router.push(`/search?${params.toString()}`);
@@ -333,13 +334,12 @@ export default function PropertySearch() {
           </div>
 
           {/* Distance Dropdown */}
-          <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 border-r border-gray-200 h-full">
+          {/* <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 border-r border-gray-200 h-full">
             <Ruler className="h-4 w-4 text-blue-800 flex-shrink-0" />
             <Select value={selectedDistance} onValueChange={setSelectedDistance}>
               <SelectTrigger className="flex-1 min-w-0 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:truncate">
                 <SelectValue placeholder="Distance" className="text-gray-500" />
               </SelectTrigger>
-              {/* Position dropdown so its left edge starts roughly under the Distance icon on desktop */}
               <SelectContent
                 position="popper"
                 align="start"
@@ -353,7 +353,7 @@ export default function PropertySearch() {
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </div> */}
 
           {/* Search Button */}
           <Button
@@ -460,7 +460,7 @@ export default function PropertySearch() {
               </Select>
             </div>
 
-            <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
+            {/* <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
               <Ruler className="h-4 w-4 text-blue-800 shrink-0" />
               <Select value={selectedDistance} onValueChange={setSelectedDistance}>
                 <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
@@ -474,7 +474,7 @@ export default function PropertySearch() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
 
             <Button
               onClick={handleSearch}
@@ -588,13 +588,12 @@ export default function PropertySearch() {
               </Select>
             </div>
 
-            <div className="flex items-center gap-1.5 px-3 py-3">
+            {/* <div className="flex items-center gap-1.5 px-3 py-3">
               <Ruler className="h-3.5 w-3.5 text-blue-800 shrink-0" />
               <Select value={selectedDistance} onValueChange={setSelectedDistance}>
                 <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-xs font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
                   <SelectValue placeholder="Distance" />
                 </SelectTrigger>
-                {/* Mobile: position dropdown so it starts under the Distance icon */}
                 <SelectContent
                   position="popper"
                   align="start"
@@ -608,7 +607,7 @@ export default function PropertySearch() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
           </div>
 
           {/* Mobile Search Button */}

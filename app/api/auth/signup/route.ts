@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
 
     const existingUser = await query(
-      'SELECT id FROM users WHERE email = $1',
+      'SELECT id FROM leads WHERE email = $1',
       [email.toLowerCase()]
     );
 
@@ -45,9 +45,9 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 10);
 
     const result = await query(
-      `INSERT INTO users (first_name, last_name, email, phone, password_hash, auth_provider, is_verified)
+      `INSERT INTO leads (first_name, last_name, email, phone, password_hash, auth_provider, is_verified)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
-       RETURNING id, first_name, last_name, email, auth_provider, role`,
+       RETURNING id, first_name, last_name, email, auth_provider`,
       [firstName, lastName, email.toLowerCase(), phone || null, passwordHash, 'email', false]
     );
 
@@ -59,10 +59,9 @@ export async function POST(request: NextRequest) {
       firstName: user.first_name,
       lastName: user.last_name,
       authProvider: user.auth_provider,
-      role: user.role || 'customer',
     });
 
-    await query('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
+    await query('UPDATE leads SET last_login = CURRENT_TIMESTAMP WHERE id = $1', [user.id]);
 
     return NextResponse.json({
       success: true,
@@ -72,7 +71,6 @@ export async function POST(request: NextRequest) {
         lastName: user.last_name,
         email: user.email,
         authProvider: user.auth_provider,
-        role: user.role || 'customer',
       },
     });
   } catch (error) {

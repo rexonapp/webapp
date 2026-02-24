@@ -27,7 +27,7 @@ export default function Footer() {
                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-orange-50 transition-colors duration-300">
                   <Mail className="h-4 w-4 text-blue-600 group-hover:text-orange-500 group-hover:scale-110 transition-all duration-300" />
                 </div>
-                <span>contact@rexon.com</span>
+                <span>rexondev5@gmail.com</span>
               </a>
               <a href="tel:+911234567890" className="flex items-center gap-2 text-slate-600 hover:text-orange-500 transition-colors duration-300 group text-sm">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center group-hover:bg-orange-50 transition-colors duration-300">
@@ -39,7 +39,7 @@ export default function Footer() {
                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
                   <MapPin className="h-4 w-4 text-blue-600" />
                 </div>
-                <span>Mumbai, India</span>
+                <span> India</span>
               </div>
             </div>
           </div>
