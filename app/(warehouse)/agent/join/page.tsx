@@ -31,7 +31,6 @@ interface AgentFormData {
 
   // Address Information
   addressLine1: string;
-  addressLine2: string;
   city: string;
   state: string;
   pincode: string;
@@ -39,18 +38,10 @@ interface AgentFormData {
   // Professional Information
   agencyName: string;
   domainName: string; // NEW
-  licenseNumber: string;
-  experienceYears: string;
-  specialization: string;
 
-  // Identity & Verification
-  aadharNumber: string;
-  panNumber: string;
-  reraRegistration: string;
 
   // Additional Information
   languagesSpoken: string[];
-  serviceAreas: string[];
   bio: string;
 
   // Documents
@@ -83,15 +74,6 @@ const INDIAN_STATES = [
   'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Delhi', 'Puducherry'
 ];
 
-const SPECIALIZATIONS = [
-  'Residential Properties',
-  'Commercial Properties',
-  'Industrial Properties',
-  'Warehouse & Logistics',
-  'Agricultural Land',
-  'Luxury Properties',
-  'Investment Properties'
-];
 
 const LANGUAGES = [
   'Hindi', 'English', 'Tamil', 'Telugu', 'Kannada',
@@ -111,20 +93,12 @@ export default function AgentRegistrationForm() {
     email: '',
     whatsappNumber: '',
     addressLine1: '',
-    addressLine2: '',
     city: '',
     state: '',
     pincode: '',
     agencyName: '',
-    domainName: '', // NEW
-    licenseNumber: '',
-    experienceYears: '',
-    specialization: '',
-    aadharNumber: '',
-    panNumber: '',
-    reraRegistration: '',
+    domainName: '', 
     languagesSpoken: [],
-    serviceAreas: [],
     bio: '',
     profileImage: null,
     documents: [],
@@ -348,14 +322,7 @@ export default function AgentRegistrationForm() {
       const error = validateField('pincode', formData.pincode);
       if (error) errors.pincode = error;
     }
-    if (formData.aadharNumber) {
-      const error = validateField('aadharNumber', formData.aadharNumber);
-      if (error) errors.aadharNumber = error;
-    }
-    if (formData.panNumber) {
-      const error = validateField('panNumber', formData.panNumber);
-      if (error) errors.panNumber = error;
-    }
+   
     if (formData.domainName) {
       const error = validateField('domainName', formData.domainName);
       if (error) errors.domainName = error;
@@ -796,173 +763,60 @@ export default function AgentRegistrationForm() {
                 </div>
                 {/* ── END DOMAIN CHECK FIELD ── */}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="licenseNumber">License Number</Label>
-                    <Input
-                      id="licenseNumber"
-                      value={formData.licenseNumber}
-                      onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                      placeholder="REG-123456"
-                      className="h-11"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="experienceYears">Years of Experience</Label>
-                    <Input
-                      id="experienceYears"
-                      type="number"
-                      min="0"
-                      value={formData.experienceYears}
-                      onChange={(e) => setFormData({ ...formData, experienceYears: e.target.value })}
-                      placeholder="5"
-                      className="h-11"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="specialization">Specialization</Label>
-                    <Select
-                      value={formData.specialization}
-                      onValueChange={(value) => setFormData({ ...formData, specialization: value })}
-                    >
-                      <SelectTrigger id="specialization" className="w-full h-12">
-                        <SelectValue placeholder="Select specialization" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SPECIALIZATIONS.map(spec => (
-                          <SelectItem key={spec} value={spec}>{spec}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Languages Spoken</Label>
-                    <Select
-                      value="select languages"
-                      name='select languages'
-                      onValueChange={(value) => {
-                        if (value && !formData.languagesSpoken.includes(value)) {
-                          setFormData(prev => ({
-                            ...prev,
-                            languagesSpoken: [...prev.languagesSpoken, value]
-                          }));
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="w-full h-12">
-                        <SelectValue>
-                          {formData.languagesSpoken.length > 0 ? (
-                            <span className="flex items-center gap-2">
-                              <span className="font-medium text-gray-900">
-                                {formData.languagesSpoken.length} {formData.languagesSpoken.length === 1 ? 'language' : 'languages'} selected
-                              </span>
-                              <span className="text-gray-500 text-sm">• Click to select more</span>
-                            </span>
-                          ) : (
-                            <span className="text-gray-500">Select languages...</span>
-                          )}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {LANGUAGES.filter(lang => !formData.languagesSpoken.includes(lang)).length > 0 ? (
-                          LANGUAGES.filter(lang => !formData.languagesSpoken.includes(lang)).map((language) => (
-                            <SelectItem key={language} value={language}>
-                              {language}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="px-2 py-6 text-center text-sm text-gray-500">
-                            All languages selected
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {formData.languagesSpoken.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {formData.languagesSpoken.map((language) => (
-                      <Badge
-                        key={language}
-                        variant="secondary"
-                        className="bg-orange-100 text-orange-800 hover:bg-orange-200 px-3 py-1.5"
-                      >
-                        {language}
-                        <button
-                          type="button"
-                          onClick={() => toggleLanguage(language)}
-                          className="ml-2 hover:text-orange-600"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
                 <div className="space-y-2">
-                  <Label htmlFor="reraRegistration">RERA Registration Number</Label>
-                  <Input
-                    id="reraRegistration"
-                    value={formData.reraRegistration}
-                    onChange={(e) => setFormData({ ...formData, reraRegistration: e.target.value })}
-                    placeholder="RERA/12345/2023"
-                    className="h-11"
-                  />
+                  <Label>Languages Spoken</Label>
+                  <Select
+                    value="select languages"
+                    onValueChange={value => {
+                      if (value && !formData.languagesSpoken.includes(value)) {
+                        setFormData(prev => ({ ...prev, languagesSpoken: [...prev.languagesSpoken, value] }));
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full h-12">
+                      <SelectValue>
+                        {formData.languagesSpoken.length > 0 ? (
+                          <span className="flex items-center gap-2">
+                            <span className="font-medium text-gray-900">
+                              {formData.languagesSpoken.length} {formData.languagesSpoken.length === 1 ? 'language' : 'languages'} selected
+                            </span>
+                            <span className="text-gray-500 text-sm">• Click to select more</span>
+                          </span>
+                        ) : (
+                          <span className="text-gray-500">Select languages...</span>
+                        )}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LANGUAGES.filter(l => !formData.languagesSpoken.includes(l)).length > 0
+                        ? LANGUAGES.filter(l => !formData.languagesSpoken.includes(l)).map(language => (
+                            <SelectItem key={language} value={language}>{language}</SelectItem>
+                          ))
+                        : <div className="px-2 py-6 text-center text-sm text-gray-500">All languages selected</div>
+                      }
+                    </SelectContent>
+                  </Select>
+                  {formData.languagesSpoken.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {formData.languagesSpoken.map(language => (
+                        <Badge key={language} variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200 px-3 py-1.5">
+                          {language}
+                          <button type="button" onClick={() => toggleLanguage(language)} className="ml-2 hover:text-blue-600">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="aadharNumber">Aadhar Number</Label>
-                    <Input
-                      id="aadharNumber"
-                      value={formData.aadharNumber}
-                      onChange={(e) => handleFieldChange('aadharNumber', e.target.value)}
-                      onBlur={() => handleFieldBlur('aadharNumber')}
-                      placeholder="1234 5678 9012"
-                      maxLength={12}
-                      className={`h-11 ${touchedFields.has('aadharNumber') && fieldErrors.aadharNumber ? 'border-orange-500' : ''}`}
-                    />
-                    {touchedFields.has('aadharNumber') && fieldErrors.aadharNumber && (
-                      <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
-                        <AlertCircle className="h-4 w-4" />
-                        {fieldErrors.aadharNumber}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="panNumber">PAN Number</Label>
-                    <Input
-                      id="panNumber"
-                      value={formData.panNumber}
-                      onChange={(e) => handleFieldChange('panNumber', e.target.value.toUpperCase())}
-                      onBlur={() => handleFieldBlur('panNumber')}
-                      placeholder="ABCDE1234F"
-                      maxLength={10}
-                      className={`h-11 ${touchedFields.has('panNumber') && fieldErrors.panNumber ? 'border-orange-500' : ''}`}
-                    />
-                    {touchedFields.has('panNumber') && fieldErrors.panNumber && (
-                      <p className="text-sm text-orange-500 flex items-center gap-1 mt-1">
-                        <AlertCircle className="h-4 w-4" />
-                        {fieldErrors.panNumber}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
+                {/* Bio */}
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio / About You</Label>
                   <Textarea
                     id="bio"
                     value={formData.bio}
-                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                    onChange={e => setFormData(p => ({ ...p, bio: e.target.value }))}
                     rows={5}
                     placeholder="Tell clients about your experience, expertise, and approach to real estate..."
                     className="resize-none"
