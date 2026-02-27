@@ -14,7 +14,7 @@ export async function GET(
     }
 
     const { warehouseId } = await params;
-
+console.log(warehouseId, "warehouseId")
     const result = await query(
       `SELECT id, property_name, title, description, property_type,
               space_available, space_unit, warehouse_size, available_from,
@@ -37,6 +37,29 @@ export async function GET(
 
     const warehouse = result.rows[0];
 
+console.log(result, "result")
+    const result1 = await query(
+      `SELECT id, title, description, property_type,
+              space_available, warehouse_size,
+              price_type, price_per_sqft,
+              city, state, address,
+              latitude, longitude,
+              is_verified, is_featured,
+              created_at
+       FROM warehouses
+       WHERE id = $1`,
+      [warehouseId]
+    );
+    console.log(result1, "result1111")
+
+    if (result1.rows.length === 0) {
+      return NextResponse.json(
+        { error: "PropertyDetails not found" },
+        { status: 404 }
+      );
+    }
+
+    const propertyDetails = result1.rows[0];
     // Fetch associated media
     const mediaResult = await query(
       `SELECT id, file_name, file_type, file_size, s3_url, is_primary, image_order, created_at
@@ -62,6 +85,7 @@ export async function GET(
     return NextResponse.json({
       success: true,
       property: {
+        propertyDetails,
         ...warehouse,
         amenities,
         images,

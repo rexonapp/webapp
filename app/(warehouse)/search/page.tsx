@@ -29,11 +29,13 @@ import {
   SlidersHorizontal,
   X,
   ChevronsUpDown,
-  RefreshCw
+  RefreshCw,
+  Share
 } from 'lucide-react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { cn } from "@/lib/utils"
+import ShareModal from '@/components/ui/shareModel';
 
 const Map = dynamic(() => import('./map'), {
   ssr: false,
@@ -530,6 +532,8 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
   const hasImages = property.images && property.images.length > 0;
   const currentImage = hasImages ? property.images![currentImageIndex] : null;
   const totalImages = property.images?.length || 0;
+  const router = useRouter();
+  const [showShareCard, setShowShareCard] = useState(false);
 
   useEffect(() => {
     if (isHovered && hasImages && totalImages > 1) {
@@ -604,43 +608,35 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
   const handleSave = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-  
     try {
-      if (!isSaved) {
-        // SAVE (POST)
-        await fetch("/api/leads/favorite", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            propertyId: property.id,
-            priceAtFavorite: property.price_per_sqft || null,
-          }),
-        });
+      const res = await fetch("/api/leads/favorite", {
+        method: isSaved ? "DELETE" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          propertyId: property.id,
+          priceAtFavorite: property.price_per_sqft || null,
+        }),
+      });
   
-        setIsSaved(true);
+      // 🚨 If not logged in → redirect
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
   
-      } else {
-        // UNSAVE (DELETE → is_active = false)
-        await fetch("/api/leads/favorite", {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            propertyId: property.id,
-          }),
-        });
-  
-        setIsSaved(false);
+      // ✅ Only update state if API successful
+      if (res.ok) {
+        setIsSaved(!isSaved);
       }
   
     } catch (error) {
       console.error("Favorite error:", error);
     }
   
-  }, [isSaved, property.id, property.price_per_sqft]);
+  }, [router, isSaved, property.id, property.price_per_sqft]);
+
   
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -653,6 +649,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
   }, [onHover]);
 
   return (
+    <>
     <Link href={`/property/${property.id}`}>
       <div 
         className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-orange-400 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col"
@@ -736,12 +733,23 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
                 </span>
               )}
             </div>
+            <div className="flex items-center gap-2">
             <button
               onClick={handleSave}
               className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-white transition-all"
             >
               <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowShareCard(true);
+                }} className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
+              >
+              <Share2 size={18} />
             </button>
+            </div>
           </div>
 
           {property.distance !== undefined && property.distance > 0 && (
@@ -816,6 +824,14 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
         </div>
       </div>
     </Link>
+    {showShareCard && (
+      <ShareModal
+        propertyId={property.id}
+        title={property.title}
+        onClose={() => setShowShareCard(false)}
+      />
+    )}
+    </>
   );
 });
 
@@ -991,12 +1007,21 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                 </span>
               )}
             </div>
+            {/* Share Icon */}
+
             <button
               onClick={handleSave}
               className="bg-white/90 backdrop-blur-sm p-2 rounded-full shadow-md hover:bg-white transition-all"
             >
               <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
             </button>
+            <button
+              // onClick={(e) => handleShare(e)}
+              className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
+            >
+              <Share size={18} />
+            </button>
+
           </div>
         </div>
 
