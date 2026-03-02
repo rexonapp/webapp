@@ -289,10 +289,10 @@ export default function Navbar() {
                           <span className="font-medium">My Profile</span>
                         </button>
                         
-                        <button onClick={()=>router.push('/mylistings')} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                        {/* <button onClick={()=>router.push('/mylistings')} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
                           <Building2 className="h-4 w-4 text-blue-600" />
                           <span className="font-medium">My Properties</span>
-                        </button>
+                        </button> */}
                         <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
                           <Link href="/myfavorites">
                             <div className="flex items-center gap-3 py-2 hover:bg-gray-100 cursor-pointer">

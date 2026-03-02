@@ -340,16 +340,14 @@ const FilterPanel = memo(({
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [sizeRange, setSizeRange] = useState({ min: '', max: '' });
   const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
-  const [verified, setVerified] = useState(false);
-  const [featured, setFeatured] = useState(false);
+  const [priceTypes, setPriceTypes] = useState<string[]>([]);
 
   const handleApply = () => {
     onApplyFilters({
       priceRange,
       sizeRange,
       propertyTypes,
-      verified,
-      featured
+      priceTypes
     });
     onClose();
   };
@@ -358,12 +356,17 @@ const FilterPanel = memo(({
     setPriceRange({ min: '', max: '' });
     setSizeRange({ min: '', max: '' });
     setPropertyTypes([]);
-    setVerified(false);
-    setFeatured(false);
+    setPriceTypes([]);
   };
 
   const togglePropertyType = (type: string) => {
     setPropertyTypes(prev => 
+      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    );
+  };
+
+  const togglePriceType = (type: string) => {
+    setPriceTypes(prev => 
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
     );
   };
@@ -469,32 +472,22 @@ const FilterPanel = memo(({
             </div>
 
             <div>
-              <h3 className="font-semibold text-gray-900 mb-3">Additional Filters</h3>
+              <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <Building2 className="h-4 w-4 text-orange-600" />
+                Price Type
+              </h3>
               <div className="space-y-2">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={verified}
-                    onChange={(e) => setVerified(e.target.checked)}
-                    className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                  />
-                  <span className="text-gray-700 group-hover:text-orange-600 transition-colors flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    Verified Only
-                  </span>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={featured}
-                    onChange={(e) => setFeatured(e.target.checked)}
-                    className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
-                  />
-                  <span className="text-gray-700 group-hover:text-orange-600 transition-colors flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-500" />
-                    Featured Only
-                  </span>
-                </label>
+                {['Rent', 'Sale'].map((type) => (
+                  <label key={type} className="flex items-center gap-3 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={priceTypes.includes(type)}
+                      onChange={() => togglePriceType(type)}
+                      className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                    />
+                    <span className="text-gray-700 group-hover:text-orange-600 transition-colors">{type}</span>
+                  </label>
+                ))}
               </div>
             </div>
           </div>
@@ -600,13 +593,6 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
     }
   }, [hasImages, property.images]);
 
-  // const handleSave = useCallback((e: React.MouseEvent) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   setIsSaved(!isSaved);
-  // }, [isSaved]);
-
-
   const handleSave = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -622,13 +608,11 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
         }),
       });
   
-      // 🚨 If not logged in → redirect
       if (res.status === 401) {
         router.push("/login");
         return;
       }
   
-      // ✅ Only update state if API successful
       if (res.ok) {
         setIsSaved(!isSaved);
       }
@@ -1018,7 +1002,6 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
               <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
             </button>
             <button
-              // onClick={(e) => handleShare(e)}
               className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
             >
               <Share size={18} />
@@ -1345,12 +1328,8 @@ function SearchResults() {
       filtered = filtered.filter(p => filters.propertyTypes.includes(p.property_type));
     }
 
-    if (filters.verified) {
-      filtered = filtered.filter(p => p.is_verified);
-    }
-
-    if (filters.featured) {
-      filtered = filtered.filter(p => p.is_featured);
+    if (filters.priceTypes.length > 0) {
+      filtered = filtered.filter(p => filters.priceTypes.includes(p.price_type));
     }
 
     setFilteredProperties(filtered);
