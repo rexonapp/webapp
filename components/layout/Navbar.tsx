@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
-import { Menu, X, ChevronDown, User, Mail, Lock, UserCircle, Phone, LogOut, AlertCircle, Building2, Plus, Settings, Heart } from 'lucide-react'
+import { Menu, X, ChevronDown, User, Building2, Plus, Settings, Heart, LogOut } from 'lucide-react'
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import LoginForm from './LoginForm'
 
 interface UserData {
   id: string;
@@ -38,23 +39,8 @@ export default function Navbar() {
   const [currentUser, setCurrentUser] = useState<UserData | null>(null)
   const [showProfileMenu, setShowProfileMenu] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
-  const router= useRouter();
-
-  const [signInData, setSignInData] = useState<SignInData>({
-    email: '',
-    password: '',
-    rememberMe: false
-  })
-
-  const [signUpData, setSignUpData] = useState<SignUpData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    phone: ''
-  })
-  const pathname = usePathname(); 
-
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     checkSession()
@@ -70,6 +56,7 @@ export default function Navbar() {
       window.history.replaceState({}, '', window.location.pathname)
     }
   }
+
   useEffect(() => {
     setShowProfileMenu(false);
   }, [pathname]);
@@ -119,8 +106,7 @@ export default function Navbar() {
     }
   }, [showAuthModal])
 
-  const handleEmailSignIn = async (e: React.MouseEvent) => {
-    e.preventDefault()
+  const handleEmailSignIn = async (signInData: SignInData) => {
     setError('')
     setLoading(true)
 
@@ -137,37 +123,22 @@ export default function Navbar() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Sign in failed')
-        return
+        throw new Error(data.error || 'Sign in failed')
       }
 
       setCurrentUser(data.user)
       setShowAuthModal(false)
-      setSignInData({ email: '', password: '', rememberMe: false })
       window.location.reload()
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      throw new Error((err as Error).message || 'An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleEmailSignUp = async (e: React.MouseEvent) => {
-    e.preventDefault()
+  const handleEmailSignUp = async (signUpData: SignUpData) => {
     setError('')
     setLoading(true)
-
-    if (!signUpData.firstName || !signUpData.lastName || !signUpData.email || !signUpData.password) {
-      setError('Please fill in all required fields')
-      setLoading(false)
-      return
-    }
-
-    if (signUpData.password.length < 8) {
-      setError('Password must be at least 8 characters long')
-      setLoading(false)
-      return
-    }
 
     try {
       const res = await fetch('/api/auth/signup', {
@@ -179,16 +150,14 @@ export default function Navbar() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Sign up failed')
-        return
+        throw new Error(data.error || 'Sign up failed')
       }
 
       setCurrentUser(data.user)
       setShowAuthModal(false)
-      setSignUpData({ firstName: '', lastName: '', email: '', password: '', phone: '' })
       window.location.reload()
     } catch (err) {
-      setError('An error occurred. Please try again.')
+      throw new Error((err as Error).message || 'An error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -218,6 +187,11 @@ export default function Navbar() {
   const openAuthModal = (mode: 'signin' | 'signup') => {
     setAuthMode(mode)
     setShowAuthModal(true)
+    setError('')
+  }
+
+  const closeAuthModal = () => {
+    setShowAuthModal(false)
     setError('')
   }
 
@@ -251,24 +225,22 @@ export default function Navbar() {
               </Link>
             </div>
             
-      
-            
             {/* Right Side Actions */}
             <div className="flex items-center space-x-3">
               {/* Agent Join Button - Desktop */}
               <Link href='/agent/join'>
-              <button className="hidden md:flex items-center space-x-2 px-4 py-2 text-blue-700 hover:text-orange-600 font-medium rounded-lg hover:bg-blue-50 transition-colors border-2 border-blue-200 hover:border-orange-300">
-                <span>Join as Agent</span>
-              </button>
+                <button className="hidden md:flex items-center space-x-2 px-4 py-2 text-blue-700 hover:text-orange-600 font-medium rounded-lg hover:bg-blue-50 transition-colors border-2 border-blue-200 hover:border-orange-300">
+                  <span>Join as Agent</span>
+                </button>
               </Link>
 
               {/* List Property Button - Only when logged in */}
               {currentUser && (
                 <Link href='/property'>
-                <button className="hidden md:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all font-medium shadow-lg hover:shadow-orange-500/50">
-                  <Plus className="h-4 w-4" />
-                  <span>List Property</span>
-                </button>
+                  <button className="hidden md:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all font-medium shadow-lg hover:shadow-orange-500/50">
+                    <Plus className="h-4 w-4" />
+                    <span>List Property</span>
+                  </button>
                 </Link>
               )}
               
@@ -313,7 +285,7 @@ export default function Navbar() {
                       {/* Menu Items */}
                       <div className="py-2">
                         <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
-                          <UserCircle className="h-4 w-4 text-blue-600" />
+                          <User className="h-4 w-4 text-blue-600" />
                           <span className="font-medium">My Profile</span>
                         </button>
                         
@@ -324,8 +296,8 @@ export default function Navbar() {
                         <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
                           <Link href="/myfavorites">
                             <div className="flex items-center gap-3 py-2 hover:bg-gray-100 cursor-pointer">
-                            <Heart className="h-4 w-4 text-red-600" />
-                            <span className="font-medium">My Favorites</span>
+                              <Heart className="h-4 w-4 text-red-600" />
+                              <span className="font-medium">My Favorites</span>
                             </div>
                           </Link>
                         </button>
@@ -397,293 +369,17 @@ export default function Navbar() {
         )}
       </nav>
 
-      {/* Auth Modal */}
-      {showAuthModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div 
-            className="absolute inset-0 backdrop-blur-sm"
-            onClick={() => setShowAuthModal(false)}
-            aria-hidden="true"
-          />
-          
-          <div 
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border-2 border-blue-100"
-            role="dialog"
-            aria-modal="true"
-          >
-            <button
-              onClick={() => setShowAuthModal(false)}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-all z-10"
-              aria-label="Close modal"
-            >
-              <X className="h-5 w-5" />
-            </button>
-            
-            <div className="p-8">
-              {/* Modal Header */}
-              <div className="text-center mb-8">
-                <div className="flex justify-center mb-4">
-                  <img
-                    src="/rexon-logo.png"
-                    alt="Rexon"
-                    className="h-12 w-auto object-contain"
-                  />
-                </div>
-                <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent mb-2">
-                  {authMode === 'signin' ? 'Welcome Back' : 'Create Account'}
-                </h2>
-                <p className="text-slate-600">
-                  {authMode === 'signin' ? 'Sign in to continue to Rexon' : 'Sign up to get started with Rexon'}
-                </p>
-              </div>
-
-              {/* Toggle Tabs */}
-              <div className="flex bg-blue-50 rounded-lg p-1 mb-6 border-2 border-blue-100">
-                <button
-                  onClick={() => {
-                    setAuthMode('signin')
-                    setError('')
-                  }}
-                  className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all ${
-                    authMode === 'signin'
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
-                      : 'text-slate-600 hover:text-blue-700'
-                  }`}
-                >
-                  Sign In
-                </button>
-                <button
-                  onClick={() => {
-                    setAuthMode('signup')
-                    setError('')
-                  }}
-                  className={`flex-1 py-2.5 px-4 rounded-md font-medium transition-all ${
-                    authMode === 'signup'
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg'
-                      : 'text-slate-600 hover:text-blue-700'
-                  }`}
-                >
-                  Sign Up
-                </button>
-              </div>
-
-              {/* Error Message */}
-              {error && (
-                <div className="mb-4 p-3 bg-orange-50 border-2 border-orange-200 rounded-lg flex items-start space-x-2">
-                  <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-orange-700 font-medium">{error}</p>
-                </div>
-              )}
-              
-              {/* Social Sign In Buttons */}
-              <div className="space-y-3 mb-6">
-                <button 
-                  onClick={handleGoogleSignIn}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                  </svg>
-                  <span>Continue with Google</span>
-                </button>
-                
-                <button 
-                  onClick={handleMicrosoftSignIn}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-                >
-                  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#00A4EF">
-                    <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
-                  </svg>
-                  <span>Continue with Microsoft</span>
-                </button>
-              </div>
-              
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t-2 border-blue-100"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-slate-500 font-medium">Or continue with email</span>
-                </div>
-              </div>
-              
-              {/* Sign In Form */}
-              {authMode === 'signin' && (
-                <div className="space-y-4">
-                  <div>
-                    <label htmlFor="signin-email" className="block text-sm font-medium text-slate-700 mb-2">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
-                      <input
-                        id="signin-email"
-                        type="email"
-                        value={signInData.email}
-                        onChange={(e) => setSignInData({...signInData, email: e.target.value})}
-                        placeholder="you@example.com"
-                        required
-                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="signin-password" className="block text-sm font-medium text-slate-700 mb-2">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
-                      <input
-                        id="signin-password"
-                        type="password"
-                        value={signInData.password}
-                        onChange={(e) => setSignInData({...signInData, password: e.target.value})}
-                        placeholder="••••••••"
-                        required
-                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between text-sm">
-                    <label htmlFor="remember" className="flex items-center space-x-2 cursor-pointer">
-                      <input 
-                        id="remember"
-                        type="checkbox" 
-                        checked={signInData.rememberMe}
-                        onChange={(e) => setSignInData({...signInData, rememberMe: e.target.checked})}
-                        className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500 cursor-pointer" 
-                      />
-                      <span className="text-slate-700">Remember me</span>
-                    </label>
-                    <button className="text-orange-600 hover:text-orange-700 font-medium hover:underline">
-                      Forgot password?
-                    </button>
-                  </div>
-                  
-                  <button
-                    onClick={handleEmailSignIn}
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-medium shadow-lg hover:shadow-orange-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Signing In...' : 'Sign In'}
-                  </button>
-                </div>
-              )}
-
-              {/* Sign Up Form */}
-              {authMode === 'signup' && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="firstName" className="block text-sm font-medium text-slate-700 mb-2">
-                        First Name
-                      </label>
-                      <div className="relative">
-                        <UserCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
-                        <input
-                          id="firstName"
-                          type="text"
-                          value={signUpData.firstName}
-                          onChange={(e) => setSignUpData({...signUpData, firstName: e.target.value})}
-                          placeholder="John"
-                          required
-                          className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label htmlFor="lastName" className="block text-sm font-medium text-slate-700 mb-2">
-                        Last Name
-                      </label>
-                      <input
-                        id="lastName"
-                        type="text"
-                        value={signUpData.lastName}
-                        onChange={(e) => setSignUpData({...signUpData, lastName: e.target.value})}
-                        placeholder="Doe"
-                        required
-                        className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="signup-email" className="block text-sm font-medium text-slate-700 mb-2">
-                      Email Address
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
-                      <input
-                        id="signup-email"
-                        type="email"
-                        value={signUpData.email}
-                        onChange={(e) => setSignUpData({...signUpData, email: e.target.value})}
-                        placeholder="you@example.com"
-                        required
-                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">
-                      Phone Number (Optional)
-                    </label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
-                      <input
-                        id="phone"
-                        type="tel"
-                        value={signUpData.phone}
-                        onChange={(e) => setSignUpData({...signUpData, phone: e.target.value})}
-                        placeholder="+91 98765 43210"
-                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="signup-password" className="block text-sm font-medium text-slate-700 mb-2">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
-                      <input
-                        id="signup-password"
-                        type="password"
-                        value={signUpData.password}
-                        onChange={(e) => setSignUpData({...signUpData, password: e.target.value})}
-                        placeholder="••••••••"
-                        required
-                        minLength={8}
-                        className="w-full pl-11 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all"
-                      />
-                    </div>
-                    <p className="text-xs text-slate-500 mt-1">Must be at least 8 characters</p>
-                  </div>
-                  
-                  <button
-                    onClick={handleEmailSignUp}
-                    disabled={loading}
-                    className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 transition-all font-medium shadow-lg hover:shadow-orange-500/50 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Creating Account...' : 'Create Account'}
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Login Form Modal */}
+      <LoginForm
+        isOpen={showAuthModal}
+        onClose={closeAuthModal}
+        authMode={authMode}
+        onAuthModeChange={setAuthMode}
+        onGoogleSignIn={handleGoogleSignIn}
+        onMicrosoftSignIn={handleMicrosoftSignIn}
+        onEmailSignIn={handleEmailSignIn}
+        onEmailSignUp={handleEmailSignUp}
+      />
     </>
   )
 }
