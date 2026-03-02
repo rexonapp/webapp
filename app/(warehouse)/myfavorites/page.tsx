@@ -25,6 +25,7 @@ export default function MyFavorites() {
               <tr>
                 <th className="p-3 border">Title</th>
                 <th className="p-3 border">City</th>
+                <th className="p-3 border">Property Id</th>
                 <th className="p-3 border">Type</th>
                 <th className="p-3 border">Price</th>
                 <th className="p-3 border">Favorited Price</th>
@@ -36,6 +37,7 @@ export default function MyFavorites() {
                 <tr key={item.id} className="hover:bg-gray-50">
                   <td className="p-3 border">{item.title}</td>
                   <td className="p-3 border">{item.city}</td>
+                  <td className="p-3 border">{item.id}</td>
                   <td className="p-3 border">{item.property_type}</td>
                   <td className="p-3 border">₹ {item.price_per_sqft}</td>
                   <td className="p-3 border">

@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 async function getProperty(warehouseId: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
   const res = await fetch(
     `${baseUrl}/api/public-property/${warehouseId}`,

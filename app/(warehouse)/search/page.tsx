@@ -36,6 +36,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { cn } from "@/lib/utils"
 import ShareModal from '@/components/ui/shareModel';
+import LoginForm from '@/components/layout/LoginForm';
 
 const Map = dynamic(() => import('./map'), {
   ssr: false,
@@ -85,6 +86,7 @@ interface Property {
   updated_at: string;
   images?: PropertyImage[];
   distance?: number;
+  isSaved?: boolean;
 }
 
 interface City {
@@ -523,7 +525,7 @@ FilterPanel.displayName = 'FilterPanel';
 const CompactPropertyCard = memo(({ property, onHover }: { property: Property; onHover?: (property: Property | null) => void }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(property.isSaved || false);  
   const [isHovered, setIsHovered] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const animationFrameRef = useRef<number | null>(null);
@@ -842,7 +844,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(property.isSaved || false);  
   const [scrollProgress, setScrollProgress] = useState(0);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -1253,6 +1255,28 @@ function SearchResults() {
             processedProperties = processedProperties.filter((p: Property) => 
               p.city.toLowerCase() === city.toLowerCase()
             );
+          }
+
+          try {
+            const propertyIds = processedProperties.map((p: Property) => p.id);
+        
+            if (propertyIds.length > 0) {
+              const favRes = await fetch("/api/leads/favorite/status", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ propertyIds }),
+              });
+              if (favRes.ok) {
+                const { favoriteIds } = await favRes.json();
+
+                processedProperties = processedProperties.map((p: Property) => ({
+                  ...p,
+                  isSaved: favoriteIds.includes(p.id),
+                }));
+              }
+            }
+          } catch (error) {
+            console.error("Favorite bulk fetch error:", error);
           }
 
           setProperties(processedProperties);
