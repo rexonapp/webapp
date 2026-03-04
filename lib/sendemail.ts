@@ -23,7 +23,7 @@ export async function sendWelcomeEmail({
     // SendGrid message configuration
     const msg = {
       to: email,
-      from:'no-reply@pryzmatech.com',
+      from:'admin@rexonproperties.in',
       subject: `Welcome to Rexon, ${fullName}! 🏠`,
       html: emailHtml,
       // Optional: Add plain text version
@@ -39,6 +39,7 @@ export async function sendWelcomeEmail({
 
     // Send email via SendGrid
     const response = await sgMail.send(msg);
+    console.log('respoonse')
 
     console.log('Welcome email sent successfully via SendGrid');
     console.log('SendGrid Response:', response[0].statusCode);
