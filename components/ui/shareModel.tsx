@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Facebook, MessageCircle } from "lucide-react";
 
 interface ShareModalProps {
   propertyId: any;
@@ -14,15 +15,27 @@ export default function ShareModal({
 }: ShareModalProps) {
   const [copied, setCopied] = useState(false);
 
-  const shareUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/property/${propertyId}`
-      : "";
+  // const shareUrl =
+  //   typeof window !== "undefined"
+  //     ? `${window.location.origin}/property/${propertyId}`
+  //     : "";
+
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+
+  const shareUrl = `${baseUrl}/property/${propertyId}`;
+
+  const encodedUrl = encodeURIComponent(shareUrl);
+  const encodedText = encodeURIComponent("Check out this property");
+
+  const whatsappUrl = `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+  const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 5000);
   };
 
   return (
@@ -42,13 +55,31 @@ export default function ShareModal({
           type="text"
           readOnly
           value={shareUrl}
-          className="w-full border rounded-md p-2 text-sm mb-3"
+          className="w-full border rounded-md p-2 text-sm mb-4"
         />
+
+        {/* Social Share Buttons */}
+        <div className="flex gap-3 mb-4">
+          <button
+            onClick={() => window.open(whatsappUrl, "_blank")}
+            className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition"
+          >
+            <MessageCircle size={18} />
+            WhatsApp
+          </button>
+
+          <button
+            onClick={() => window.open(facebookUrl, "_blank")}
+            className="flex-1 flex items-center justify-center gap-2 bg-blue-700 text-white py-2 rounded-md hover:bg-blue-800 transition"
+          >
+            <Facebook size={18} />
+            Facebook
+          </button>
+        </div>
 
         <button
           onClick={handleCopy}
-          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
-        >
+          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-500 transition"        >
           {copied ? "Copied!" : "Copy Link"}
         </button>
       </div>
