@@ -5,7 +5,6 @@ import {
   Head,
   Heading,
   Html,
-  Img,
   Link,
   Preview,
   Row,
@@ -26,7 +25,7 @@ export const WelcomeEmail = ({
   email = 'customer@example.com',
   city = 'Your City',
 }: WelcomeEmailProps) => {
-  const previewText = `Welcome to Rexon - Let's find your dream property!`;
+  const previewText = `Welcome to Rexon – Let's find your dream property!`;
 
   return (
     <Html>
@@ -34,141 +33,187 @@ export const WelcomeEmail = ({
       <Preview>{previewText}</Preview>
       <Body style={main}>
         <Container style={container}>
-          {/* Header with Logo */}
+
+          {/* ── Header ── */}
           <Section style={header}>
             <Row>
-              <Column>
-                <Heading style={headerTitle}>REXON</Heading>
+              <Column style={{ verticalAlign: 'middle' }}>
+                <Heading style={logoText}>REXON</Heading>
+                <Text style={logoTagline}>Real Estate Excellence</Text>
+              </Column>
+              <Column style={{ textAlign: 'right', verticalAlign: 'middle' }}>
+                <Text style={headerBadge}>Premium Member</Text>
               </Column>
             </Row>
           </Section>
 
-          {/* Hero Section */}
+          {/* ── Accent bar ── */}
+          <Section style={accentBar} />
+
+          {/* ── Hero ── */}
           <Section style={heroSection}>
-            <Heading style={heroHeading}>
-              Welcome to Rexon! 🎉
-            </Heading>
-            <Text style={heroText}>
-              We're thrilled to have you on board, {fullName}!
+            <Text style={welcomeLabel}>WELCOME ABOARD</Text>
+            <Heading style={heroHeading}>Hello, {fullName}!</Heading>
+            <Text style={heroSubtext}>
+              Your journey to finding the perfect property starts here. We're
+              delighted to have you as part of the Rexon family.
             </Text>
           </Section>
 
-          {/* Main Content */}
+          {/* ── Account Details ── */}
           <Section style={content}>
-            <Text style={paragraph}>
-              Thank you for registering with Rexon. You've taken the first step 
-              towards finding your perfect property, and we're here to guide you 
-              every step of the way.
-            </Text>
-
-            {/* Account Details Card */}
             <Section style={accountCard}>
-              <Heading style={cardHeading}>Your Account Details</Heading>
+              <Row>
+                <Column style={cardAccentBar} />
+                <Column style={{ paddingLeft: '20px' }}>
+                  <Text style={cardLabel}>YOUR ACCOUNT</Text>
+                  <Heading style={cardHeading}>Account Summary</Heading>
+                </Column>
+              </Row>
               <Hr style={divider} />
               <Row style={detailRow}>
-                <Column style={detailLabel}>Name:</Column>
+                <Column style={detailLabel}>Full Name</Column>
                 <Column style={detailValue}>{fullName}</Column>
               </Row>
+              <Hr style={thinDivider} />
               <Row style={detailRow}>
-                <Column style={detailLabel}>Email:</Column>
+                <Column style={detailLabel}>Email Address</Column>
                 <Column style={detailValue}>{email}</Column>
               </Row>
+              <Hr style={thinDivider} />
               <Row style={detailRow}>
-                <Column style={detailLabel}>City:</Column>
+                <Column style={detailLabel}>City</Column>
                 <Column style={detailValue}>{city}</Column>
               </Row>
             </Section>
 
-            {/* What's Next Section */}
-            <Heading style={sectionHeading}>What's Next?</Heading>
-            <Section style={featureList}>
+            {/* ── What's Next ── */}
+            <Text style={sectionLabel}>WHAT YOU GET</Text>
+            <Heading style={sectionHeading}>Everything You Need to Find Your Home</Heading>
+
+            <Section style={featureGrid}>
               <Row style={featureRow}>
-                <Column style={featureIcon}>🏠</Column>
+                <Column style={featureIconCol}>
+                  <Section style={iconBox}>
+                    <Text style={iconText}>🏠</Text>
+                  </Section>
+                </Column>
                 <Column style={featureContent}>
-                  <Text style={featureTitle}>Browse Properties</Text>
+                  <Text style={featureTitle}>Curated Property Listings</Text>
                   <Text style={featureDescription}>
-                    Explore our extensive collection of properties tailored to your preferences
+                    Access thousands of verified properties hand-picked to match
+                    your exact preferences and budget.
                   </Text>
                 </Column>
               </Row>
 
               <Row style={featureRow}>
-                <Column style={featureIcon}>🔔</Column>
+                <Column style={featureIconCol}>
+                  <Section style={iconBox}>
+                    <Text style={iconText}>🔔</Text>
+                  </Section>
+                </Column>
                 <Column style={featureContent}>
-                  <Text style={featureTitle}>Get Notifications</Text>
+                  <Text style={featureTitle}>Instant Property Alerts</Text>
                   <Text style={featureDescription}>
-                    Receive instant updates about new properties matching your criteria
+                    Be the first to know when a property matching your criteria
+                    hits the market.
                   </Text>
                 </Column>
               </Row>
 
               <Row style={featureRow}>
-                <Column style={featureIcon}>💼</Column>
+                <Column style={featureIconCol}>
+                  <Section style={iconBox}>
+                    <Text style={iconText}>💼</Text>
+                  </Section>
+                </Column>
                 <Column style={featureContent}>
-                  <Text style={featureTitle}>Expert Assistance</Text>
+                  <Text style={featureTitle}>Dedicated Expert Support</Text>
                   <Text style={featureDescription}>
-                    Our team of property experts is ready to help you find your dream home
+                    Our experienced property advisors are available around the
+                    clock to assist you.
                   </Text>
                 </Column>
               </Row>
 
               <Row style={featureRow}>
-                <Column style={featureIcon}>📊</Column>
+                <Column style={featureIconCol}>
+                  <Section style={iconBox}>
+                    <Text style={iconText}>📊</Text>
+                  </Section>
+                </Column>
                 <Column style={featureContent}>
-                  <Text style={featureTitle}>Market Insights</Text>
+                  <Text style={featureTitle}>Live Market Intelligence</Text>
                   <Text style={featureDescription}>
-                    Stay informed with the latest market trends and property valuations
+                    Make confident decisions with real-time pricing data and
+                    neighbourhood insights.
                   </Text>
                 </Column>
               </Row>
             </Section>
 
-            {/* CTA Button */}
+            {/* ── CTA ── */}
             <Section style={ctaSection}>
-              <Link href="https://yourwebsite.com" style={button}>
-                Start Exploring Properties
+              <Link href="https://rexonproperties.in" style={ctaButton}>
+                Explore Properties Now →
               </Link>
+              <Text style={ctaSubtext}>No credit card required · Free forever</Text>
             </Section>
 
-            {/* Help Section */}
+            {/* ── Help ── */}
             <Section style={helpSection}>
-              <Text style={helpText}>
-                <strong>Need help getting started?</strong>
-              </Text>
-              <Text style={helpText}>
-                Our support team is here for you 24/7. Feel free to reach out at{' '}
-                <Link href="mailto:support@rexon.com" style={link}>
-                  support@rexon.com
-                </Link>{' '}
-                or call us at{' '}
-                <Link href="tel:+911234567890" style={link}>
-                  +91 123 456 7890
-                </Link>
-              </Text>
+              <Row>
+                <Column style={helpIconCol}>
+                  <Text style={helpIcon}>💬</Text>
+                </Column>
+                <Column>
+                  <Text style={helpTitle}>Need Help Getting Started?</Text>
+                  <Text style={helpBody}>
+                    Our support team is available 24 / 7. Reach us at{' '}
+                    <Link href="mailto:support@rexon.com" style={helpLink}>
+                      support@rexon.com
+                    </Link>{' '}
+                    or call{' '}
+                    <Link href="tel:+911234567890" style={helpLink}>
+                      +91 123 456 7890
+                    </Link>
+                    .
+                  </Text>
+                </Column>
+              </Row>
             </Section>
           </Section>
 
-          {/* Footer */}
+          {/* ── Footer ── */}
           <Section style={footer}>
             <Hr style={footerDivider} />
-            <Text style={footerText}>
-              © {new Date().getFullYear()} Rexon. All rights reserved.
-            </Text>
-            <Text style={footerText}>
-              You're receiving this email because you registered at Rexon.
-            </Text>
-            <Row style={socialLinks}>
-              <Column align="center">
+            <Row style={socialRow}>
+              <Column style={{ textAlign: 'center' }}>
                 <Link href="#" style={socialLink}>Facebook</Link>
-                {' • '}
+                {'  ·  '}
                 <Link href="#" style={socialLink}>Twitter</Link>
-                {' • '}
+                {'  ·  '}
                 <Link href="#" style={socialLink}>Instagram</Link>
-                {' • '}
+                {'  ·  '}
                 <Link href="#" style={socialLink}>LinkedIn</Link>
               </Column>
             </Row>
+            <Text style={footerText}>
+              © {new Date().getFullYear()} Rexon Realty Pvt. Ltd. · All rights reserved.
+            </Text>
+            <Text style={footerText}>
+              You received this email because you registered at Rexon.
+            </Text>
+            <Text style={footerUnsubscribe}>
+              <Link href="#" style={unsubLink}>Unsubscribe</Link>
+              {' · '}
+              <Link href="#" style={unsubLink}>Privacy Policy</Link>
+              {' · '}
+              <Link href="#" style={unsubLink}>Terms of Service</Link>
+            </Text>
           </Section>
+
         </Container>
       </Body>
     </Html>
@@ -177,205 +222,327 @@ export const WelcomeEmail = ({
 
 export default WelcomeEmail;
 
-// Styles
+/* ─────────────────────────────────────────
+   STYLES
+───────────────────────────────────────── */
+
 const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif',
+  backgroundColor: '#eef2f7',
+  fontFamily: 'Georgia, "Times New Roman", serif',
 };
 
 const container = {
   backgroundColor: '#ffffff',
-  margin: '0 auto',
-  padding: '0',
-  marginBottom: '64px',
-  maxWidth: '600px',
+  margin: '32px auto',
+  maxWidth: '620px',
+  borderRadius: '4px',
+  overflow: 'hidden',
+  boxShadow: '0 4px 24px rgba(30,58,120,0.10)',
 };
 
+/* Header */
 const header = {
-  backgroundColor: '#dc2626',
-  padding: '24px 40px',
+  backgroundColor: '#1d4ed8',  // blue-700
+  padding: '28px 40px',
 };
 
-const headerTitle = {
+const logoText = {
   color: '#ffffff',
-  fontSize: '28px',
-  fontWeight: 'bold',
+  fontSize: '26px',
+  fontWeight: '700',
   margin: '0',
-  letterSpacing: '2px',
+  letterSpacing: '4px',
+  fontFamily: 'Georgia, serif',
 };
 
+const logoTagline = {
+  color: '#93c5fd',  // blue-300
+  fontSize: '11px',
+  letterSpacing: '2px',
+  margin: '4px 0 0',
+  textTransform: 'uppercase' as const,
+};
+
+const headerBadge = {
+  display: 'inline-block',
+  backgroundColor: '#f97316',  // orange-500
+  color: '#ffffff',
+  fontSize: '11px',
+  fontWeight: '600',
+  letterSpacing: '1px',
+  padding: '5px 12px',
+  borderRadius: '20px',
+  margin: '0',
+};
+
+/* Accent bar */
+const accentBar = {
+  backgroundColor: '#f97316',  // orange-500
+  height: '4px',
+  padding: '0',
+  margin: '0',
+};
+
+/* Hero */
 const heroSection = {
-  backgroundColor: '#fef2f2',
-  padding: '40px 40px 30px',
+  backgroundColor: '#eff6ff',  // blue-50
+  padding: '48px 48px 40px',
   textAlign: 'center' as const,
 };
 
+const welcomeLabel = {
+  color: '#3b82f6',  // blue-500
+  fontSize: '11px',
+  fontWeight: '700',
+  letterSpacing: '3px',
+  margin: '0 0 16px',
+};
+
 const heroHeading = {
-  color: '#1f2937',
-  fontSize: '32px',
-  fontWeight: 'bold',
+  color: '#1e3a8a',  // blue-900
+  fontSize: '34px',
+  fontWeight: '700',
   margin: '0 0 16px',
   lineHeight: '1.2',
+  fontFamily: 'Georgia, serif',
 };
 
-const heroText = {
-  color: '#4b5563',
-  fontSize: '18px',
-  margin: '0',
-  lineHeight: '1.5',
-};
-
-const content = {
-  padding: '40px',
-};
-
-const paragraph = {
+const heroSubtext = {
   color: '#374151',
   fontSize: '16px',
-  lineHeight: '1.6',
-  margin: '0 0 24px',
+  lineHeight: '1.7',
+  margin: '0',
+  maxWidth: '460px',
 };
 
+/* Content wrapper */
+const content = {
+  padding: '40px 48px',
+};
+
+/* Account card */
 const accountCard = {
-  backgroundColor: '#f9fafb',
-  borderRadius: '8px',
-  padding: '24px',
-  marginBottom: '32px',
-  border: '1px solid #e5e7eb',
+  backgroundColor: '#f8faff',
+  borderRadius: '6px',
+  padding: '28px 28px 20px',
+  marginBottom: '40px',
+  border: '1px solid #dbeafe',
+};
+
+const cardAccentBar = {
+  backgroundColor: '#3b82f6',
+  width: '4px',
+  borderRadius: '4px',
+};
+
+const cardLabel = {
+  color: '#3b82f6',
+  fontSize: '10px',
+  fontWeight: '700',
+  letterSpacing: '2px',
+  margin: '0 0 4px',
 };
 
 const cardHeading = {
-  color: '#1f2937',
+  color: '#1e3a8a',
   fontSize: '18px',
   fontWeight: '600',
-  margin: '0 0 16px',
+  margin: '0',
+  fontFamily: 'Georgia, serif',
 };
 
 const divider = {
-  borderColor: '#e5e7eb',
-  margin: '0 0 16px',
+  borderColor: '#dbeafe',
+  margin: '20px 0 16px',
+};
+
+const thinDivider = {
+  borderColor: '#eff6ff',
+  margin: '10px 0',
 };
 
 const detailRow = {
-  marginBottom: '12px',
+  padding: '6px 0',
 };
 
 const detailLabel = {
   color: '#6b7280',
-  fontSize: '14px',
+  fontSize: '13px',
   fontWeight: '500',
-  width: '100px',
+  width: '140px',
 };
 
 const detailValue = {
-  color: '#1f2937',
-  fontSize: '14px',
-  fontWeight: '400',
+  color: '#1e3a8a',
+  fontSize: '13px',
+  fontWeight: '600',
+};
+
+/* Section headings */
+const sectionLabel = {
+  color: '#3b82f6',
+  fontSize: '10px',
+  fontWeight: '700',
+  letterSpacing: '3px',
+  margin: '0 0 8px',
 };
 
 const sectionHeading = {
-  color: '#1f2937',
-  fontSize: '20px',
-  fontWeight: '600',
-  margin: '32px 0 20px',
+  color: '#1e3a8a',
+  fontSize: '22px',
+  fontWeight: '700',
+  margin: '0 0 28px',
+  fontFamily: 'Georgia, serif',
 };
 
-const featureList = {
-  marginBottom: '32px',
+/* Features */
+const featureGrid = {
+  marginBottom: '8px',
 };
 
 const featureRow = {
   marginBottom: '20px',
 };
 
-const featureIcon = {
-  fontSize: '24px',
-  width: '40px',
+const featureIconCol = {
+  width: '52px',
   verticalAlign: 'top',
 };
 
+const iconBox = {
+  backgroundColor: '#eff6ff',
+  borderRadius: '10px',
+  padding: '10px',
+  width: '44px',
+  textAlign: 'center' as const,
+  border: '1px solid #dbeafe',
+};
+
+const iconText = {
+  fontSize: '20px',
+  margin: '0',
+  lineHeight: '1',
+};
+
 const featureContent = {
-  paddingLeft: '12px',
+  paddingLeft: '16px',
+  verticalAlign: 'top',
 };
 
 const featureTitle = {
-  color: '#1f2937',
-  fontSize: '16px',
+  color: '#1e3a8a',
+  fontSize: '15px',
   fontWeight: '600',
-  margin: '0 0 4px',
+  margin: '0 0 5px',
   lineHeight: '1.4',
 };
 
 const featureDescription = {
   color: '#6b7280',
-  fontSize: '14px',
+  fontSize: '13px',
   margin: '0',
-  lineHeight: '1.5',
+  lineHeight: '1.6',
 };
 
+/* CTA */
 const ctaSection = {
   textAlign: 'center' as const,
-  margin: '40px 0',
+  padding: '36px 0 8px',
 };
 
-const button = {
-  backgroundColor: '#dc2626',
+const ctaButton = {
+  backgroundColor: '#f97316',  // orange-500
   borderRadius: '6px',
   color: '#ffffff',
-  fontSize: '16px',
-  fontWeight: '600',
+  fontSize: '15px',
+  fontWeight: '700',
   textDecoration: 'none',
-  textAlign: 'center' as const,
   display: 'inline-block',
-  padding: '14px 32px',
-  lineHeight: '1.5',
+  padding: '16px 40px',
+  letterSpacing: '0.5px',
 };
 
+const ctaSubtext = {
+  color: '#9ca3af',
+  fontSize: '12px',
+  margin: '14px 0 0',
+};
+
+/* Help */
 const helpSection = {
-  backgroundColor: '#fffbeb',
-  borderRadius: '8px',
-  padding: '24px',
-  marginTop: '32px',
-  border: '1px solid #fcd34d',
+  backgroundColor: '#fffbf5',
+  borderRadius: '6px',
+  padding: '22px 24px',
+  marginTop: '36px',
+  border: '1px solid #fed7aa',  // orange-200
 };
 
-const helpText = {
-  color: '#78350f',
+const helpIconCol = {
+  width: '40px',
+  verticalAlign: 'top',
+};
+
+const helpIcon = {
+  fontSize: '22px',
+  margin: '2px 0 0',
+};
+
+const helpTitle = {
+  color: '#1e3a8a',
   fontSize: '14px',
-  lineHeight: '1.6',
-  margin: '0 0 8px',
+  fontWeight: '700',
+  margin: '0 0 6px',
 };
 
-const link = {
-  color: '#dc2626',
+const helpBody = {
+  color: '#374151',
+  fontSize: '13px',
+  lineHeight: '1.6',
+  margin: '0',
+};
+
+const helpLink = {
+  color: '#f97316',
   textDecoration: 'underline',
 };
 
+/* Footer */
 const footer = {
-  padding: '32px 40px',
-  backgroundColor: '#f9fafb',
+  padding: '28px 48px 36px',
+  backgroundColor: '#1e3a8a',  // blue-900
 };
 
 const footerDivider = {
-  borderColor: '#e5e7eb',
+  borderColor: '#2d4fa3',
   margin: '0 0 24px',
 };
 
-const footerText = {
-  color: '#6b7280',
-  fontSize: '12px',
-  lineHeight: '1.5',
-  margin: '0 0 8px',
-  textAlign: 'center' as const,
-};
-
-const socialLinks = {
-  marginTop: '16px',
+const socialRow = {
+  marginBottom: '16px',
 };
 
 const socialLink = {
-  color: '#6b7280',
+  color: '#93c5fd',  // blue-300
   fontSize: '12px',
+  textDecoration: 'none',
+};
+
+const footerText = {
+  color: '#93c5fd',
+  fontSize: '12px',
+  lineHeight: '1.6',
+  margin: '0 0 4px',
+  textAlign: 'center' as const,
+};
+
+const footerUnsubscribe = {
+  color: '#60a5fa',
+  fontSize: '11px',
+  margin: '16px 0 0',
+  textAlign: 'center' as const,
+};
+
+const unsubLink = {
+  color: '#60a5fa',
   textDecoration: 'none',
 };
