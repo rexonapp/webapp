@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { query } from '@/lib/db';
 import { randomBytes } from 'crypto';
+import bcrypt from 'bcrypt';
+import { sendAgentInviteEmail } from '@/lib/sendemail';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'ap-south-2',
@@ -15,9 +17,35 @@ const BUCKET_NAME = 'rexon-web';
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const MAX_DOCUMENT_SIZE = 5 * 1024 * 1024;
 const PLATFORM_DOMAIN = 'rexon.com';
+const BCRYPT_ROUNDS = 10;
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const ALLOWED_DOCUMENT_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+
+// Generates a strong 10-char random password
+// Guarantees: 1 uppercase, 1 lowercase, 1 digit, 1 special — rest random, shuffled
+function generateTemporaryPassword(): string {
+  const upper   = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lower   = 'abcdefghjkmnpqrstuvwxyz';
+  const digits  = '23456789';
+  const special = '@#$!&*';
+  const all     = upper + lower + digits + special;
+
+  const mandatory = [
+    upper  [Math.floor(Math.random() * upper.length)],
+    lower  [Math.floor(Math.random() * lower.length)],
+    digits [Math.floor(Math.random() * digits.length)],
+    special[Math.floor(Math.random() * special.length)],
+  ];
+  const rest = Array.from({ length: 6 }, () => all[Math.floor(Math.random() * all.length)]);
+
+  const combined = [...mandatory, ...rest];
+  for (let i = combined.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [combined[i], combined[j]] = [combined[j], combined[i]];
+  }
+  return combined.join('');
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -187,8 +215,12 @@ export async function POST(request: NextRequest) {
       kycDocumentS3Url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'ap-south-2'}.amazonaws.com/${kycDocumentS3Key}`;
     }
 
+    // ── Password hashing ──────────────────────────────────────────────────────
+    const temporaryPassword = generateTemporaryPassword();
+    const passwordSalt = await bcrypt.genSalt(BCRYPT_ROUNDS);
+    const passwordHash = await bcrypt.hash(temporaryPassword, passwordSalt);
+
     // ── Insert agent ──────────────────────────────────────────────────────────
-    // Fixed: Corrected the number of parameters and parameter mapping
     const agentResult = await query(
       `INSERT INTO agents
        (full_name, email, mobile_number, whatsapp_number, city, state, address, pincode,
@@ -197,30 +229,35 @@ export async function POST(request: NextRequest) {
         profile_photo_s3_key, profile_photo_s3_url,
         kyc_document_s3_key, kyc_document_s3_url,
         languages_spoken,
-        terms_accepted, is_verified, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+        password_hash, password_salt, is_temporary_password,
+        terms_accepted, is_verified, status,
+        created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, NOW() AT TIME ZONE 'Asia/Kolkata')
        RETURNING id, full_name, email, mobile_number, city, agency_name, status, created_at`,
       [
-        fullName,           
-        email,              
-        primaryPhone,       
-        whatsappNumber,     
-        city,              
-        state,              
-        fullAddress,        
-        pincode,            
-        dateOfBirth,        
-        gender,             
-        agencyName,         
-        bio,               
-        profilePhotoS3Key,  
-        profilePhotoS3Url, 
-        kycDocumentS3Key, 
-        kycDocumentS3Url,   
-        languagesSpoken.length > 0 ? languagesSpoken : null,
-        true,              
-        false,             
-        'pending',        
+        fullName,           // $1
+        email,              // $2
+        primaryPhone,       // $3
+        whatsappNumber,     // $4
+        city,               // $5
+        state,              // $6
+        fullAddress,        // $7
+        pincode,            // $8
+        dateOfBirth,        // $9
+        gender,             // $10
+        agencyName,         // $11
+        bio,                // $12
+        profilePhotoS3Key,  // $13
+        profilePhotoS3Url,  // $14
+        kycDocumentS3Key,   // $15
+        kycDocumentS3Url,   // $16
+        languagesSpoken.length > 0 ? languagesSpoken : null, // $17
+        passwordHash,       // $18 - password_hash
+        passwordSalt,       // $19 - password_salt
+        true,               // $20 - is_temporary_password
+        true,               // $21 - terms_accepted
+        false,              // $22 - is_verified
+        'approved',           // $23 - status
       ]
     );
 
@@ -237,10 +274,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // ── Send agent invite email (non-blocking — never fails the registration) ─
+    const emailResult = await sendAgentInviteEmail({
+      fullName,
+      email,
+      temporaryPassword,
+      agencyName: agencyName || undefined,
+      city: city || undefined,
+    });
+
+    if (!emailResult.success) {
+      console.error('Agent invite email failed to send:', emailResult.error);
+    }
+
     return NextResponse.json({
       success: true,
       agent: agentResult.rows[0],
-      message: 'Agent registration submitted successfully. We will review and get back to you.',
+      message: 'Agent registered successfully. Login credentials have been sent to their email.',
+      emailSent: emailResult.success,
     });
 
   } catch (error) {
@@ -323,7 +374,7 @@ export async function PUT(request: NextRequest) {
         // Handle languages_spoken as text[] array
         if (field === 'languages_spoken' && Array.isArray(body[field])) {
           updates.push(`${field} = $${paramCount}`);
-          values.push(body[field].length > 0 ? body[field] : null);  // Pass array directly
+          values.push(body[field].length > 0 ? body[field] : null);
         } else {
           updates.push(`${field} = $${paramCount}`);
           values.push(body[field]);
