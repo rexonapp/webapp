@@ -623,6 +623,23 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
   
   }, [router, isSaved, property.id, property.price_per_sqft]);
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  
+    try {
+      const res = await fetch("/api/auth/me");
+      const data = await res.json();
+
+      if (!data.user) {
+        router.push("/login");
+        return;
+      }
+      setShowShareCard(true);
+    } catch (error) {
+      console.error("Share auth error:", error);
+    }
+  };
   
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
@@ -726,17 +743,14 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
             >
               <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
               </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setShowShareCard(true);
-                }} className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
-              >
-              <Share2 size={18} />
-            </button>
+                <button
+                  onClick={handleShare}
+                  className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
+                >
+                  <Share2 size={18} />
+                </button>
+              </div>
             </div>
-          </div>
 
           {property.distance !== undefined && property.distance > 0 && (
             <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded font-medium">
