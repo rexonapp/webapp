@@ -1,3 +1,5 @@
+// app/api/agents/register/route.ts - WITH DEBUGGING
+
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { query } from '@/lib/db';
@@ -16,14 +18,12 @@ const s3Client = new S3Client({
 const BUCKET_NAME = 'rexon-web';
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const MAX_DOCUMENT_SIZE = 5 * 1024 * 1024;
-const PLATFORM_DOMAIN = 'rexon.com';
+const PLATFORM_DOMAIN = 'rexonproperties.in';
 const BCRYPT_ROUNDS = 10;
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const ALLOWED_DOCUMENT_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
 
-// Generates a strong 10-char random password
-// Guarantees: 1 uppercase, 1 lowercase, 1 digit, 1 special — rest random, shuffled
 function generateTemporaryPassword(): string {
   const upper   = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   const lower   = 'abcdefghjkmnpqrstuvwxyz';
@@ -47,9 +47,66 @@ function generateTemporaryPassword(): string {
   return combined.join('');
 }
 
+// ── Vercel domain provisioning ────────────────────────────────────────────────
+async function addDomainToVercel(subdomain: string): Promise<{ success: boolean; error?: string }> {
+  const fullDomain = `${subdomain}.${PLATFORM_DOMAIN}`;
+  const projectId = process.env.VERCEL_REXON_CRM_PROJECT_ID || '';
+  const token = process.env.VERCEL_TOKEN || '';
+  const teamId = process.env.VERCEL_TEAM_ID || '';
+
+  if (!projectId || !token) {
+    console.warn('Vercel env vars missing — skipping domain provisioning');
+    return { success: false, error: 'Vercel config missing' };
+  }
+
+  const url = teamId
+    ? `https://api.vercel.com/v10/projects/${projectId}/domains?teamId=${teamId}`
+    : `https://api.vercel.com/v10/projects/${projectId}/domains`;
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: fullDomain }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Domain already exists on project — that's fine
+      if (data.error?.code === 'domain_already_in_use') {
+        return { success: true };
+      }
+      console.error('Vercel domain add failed:', data);
+      return { success: false, error: data.error?.message || 'Vercel API error' };
+    }
+
+    console.log(`Vercel domain added: ${fullDomain}`);
+    return { success: true };
+  } catch (err) {
+    console.error('Vercel domain provision error:', err);
+    return { success: false, error: 'Network error calling Vercel API' };
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 export async function POST(request: NextRequest) {
   try {
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('🚀 START: Agent Registration - Route.ts');
+    console.log('═══════════════════════════════════════════════════════');
+
     const formData = await request.formData();
+
+    // ── DEBUG: Log all form data keys ──
+    const allKeys = Array.from(formData.keys());
+    console.log('📋 All formData keys received:', allKeys);
+    console.log('✓ Has "domainName" key?', formData.has('domainName'));
+    console.log('✓ Raw domainName value:', formData.get('domainName'));
+    console.log('✓ DomainName type:', typeof formData.get('domainName'));
 
     // Personal Details
     const fullName = formData.get('fullName') as string;
@@ -73,18 +130,34 @@ export async function POST(request: NextRequest) {
 
     // Professional Information
     const agencyName = formData.get('agencyName') as string || '';
-    const domainName = (formData.get('domainName') as string || '').trim().toLowerCase();
+    const domainNameRaw = formData.get('domainName') as string;
+    const domainName = (domainNameRaw || '').trim().toLowerCase();
+
+    // ── DEBUG: Log extracted domain data ──
+    console.log('📝 Domain extraction details:', {
+      domainNameRaw,
+      domainName,
+      domainName_type: typeof domainName,
+      domainName_length: domainName?.length,
+      domainName_isEmpty: domainName === '',
+      domainName_isFalsy: !domainName,
+    });
 
     // Additional Information
     const languagesSpokenStr = formData.get('languagesSpoken') as string;
     const languagesSpoken = languagesSpokenStr ? JSON.parse(languagesSpokenStr) : [];
     const bio = formData.get('bio') as string || '';
 
+    // TNC fields
+    const termsAcceptedRaw = formData.get('termsAccepted') as string;
+    const tncVersion = (formData.get('tncVersion') as string || '1.0').trim();
+    const termsAccepted = termsAcceptedRaw === 'true';
+
     // Files
     const profileImage = formData.get('profileImage') as File | null;
     const documents = formData.getAll('documents') as File[];
 
-    // ── Validation ────────────────────────────────────────────────────────────
+    // ── Validation ────────────────────────────────────────────────────────
     if (!fullName || !primaryPhone || !email) {
       return NextResponse.json(
         { error: 'Please fill in all required fields: full name, primary phone, and email' },
@@ -106,11 +179,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Email duplicate check ─────────────────────────────────────────────────
-    const existingEmail = await query(
-      'SELECT id FROM agents WHERE email = $1',
-      [email]
-    );
+    if (!termsAccepted) {
+      return NextResponse.json(
+        { error: 'You must accept the Terms and Conditions to register' },
+        { status: 400 }
+      );
+    }
+
+    // ── Email duplicate check ──────────────────────────────────────────────
+    const existingEmail = await query('SELECT id FROM agents WHERE email = $1', [email]);
     if (existingEmail.rows.length > 0) {
       return NextResponse.json(
         { error: 'This email is already registered as an agent' },
@@ -118,7 +195,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ── Domain validation & duplicate check ───────────────────────────────────
+    // ── Domain validation & duplicate check ───────────────────────────────
     if (domainName) {
       if (!/^[a-z0-9-]+$/.test(domainName)) {
         return NextResponse.json(
@@ -139,9 +216,9 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Race condition safety — re-check at submit time
+      // ── Check both active and pending to prevent race conditions ──────────
       const domainCheck = await query(
-        `SELECT id FROM agent_domains WHERE domain_name = $1 AND status = 'pending'`,
+        `SELECT id FROM agent_domains WHERE domain_name = $1 AND status IN ('active', 'pending')`,
         [domainName]
       );
       if (domainCheck.rows.length > 0) {
@@ -152,7 +229,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ── File uploads ──────────────────────────────────────────────────────────
+    // ── File uploads ──────────────────────────────────────────────────────
     let profilePhotoS3Key = null;
     let profilePhotoS3Url = null;
     let kycDocumentS3Key = null;
@@ -160,22 +237,14 @@ export async function POST(request: NextRequest) {
 
     if (profileImage && profileImage.size > 0) {
       if (!ALLOWED_IMAGE_TYPES.includes(profileImage.type)) {
-        return NextResponse.json(
-          { error: 'Profile image must be JPG, PNG, or WebP' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Profile image must be JPG, PNG, or WebP' }, { status: 400 });
       }
       if (profileImage.size > MAX_IMAGE_SIZE) {
-        return NextResponse.json(
-          { error: 'Profile image must be less than 2MB' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'Profile image must be less than 2MB' }, { status: 400 });
       }
-
       const fileExtension = profileImage.name.split('.').pop();
       const randomString = randomBytes(16).toString('hex');
       profilePhotoS3Key = `agents/profile/${Date.now()}-${randomString}.${fileExtension}`;
-
       const arrayBuffer = await profileImage.arrayBuffer();
       await s3Client.send(new PutObjectCommand({
         Bucket: BUCKET_NAME,
@@ -189,22 +258,14 @@ export async function POST(request: NextRequest) {
     if (documents && documents.length > 0) {
       const kycDocument = documents[0];
       if (!ALLOWED_DOCUMENT_TYPES.includes(kycDocument.type)) {
-        return NextResponse.json(
-          { error: 'KYC document must be PDF, JPG, or PNG' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'KYC document must be PDF, JPG, or PNG' }, { status: 400 });
       }
       if (kycDocument.size > MAX_DOCUMENT_SIZE) {
-        return NextResponse.json(
-          { error: 'KYC document must be less than 5MB' },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: 'KYC document must be less than 5MB' }, { status: 400 });
       }
-
       const fileExtension = kycDocument.name.split('.').pop();
       const randomString = randomBytes(16).toString('hex');
       kycDocumentS3Key = `agents/kyc/${Date.now()}-${randomString}.${fileExtension}`;
-
       const arrayBuffer = await kycDocument.arrayBuffer();
       await s3Client.send(new PutObjectCommand({
         Bucket: BUCKET_NAME,
@@ -215,12 +276,12 @@ export async function POST(request: NextRequest) {
       kycDocumentS3Url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'ap-south-2'}.amazonaws.com/${kycDocumentS3Key}`;
     }
 
-    // ── Password hashing ──────────────────────────────────────────────────────
+    // ── Password hashing ──────────────────────────────────────────────────
     const temporaryPassword = generateTemporaryPassword();
     const passwordSalt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const passwordHash = await bcrypt.hash(temporaryPassword, passwordSalt);
 
-    // ── Insert agent ──────────────────────────────────────────────────────────
+    // ── Insert agent ──────────────────────────────────────────────────────
     const agentResult = await query(
       `INSERT INTO agents
        (full_name, email, mobile_number, whatsapp_number, city, state, address, pincode,
@@ -235,57 +296,87 @@ export async function POST(request: NextRequest) {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, NOW() AT TIME ZONE 'Asia/Kolkata')
        RETURNING id, full_name, email, mobile_number, city, agency_name, status, created_at`,
       [
-        fullName,           // $1
-        email,              // $2
-        primaryPhone,       // $3
-        whatsappNumber,     // $4
-        city,               // $5
-        state,              // $6
-        fullAddress,        // $7
-        pincode,            // $8
-        dateOfBirth,        // $9
-        gender,             // $10
-        agencyName,         // $11
-        bio,                // $12
-        profilePhotoS3Key,  // $13
-        profilePhotoS3Url,  // $14
-        kycDocumentS3Key,   // $15
-        kycDocumentS3Url,   // $16
-        languagesSpoken.length > 0 ? languagesSpoken : null, // $17
-        passwordHash,       // $18 - password_hash
-        passwordSalt,       // $19 - password_salt
-        true,               // $20 - is_temporary_password
-        true,               // $21 - terms_accepted
-        false,              // $22 - is_verified
-        'approved',           // $23 - status
+        fullName, email, primaryPhone, whatsappNumber,
+        city, state, fullAddress, pincode,
+        dateOfBirth, gender, agencyName, bio,
+        profilePhotoS3Key, profilePhotoS3Url,
+        kycDocumentS3Key, kycDocumentS3Url,
+        languagesSpoken.length > 0 ? languagesSpoken : null,
+        passwordHash, passwordSalt,
+        true,   // is_temporary_password
+        true,   // terms_accepted
+        false,  // is_verified
+        'pending',
       ]
     );
 
     const agentId = agentResult.rows[0].id;
 
-    // ── Insert domain record if provided ──────────────────────────────────────
+    const clientIp =
+      request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+      request.headers.get('x-real-ip') ||
+      null;
+
+    await query(
+      `INSERT INTO agent_tnc_acceptance (agent_id, tnc_version, ip_address)
+       VALUES ($1, $2, $3)`,
+      [agentId, tncVersion, clientIp]
+    );
+
+    // ── Insert domain + provision on Vercel ───────────────────────────────
     if (domainName) {
       const fullDomain = `${domainName}.${PLATFORM_DOMAIN}`;
+
+      // 1. Save to DB as pending first
       await query(
         `INSERT INTO agent_domains
          (agent_id, domain_name, full_domain, status, is_active, created_at)
-         VALUES ($1, $2, $3, $4, $5, NOW())`,
-        [agentId, domainName, fullDomain, 'pending', true]
+         VALUES ($1, $2, $3, 'pending', true, NOW())`,
+        [agentId, domainName, fullDomain]
       );
+
+      // 2. Call Vercel API to add the subdomain to rexon-crm project
+      const vercelResult = await addDomainToVercel(domainName);
+
+      // 3. Update DB status based on Vercel result
+      await query(
+        `UPDATE agent_domains
+         SET status = $1, updated_at = NOW()
+         WHERE agent_id = $2 AND domain_name = $3`,
+        [vercelResult.success ? 'active' : 'failed', agentId, domainName]
+      );
+
+      if (!vercelResult.success) {
+        // Don't fail the whole registration — agent is created, domain just needs retry
+        console.error(`Domain provisioning failed for ${fullDomain}:`, vercelResult.error);
+      }
     }
 
-    // ── Send agent invite email (non-blocking — never fails the registration) ─
+    // ── Send invite email with domain name ─────────────────────────────────
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('📧 SENDING EMAIL');
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('📧 About to call sendAgentInviteEmail with:', {
+      fullName,
+      email,
+      domainName,  // ← CHECK THIS!
+      agencyName,
+      city,
+    });
+
     const emailResult = await sendAgentInviteEmail({
       fullName,
       email,
       temporaryPassword,
       agencyName: agencyName || undefined,
       city: city || undefined,
+      domainName: domainName || undefined,  // ← PASSING THIS
     });
 
-    if (!emailResult.success) {
-      console.error('Agent invite email failed to send:', emailResult.error);
-    }
+    console.log('📧 Email send result:', emailResult);
+    console.log('═══════════════════════════════════════════════════════');
+    console.log('✅ FINISHED: Agent Registration');
+    console.log('═══════════════════════════════════════════════════════');
 
     return NextResponse.json({
       success: true,
@@ -306,14 +397,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    return NextResponse.json(
-      { error: 'Registration failed. Please try again.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Registration failed. Please try again.' }, { status: 500 });
   }
 }
 
-// GET — fetch agent profile by email (query param)
+// GET — fetch agent profile by email
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -371,7 +459,6 @@ export async function PUT(request: NextRequest) {
 
     allowedFields.forEach(field => {
       if (body[field] !== undefined) {
-        // Handle languages_spoken as text[] array
         if (field === 'languages_spoken' && Array.isArray(body[field])) {
           updates.push(`${field} = $${paramCount}`);
           values.push(body[field].length > 0 ? body[field] : null);

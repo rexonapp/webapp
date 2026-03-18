@@ -1,3 +1,4 @@
+// app/api/agents/check-domain/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
@@ -43,9 +44,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ available: false, reason: 'reserved' });
     }
 
-    // Check database
     const result = await query(
-      `SELECT id FROM agent_domains WHERE domain_name = $1 AND status = 'active'`,
+      `SELECT id FROM agent_domains WHERE domain_name = $1 AND status IN ('active', 'pending')`,
       [name]
     );
 

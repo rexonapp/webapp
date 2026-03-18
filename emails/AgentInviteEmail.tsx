@@ -20,6 +20,7 @@ interface AgentInviteEmailProps {
   temporaryPassword: string;
   agencyName?: string;
   city?: string;
+  domainName?: string;
 }
 
 export const AgentInviteEmail = ({
@@ -28,9 +29,17 @@ export const AgentInviteEmail = ({
   temporaryPassword = 'Temp@1234',
   agencyName = '',
   city = '',
+  domainName = ''
 }: AgentInviteEmailProps) => {
   const previewText = `Your Rexon Agent Dashboard credentials are ready — log in now`;
-  const dashboardUrl = 'http://rexon-crm.vercel.app';
+
+  // ── Construct full domain URL from the provided domain name ────────────────
+  // domainName comes in as: "john-agency"
+  // We construct: "https://john-agency.rexonproperties.in"
+  const PLATFORM_DOMAIN = 'rexonproperties.in';
+  const fullDomainUrl = domainName && domainName.trim()
+    ? `https://${domainName}.${PLATFORM_DOMAIN}`
+    : `https://rexon-crm.vercel.app`;  // Only fallback if NO domain provided
 
   return (
     <Html>
@@ -92,11 +101,12 @@ export const AgentInviteEmail = ({
               </Row>
               <Hr style={thinDivider} />
 
+              {/* ── Dashboard URL with proper link ── */}
               <Row style={detailRow}>
                 <Column style={detailLabel}>Dashboard</Column>
                 <Column>
-                  <Link href={dashboardUrl} style={dashboardLinkInline}>
-                    rexon-crm.vercel.app
+                  <Link href={fullDomainUrl} style={dashboardLinkInline}>
+                    {fullDomainUrl}
                   </Link>
                 </Column>
               </Row>
@@ -156,8 +166,8 @@ export const AgentInviteEmail = ({
 
             {/* CTA Button */}
             <Section style={ctaSection}>
-              <Link href={dashboardUrl} style={ctaButton}>
-                Accept Invite →
+              <Link href={fullDomainUrl} style={ctaButton}>
+                Access Dashboard →
               </Link>
             </Section>
 
