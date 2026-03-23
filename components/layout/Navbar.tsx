@@ -284,10 +284,10 @@ export default function Navbar() {
 
                       {/* Menu Items */}
                       <div className="py-2">
-                        <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                        {/* <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
                           <User className="h-4 w-4 text-blue-600" />
                           <span className="font-medium">My Profile</span>
-                        </button>
+                        </button> */}
                         
                         {/* <button onClick={()=>router.push('/mylistings')} className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
                           <Building2 className="h-4 w-4 text-blue-600" />
