@@ -162,17 +162,27 @@ export default function HomePage() {
             <p className="text-xl text-blue-100 mb-10 max-w-3xl mx-auto leading-relaxed">
               Join thousands of satisfied property owners and businesses who found their perfect match with Rexon
             </p>
-            <Link href="/properties">
-              <Button size="lg" className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-12 py-6 text-lg shadow-2xl hover:shadow-orange-500/50 transform hover:scale-110 transition-all duration-500 border-0 rounded-xl font-semibold ripple-button group relative overflow-hidden">
-                <span className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <span className="relative z-10 flex items-center gap-2">
-                  Browse Properties Now
-                  <svg className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </span>
-              </Button>
-            </Link>
+            <Button
+            size="lg"
+            onClick={() => {
+              const heroSearch = document.querySelector('#hero-search') as HTMLElement;
+              if (heroSearch) {
+                heroSearch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => heroSearch.focus(), 600);
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            className="bg-gradient-to-r from-orange-500 via-orange-600 to-orange-700 hover:from-orange-600 hover:via-orange-700 hover:to-orange-800 text-white px-12 py-6 text-lg shadow-2xl hover:shadow-orange-500/50 transform hover:scale-110 transition-all duration-500 border-0 rounded-xl font-semibold ripple-button group relative overflow-hidden"
+          >
+            <span className="absolute inset-0 bg-gradient-to-r from-orange-400 to-orange-500 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <span className="relative z-10 flex items-center gap-2">
+              Browse Properties Now
+              <svg className="w-5 h-5 group-hover:translate-x-2 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </span>
+          </Button>
           </div>
         </section>
       </main>

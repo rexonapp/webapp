@@ -243,6 +243,7 @@ export default function PropertySearch() {
                 <MapPin className="h-4 w-4 text-blue-800 flex-shrink-0" />
                 <input
                   type="text"
+                   id="hero-search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setOpenDesktop(true)}
