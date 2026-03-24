@@ -132,11 +132,10 @@ export async function GET(request: NextRequest) {
 
     // Property type filter
     if (propertyType && propertyType !== 'all') {
-      queryText += ` AND property_type = $${paramCounter}`;
+      queryText += ` AND LOWER(TRIM(property_type)) = LOWER(TRIM($${paramCounter}))`;
       queryParams.push(propertyType);
       paramCounter++;
     }
-
     // Distance/size filter
     if (distance) {
       const distanceValue = parseInt(distance);
