@@ -95,6 +95,11 @@ interface City {
   stateCode?: string;
   latitude?: number;
   longitude?: number;
+  // Comma-separated alternate spellings at the same lat/long
+  // e.g. "Bengaluru,Bangalore Urban" when user searched "Bangalore"
+  alternate_name?: string;
+  // Full deduplicated list of all name variants (primary + alternates)
+  all_names?: string[];
 }
 
 // Interface for map bounds
@@ -289,34 +294,50 @@ const CitySearch = memo(({
             </div>
           ) : (
             <div>
-              {cities.map((city) => (
-                <button
-                  key={city.id || city.city}
-                  onClick={() => handleCitySelect(city)}
-                  className="w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3"
-                >
-                  <CheckCircle2
-                    className={cn(
-                      "h-4 w-4 text-orange-600 flex-shrink-0",
-                      selectedCity?.city === city.city &&
-                      (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
-                        ? "opacity-100"
-                        : "opacity-0"
-                    )}
-                  />
-                  <MapPin className="h-4 w-4 text-blue-800/70 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}
-                    </div>
-                    {city.latitude && city.longitude && (
-                      <div className="text-xs text-gray-500">
-                        {Number(city.latitude).toFixed(4)}, {Number(city.longitude).toFixed(4)}
+              {cities.map((city) => {
+                // Show alternate names as a hint so the user knows
+                // this entry covers e.g. "Bangalore" too
+                const altHint = city.all_names && city.all_names.length > 1
+                  ? city.all_names.filter(
+                      (n) => n.toLowerCase() !== city.city.toLowerCase()
+                    ).join(', ')
+                  : city.alternate_name || '';
+
+                return (
+                  <button
+                    key={city.id || city.city}
+                    onClick={() => handleCitySelect(city)}
+                    className="w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3"
+                  >
+                    <CheckCircle2
+                      className={cn(
+                        "h-4 w-4 text-orange-600 flex-shrink-0",
+                        selectedCity?.city === city.city &&
+                        (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                    <MapPin className="h-4 w-4 text-blue-800/70 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <div className="font-medium text-gray-900">
+                        {city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}
                       </div>
-                    )}
-                  </div>
-                </button>
-              ))}
+                      {/* Show alternate names below the primary name */}
+                      {altHint && (
+                        <div className="text-xs text-gray-400 truncate">
+                          Also: {altHint}
+                        </div>
+                      )}
+                      {city.latitude && city.longitude && (
+                        <div className="text-xs text-gray-500">
+                          {Number(city.latitude).toFixed(4)}, {Number(city.longitude).toFixed(4)}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -616,11 +637,9 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
       if (res.ok) {
         setIsSaved(!isSaved);
       }
-  
     } catch (error) {
       console.error("Favorite error:", error);
     }
-  
   }, [router, isSaved, property.id, property.price_per_sqft]);
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -737,20 +756,20 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
               )}
             </div>
             <div className="flex items-center gap-2">
-            <button
-              onClick={handleSave}
-              className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-white transition-all"
-            >
-              <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
+              <button
+                onClick={handleSave}
+                className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-white transition-all"
+              >
+                <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
               </button>
-                <button
-                  onClick={handleShare}
-                  className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
-                >
-                  <Share2 size={18} />
-                </button>
-              </div>
+              <button
+                onClick={handleShare}
+                className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
+              >
+                <Share2 size={18} />
+              </button>
             </div>
+          </div>
 
           {property.distance !== undefined && property.distance > 0 && (
             <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded font-medium">
@@ -1007,7 +1026,6 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                 </span>
               )}
             </div>
-            {/* Share Icon */}
 
             <button
               onClick={handleSave}
@@ -1020,7 +1038,6 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
             >
               <Share size={18} />
             </button>
-
           </div>
         </div>
 
@@ -1164,9 +1181,7 @@ function SearchResults() {
   const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   
-  // Dynamic map state - ALWAYS ENABLED
   const [visiblePropertyIds, setVisiblePropertyIds] = useState<Set<number>>(new Set());
-  const [isMapLoading, setIsMapLoading] = useState(false);
 
   const city = searchParams.get('city');
   const state = searchParams.get('state');
@@ -1174,6 +1189,8 @@ function SearchResults() {
   const lat = searchParams.get('lat');
   const lng = searchParams.get('lng');
   const distance = searchParams.get('distance');
+  // Alternate city names from URL (e.g. "Bengaluru,Bangalore Urban")
+  const alternateCityNames = searchParams.get('alternate_names');
 
   const initialCityDisplay = useMemo(() => {
     if (city && state) {
@@ -1184,26 +1201,23 @@ function SearchResults() {
     return '';
   }, [city, state]);
 
-  // Handle map bounds change - filter visible properties
   const handleMapBoundsChange = useCallback((bounds: MapBounds) => {
-    // Filter properties that are within the visible bounds
     const visibleIds = new Set<number>();
     
     properties.forEach(property => {
       if (property.latitude && property.longitude) {
-        const lat = property.latitude;
-        const lng = property.longitude;
+        const pLat = property.latitude;
+        const pLng = property.longitude;
         
-        // Check if property is within bounds
-        if (lat >= bounds.sw.lat && lat <= bounds.ne.lat &&
-            lng >= bounds.sw.lng && lng <= bounds.ne.lng) {
+        if (pLat >= bounds.sw.lat && pLat <= bounds.ne.lat &&
+            pLng >= bounds.sw.lng && pLng <= bounds.ne.lng) {
           visibleIds.add(property.id);
         }
       }
     });
     
     setVisiblePropertyIds(visibleIds);
-    setCurrentPage(1); // Reset to first page when bounds change
+    setCurrentPage(1);
   }, [properties]);
 
   useEffect(() => {
@@ -1217,6 +1231,8 @@ function SearchResults() {
         if (distance) params.append('distance', distance);
         if (lat) params.append('lat', lat);
         if (lng) params.append('lng', lng);
+        // Forward alternate city names to the search API
+        if (alternateCityNames) params.append('alternate_names', alternateCityNames);
 
         const response = await fetch(`/api/warehouse/search?${params.toString()}`);
         if (!response.ok) {
@@ -1247,12 +1263,9 @@ function SearchResults() {
               );
             }
           }
-          
-          if (city) {
-            processedProperties = processedProperties.filter((p: Property) => 
-              p.city.toLowerCase() === city.toLowerCase()
-            );
-          }
+
+          // NOTE: The city filter is now handled server-side (including alternate names),
+          // so we no longer need the client-side city filter here.
 
           try {
             const propertyIds = processedProperties.map((p: Property) => p.id);
@@ -1279,7 +1292,6 @@ function SearchResults() {
           setProperties(processedProperties);
           setFilteredProperties(processedProperties);
           
-          // Initialize with all properties visible
           const allIds = new Set<number>(processedProperties.map((p: Property) => p.id));
           setVisiblePropertyIds(allIds);
         } else {
@@ -1296,7 +1308,7 @@ function SearchResults() {
     };
 
     fetchProperties();
-  }, [city, state, propertyType, distance, lat, lng]);
+  }, [city, state, propertyType, distance, lat, lng, alternateCityNames]);
 
   const handleCitySelect = useCallback((selectedCity: City) => {
     const params = new URLSearchParams();
@@ -1309,6 +1321,25 @@ function SearchResults() {
     if (selectedCity.latitude !== undefined && selectedCity.longitude !== undefined) {
       params.set('lat', selectedCity.latitude.toString());
       params.set('lng', selectedCity.longitude.toString());
+    }
+
+    // Pass all alternate name variants so the warehouse search can match
+    // any spelling that exists in the DB for this same location
+    const allNames = selectedCity.all_names || [];
+    const alternates = allNames.filter(
+      (n) => n.toLowerCase() !== selectedCity.city.toLowerCase()
+    );
+    // Also include the top-level alternate_name field as a fallback
+    if (selectedCity.alternate_name) {
+      selectedCity.alternate_name.split(',').forEach((n) => {
+        const trimmed = n.trim();
+        if (trimmed && !alternates.includes(trimmed)) {
+          alternates.push(trimmed);
+        }
+      });
+    }
+    if (alternates.length > 0) {
+      params.set('alternate_names', alternates.join(','));
     }
     
     if (propertyType) {
@@ -1373,10 +1404,9 @@ function SearchResults() {
     }
   }, [filteredProperties, sortBy]);
 
-  // Filter by visible properties when map bounds change
   const visibleProperties = useMemo(() => {
     if (visiblePropertyIds.size === 0) {
-      return sortedProperties; // Show all if none visible (initial state)
+      return sortedProperties;
     }
     return sortedProperties.filter(p => visiblePropertyIds.has(p.id));
   }, [sortedProperties, visiblePropertyIds]);
@@ -1670,7 +1700,7 @@ function SearchResults() {
                       currentPage === totalPages
                         ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
                         : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
-                    }`}
+                      }`}
                   >
                     <ChevronRight className="h-5 w-5" />
                   </button>

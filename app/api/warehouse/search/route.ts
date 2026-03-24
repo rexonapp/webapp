@@ -41,7 +41,6 @@ const STATE_MAP: Record<string, string> = {
   'PY': 'Puducherry'
 };
 
-// Search endpoint to fetch warehouses based on filters
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
@@ -50,7 +49,10 @@ export async function GET(request: NextRequest) {
     const propertyType = searchParams.get('type');
     const distance = searchParams.get('distance');
 
-    // Build the query dynamically based on filters
+    // alternate_names is a comma-separated list of alternate spellings
+    // for the same city (same lat/long), e.g. "Bengaluru,Bangalore Rural"
+    const alternateCityNames = searchParams.get('alternate_names');
+
     let queryText = `
       SELECT
         id,
@@ -87,46 +89,61 @@ export async function GET(request: NextRequest) {
     const queryParams: any[] = [];
     let paramCounter = 1;
 
-    // Add city filter with flexible matching (handles spelling variations like Tirupati/Tirupathi)
+    // Build city matching clause
+    // Matches: exact city name OR any of the provided alternate names
+    // (all representing the same physical location — same lat/long)
     if (city && city.trim() !== '') {
-      // Use fuzzy matching to handle slight spelling variations
-      // Matches if: exact match OR first 7 characters match (handles Tirupati/Tirupathi)
+      // Collect all name variants to match against
+      const cityVariants: string[] = [city.trim()];
+
+      if (alternateCityNames && alternateCityNames.trim() !== '') {
+        const extras = alternateCityNames
+          .split(',')
+          .map((n) => n.trim())
+          .filter((n) => n.length > 0);
+        cityVariants.push(...extras);
+      }
+
+      // Build: LOWER(TRIM(city)) = ANY($N)
+      // Using PostgreSQL ANY with an array is clean and handles N variants
+      const variantsLower = cityVariants.map((v) => v.toLowerCase());
+
       queryText += ` AND (
-        LOWER(TRIM(city)) = LOWER(TRIM($${paramCounter}))
-        OR LEFT(LOWER(TRIM(city)), 7) = LEFT(LOWER(TRIM($${paramCounter})), 7)
+        LOWER(TRIM(city)) = ANY($${paramCounter}::text[])
+        OR LEFT(LOWER(TRIM(city)), 7) = LEFT(LOWER(TRIM($${paramCounter + 1})), 7)
       )`;
-      queryParams.push(city);
-      paramCounter++;
+
+      queryParams.push(variantsLower);           // $N  — array of all variants
+      queryParams.push(city.trim().toLowerCase()); // $N+1 — for prefix fuzzy match on primary name
+      paramCounter += 2;
     }
 
-    // Add state filter - handle both state codes and full names
+    // State filter — handle both codes and full names
     if (state && state.trim() !== '') {
-      // Convert state code to full name if it's a code (2-3 chars)
-      const stateValue = state.length <= 3 && STATE_MAP[state.toUpperCase()]
-        ? STATE_MAP[state.toUpperCase()]
-        : state;
+      const stateValue =
+        state.length <= 3 && STATE_MAP[state.toUpperCase()]
+          ? STATE_MAP[state.toUpperCase()]
+          : state;
 
       queryText += ` AND LOWER(TRIM(state)) = LOWER(TRIM($${paramCounter}))`;
       queryParams.push(stateValue);
       paramCounter++;
     }
 
-    // Add property type filter
+    // Property type filter
     if (propertyType && propertyType !== 'all') {
       queryText += ` AND property_type = $${paramCounter}`;
       queryParams.push(propertyType);
       paramCounter++;
     }
 
-    // Add distance filter (warehouse_size in meters)
+    // Distance/size filter
     if (distance) {
       const distanceValue = parseInt(distance);
       if (distanceValue === 10000) {
-        // 10000 metres or above
         queryText += ` AND warehouse_size >= $${paramCounter}`;
         queryParams.push(distanceValue);
       } else {
-        // Less than or equal to specified distance
         queryText += ` AND warehouse_size <= $${paramCounter}`;
         queryParams.push(distanceValue);
       }
@@ -135,32 +152,26 @@ export async function GET(request: NextRequest) {
 
     queryText += ` ORDER BY is_featured DESC, created_at DESC`;
 
-    // Execute the query
     const warehousesResult = await query(queryText, queryParams);
-    console.log(`Search: Found ${warehousesResult.rows.length} properties for filters:`, { city, state, propertyType, distance });
+    console.log(
+      `Search: Found ${warehousesResult.rows.length} properties for filters:`,
+      { city, state, propertyType, distance, alternateCityNames }
+    );
 
-    // Helper function to safely parse amenities
     const parseAmenities = (amenities: any): string[] => {
       if (!amenities) return [];
-
-      // If it's already an array, return it
       if (Array.isArray(amenities)) return amenities;
-
-      // If it's a string, try to parse it
       if (typeof amenities === 'string') {
         try {
           const parsed = JSON.parse(amenities);
           return Array.isArray(parsed) ? parsed : [];
         } catch (e) {
-          console.warn('Failed to parse amenities:', amenities);
           return [];
         }
       }
-
       return [];
     };
 
-    // Fetch images for each warehouse from uploads table
     const properties = await Promise.all(
       warehousesResult.rows.map(async (warehouse) => {
         const mediaResult = await query(
@@ -179,29 +190,21 @@ export async function GET(request: NextRequest) {
       })
     );
 
-    return NextResponse.json({
-      success: true,
-      count: properties.length,
-      properties: properties,
-      filters: {
-        city,
-        state,
-        propertyType,
-        distance
+    return NextResponse.json(
+      {
+        success: true,
+        count: properties.length,
+        properties,
+        filters: { city, state, propertyType, distance, alternateCityNames },
+      },
+      {
+        headers: { 'Cache-Control': 'no-store, must-revalidate' },
       }
-    }, {
-      headers: {
-        'Cache-Control': 'no-store, must-revalidate',
-      }
-    });
-
+    );
   } catch (error) {
     console.error('Search warehouses error:', error);
     return NextResponse.json(
-      {
-        error: 'Failed to search warehouses. Please try again.',
-        success: false
-      },
+      { error: 'Failed to search warehouses. Please try again.', success: false },
       { status: 500 }
     );
   }
