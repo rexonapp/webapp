@@ -71,7 +71,7 @@ export default function PropertySearch() {
     { id: 'warehouse', label: 'Warehouse' },
     { id: 'farm land', label: 'Farm Land' },
     { id: 'factory', label: 'Factory' },
-    { id: 'industrial-shed', label: 'Industrial Shed' },
+    { id: 'industrial', label: 'Industrial' },
     { id: 'cold-storage', label: 'Cold Storage' },
     { id: 'commercial-land', label: 'Commercial Land' },
     { id: 'office-space', label: 'Office Space' },
