@@ -39,7 +39,6 @@ interface PropertyType {
   label: string;
 }
 
-// Top cities shown by default when the input is focused but empty
 const TOP_CITIES: City[] = [
   { id: 'bengaluru-KA', city: 'Bengaluru', stateCode: 'KA', latitude: 12.9716, longitude: 77.5946, all_names: ['Bengaluru', 'Bangalore'] },
   { id: 'chennai-TN', city: 'Chennai', stateCode: 'TN', latitude: 13.0827, longitude: 80.2707 },
@@ -66,6 +65,11 @@ export default function PropertySearch() {
   const [cities, setCities] = useState<City[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // One ref per breakpoint — only the visible one will be in the DOM, so only that focus() fires
+  const cityInputDesktopRef = useRef<HTMLInputElement>(null);
+  const cityInputTabletRef = useRef<HTMLInputElement>(null);
+  const cityInputMobileRef = useRef<HTMLInputElement>(null);
 
   const propertyTypes: PropertyType[] = [
     { id: 'warehouse', label: 'Warehouse' },
@@ -120,9 +124,17 @@ export default function PropertySearch() {
   }, [searchQuery, fetchCities]);
 
   const handleSearch = () => {
+    // Guard: no city selected → focus the visible city input (opens dropdown) and bail
+    if (!selectedCity) {
+      cityInputDesktopRef.current?.focus();
+      cityInputTabletRef.current?.focus();
+      cityInputMobileRef.current?.focus();
+      return;
+    }
+
     const params = new URLSearchParams();
 
-    if (selectedCity && selectedCity.city) {
+    if (selectedCity.city) {
       params.append('city', selectedCity.city);
       if (selectedCity.stateCode) params.append('state', selectedCity.stateCode);
       if (selectedCity.latitude !== undefined && selectedCity.longitude !== undefined) {
@@ -176,11 +188,9 @@ export default function PropertySearch() {
     }
   }, [searchQuery, selectedCity]);
 
-  // Determines what to show in the dropdown
   const isSearching = searchQuery.trim().length >= 1;
   const displayCities = isSearching ? cities : TOP_CITIES;
 
-  // Shared dropdown content — used across all three breakpoints
   const DropdownContent = () => (
     <Command shouldFilter={false}>
       <CommandList>
@@ -235,7 +245,6 @@ export default function PropertySearch() {
     </Command>
   );
 
-  // Shared dropdown content for mobile (smaller text)
   const MobileDropdownContent = () => (
     <Command shouldFilter={false}>
       <CommandList>
@@ -303,6 +312,7 @@ export default function PropertySearch() {
               <div className="flex-[2] min-w-0 flex items-center gap-2.5 px-4 border-r border-gray-200 relative h-full">
                 <MapPin className="h-4 w-4 text-blue-800 flex-shrink-0" />
                 <input
+                  ref={cityInputDesktopRef}
                   type="text"
                   id="hero-search"
                   value={searchQuery}
@@ -356,6 +366,7 @@ export default function PropertySearch() {
               <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 relative">
                 <MapPin className="h-4 w-4 text-blue-800 shrink-0" />
                 <input
+                  ref={cityInputTabletRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -408,6 +419,7 @@ export default function PropertySearch() {
               <div className="flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 relative">
                 <MapPin className="h-4 w-4 text-blue-800 shrink-0" />
                 <input
+                  ref={cityInputMobileRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}

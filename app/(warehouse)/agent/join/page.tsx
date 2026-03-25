@@ -1119,8 +1119,11 @@ export default function AgentRegistrationForm() {
                 {tncSections.map((s, idx) => (
                   <div key={s.id}>
                     <h3 className="text-sm font-semibold text-gray-900 mb-1.5">{s.section_number}. {s.section_title}</h3>
-                    <p className="text-sm text-gray-500 leading-relaxed whitespace-pre-line">{s.section_content}</p>
-                    {idx < tncSections.length - 1 && <Separator className="mt-5" />}
+                    {s.section_content.trim().split('\n').filter(line => line.trim() !== '').map((line, i) => (
+  <p key={i} className="text-sm text-gray-500 leading-relaxed">
+    {line.trim()}
+  </p>
+))}                    {idx < tncSections.length - 1 && <Separator className="mt-5" />}
                   </div>
                 ))}
               </div>
