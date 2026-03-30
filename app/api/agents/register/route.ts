@@ -6,6 +6,7 @@ import { query } from '@/lib/db';
 import { randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 import { sendAgentInviteEmail } from '@/lib/sendemail';
+import { getAutoApprovalFlags } from '@/lib/getAutoApprovalFlag';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'ap-south-2',
@@ -281,6 +282,10 @@ export async function POST(request: NextRequest) {
     const passwordSalt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const passwordHash = await bcrypt.hash(temporaryPassword, passwordSalt);
 
+    const { autoApproveAgents } = await getAutoApprovalFlags();
+    console.log('autoApproveAgents:', autoApproveAgents);
+    const initialStatus = autoApproveAgents ? 'approved' : 'pending';
+    console.log(initialStatus,'inital status')
     // ── Insert agent ──────────────────────────────────────────────────────
     const agentResult = await query(
       `INSERT INTO agents
@@ -306,8 +311,7 @@ export async function POST(request: NextRequest) {
         true,   // is_temporary_password
         true,   // terms_accepted
         false,  // is_verified
-        'pending',
-      ]
+        initialStatus      ]
     );
 
     const agentId = agentResult.rows[0].id;
