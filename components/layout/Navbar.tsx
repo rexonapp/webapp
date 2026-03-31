@@ -235,14 +235,14 @@ export default function Navbar() {
               </Link>
 
               {/* List Property Button - Only when logged in */}
-              {currentUser && (
+              {/* {currentUser && (
                 <Link href='/property'>
                   <button className="hidden md:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all font-medium shadow-lg hover:shadow-orange-500/50">
                     <Plus className="h-4 w-4" />
                     <span>List Property</span>
                   </button>
                 </Link>
-              )}
+              )} */}
               
               {/* User Profile or Sign In */}
               {currentUser ? (

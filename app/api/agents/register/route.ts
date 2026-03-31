@@ -7,6 +7,7 @@ import { randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 import { sendAgentInviteEmail } from '@/lib/sendemail';
 import { getAutoApprovalFlags } from '@/lib/getAutoApprovalFlag';
+import { notifyAgentRegistered } from '@/lib/notifyAgentRegistered';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'ap-south-2',
@@ -315,6 +316,14 @@ export async function POST(request: NextRequest) {
     );
 
     const agentId = agentResult.rows[0].id;
+    notifyAgentRegistered({
+      newAgentId:    agentId,
+      fullName,
+      email,
+      agencyName:    agencyName || undefined,
+      city:          city       || undefined,
+      initialStatus,               
+    }).catch(err => console.error('[notifyAgentRegistered] failed silently:', err)); 
 
     const clientIp =
       request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
