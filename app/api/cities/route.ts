@@ -6,6 +6,7 @@ interface CityResponse {
   state: string;
   latitude: number;
   alternate_name: string;
+  stateCode: string; 
   longitude: number;
 }
 
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest) {
         searchResults.push({
           id: `${primary.name}-${primary.state}-${index}`,
           city: primary.name,
-          stateCode: primary.state,
+          stateCode: primary.stateCode,
           alternate_name: alternateNames.join(',') || primary.alternate_name || undefined,
           all_names: [...allNames],
           latitude: primary.latitude,
@@ -141,9 +142,9 @@ export async function GET(request: NextRequest) {
     console.log(`📊 Received ${data.length} cities from Indian Cities API`);
 
     const allCities = data.map((city, index) => ({
-      id: `${city.name}-${city.state}-${index}`,
+      id: `${city.name}-${city.stateCode}-${index}`,
       city: city.name,
-      stateCode: city.state,
+      stateCode: city.stateCode,
       alternate_name: city.alternate_name || undefined,
       latitude: city.latitude,
       longitude: city.longitude,

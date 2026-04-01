@@ -189,7 +189,7 @@ function PortalDropdown({
                 <span className="w-5 flex-shrink-0 flex items-center justify-center">
                   {isSelected
                     ? <Check  className="h-4 w-4 text-orange-500" />
-                    : <MapPin className="h-4 w-4 text-gray-400" />}
+                    : <MapPin className="h-4 w-4 text-blue-400" />}
                 </span>
                 <span className={cn(
                   'text-sm flex-1',
