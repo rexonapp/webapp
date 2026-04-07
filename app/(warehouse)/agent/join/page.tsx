@@ -206,7 +206,7 @@ export default function AgentRegistrationForm() {
         if (value && value.length > 150) return 'Agency name must be under 150 characters.';
         break;
       case 'domainName':  // ← Changed from 'username'
-        if (!value || value.trim() === '') return 'Domain name is required.';
+        // if (!value || value.trim() === '') return 'Domain name is required.';
         if (value.length < 3) return 'Domain name must be at least 3 characters.';
         if (value.length > 50) return 'Domain name must be under 50 characters.';
         if (!/^[a-z0-9-]+$/.test(value)) return 'Only lowercase letters, numbers, and hyphens allowed.';
@@ -726,8 +726,8 @@ export default function AgentRegistrationForm() {
                   <Label className="text-sm font-medium">
                     <span className="flex items-center gap-1.5">
                       <Globe className="h-3.5 w-3.5 text-gray-400" />
-                      Domain Name <span className="text-red-500">*</span>
-                      <span className="text-xs text-gray-400 font-normal">— Your public profile URL</span>
+                      Domain Name
+                      <span className="text-xs text-gray-400 font-normal">— Your public profile URL (Optional)</span>
                     </span>
                   </Label>
                   <div className="relative">

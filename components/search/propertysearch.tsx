@@ -133,6 +133,7 @@ function PortalDropdown({
         top:           coords.top,
         left:          coords.left,
         width:         coords.width,
+        maxWidth:      560,  
         zIndex:        99999,
         pointerEvents: isOpen ? 'auto' : 'none',
         transform:     isOpen ? 'translateY(0)'   : 'translateY(-8px)',
@@ -167,7 +168,7 @@ function PortalDropdown({
           <span className="font-medium text-gray-700">&ldquo;{searchQuery}&rdquo;</span>
         </div>
       ) : (
-        <ul ref={listRef} className="py-1.5 max-h-[272px] overflow-y-auto" role="listbox">
+        <ul ref={listRef} className="py-1.5 max-h-[220px] overflow-y-auto" role="listbox">
           {displayCities.map((city, i) => {
             const isSelected =
               selectedCity?.city === city.city &&
@@ -200,11 +201,7 @@ function PortalDropdown({
                     <span className="ml-1 text-gray-400 font-normal">{city.stateCode}</span>
                   )}
                 </span>
-                {city.stateCode && (
-                  <span className="text-[10px] font-medium text-gray-400 bg-gray-100 rounded px-1.5 py-0.5 uppercase tracking-wide flex-shrink-0">
-                    {city.stateCode}
-                  </span>
-                )}
+               
               </li>
             )
           })}
@@ -434,7 +431,7 @@ export default function PropertySearch() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
+    <div className="w-full max-w-3xl mx-auto px-4">
       <div
         ref={containerRef}
         className="relative shadow-lg border border-gray-200/60 bg-white/95 backdrop-blur-sm rounded-xl"
@@ -445,11 +442,11 @@ export default function PropertySearch() {
           {...portalProps}
         />
 
-        <div className="hidden lg:flex items-stretch h-14">
+        <div className="hidden lg:flex items-stretch h-12">
           <div
             ref={anchorDesktopRef}
             className={cn(
-              'flex-[2] min-w-0 flex items-center gap-2.5 px-4 border-r border-gray-200 rounded-l-xl h-full transition-colors cursor-text',
+              'flex-[2] min-w-0 flex items-center gap-2.5 px-3 border-r border-gray-200 rounded-l-xl h-full transition-colors cursor-text',
               isOpen && 'bg-blue-50/40',
             )}
           >
@@ -462,7 +459,7 @@ export default function PropertySearch() {
 
           <Button
             onClick={handleSearch}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-7 !h-full rounded-none rounded-r-xl font-medium text-sm shadow-none flex items-center gap-2 transition-colors"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-5 !h-full rounded-none rounded-r-xl font-medium text-sm shadow-none flex items-center gap-2 transition-colors"
           >
             <Search className="h-4 w-4" />
             <span>Search</span>

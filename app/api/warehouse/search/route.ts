@@ -81,7 +81,8 @@ export async function GET(request: NextRequest) {
         is_featured,
         status,
         created_at,
-        updated_at
+        updated_at,
+        total_price
       FROM warehouses
       WHERE status = 'Active'
     `;

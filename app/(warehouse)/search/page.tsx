@@ -87,6 +87,7 @@ interface Property {
   images?: PropertyImage[];
   distance?: number;
   isSaved?: boolean;
+  total_price: number; 
 }
 
 interface City {
@@ -771,11 +772,11 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
             </div>
           </div>
 
-          {property.distance !== undefined && property.distance > 0 && (
+          {/* {property.distance !== undefined && property.distance > 0 && (
             <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded font-medium">
               {property.distance.toFixed(1)} km
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="p-3 flex flex-col flex-1">
@@ -809,26 +810,32 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
                 {property.space_available?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
               </p>
             </div>
-            <div>
+            {/* <div>
               <p className="text-xs text-gray-500 mb-0.5">Total</p>
               <p className="text-sm font-bold text-gray-900">
                 {property.warehouse_size?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
               </p>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex-1" />
 
-          <div className="mb-2">
-            <p className="text-xs text-gray-500 mb-0.5">Price per sqft</p>
-            <div className="flex items-baseline gap-0.5">
-              <IndianRupee className="h-4 w-4 text-orange-600" />
-              <span className="text-lg font-bold text-orange-600">
-                {property.price_per_sqft?.toLocaleString('en-IN')}
-              </span>
-              <span className="text-xs text-gray-600 font-medium">/sqft</span>
-            </div>
-          </div>
+        <div className="mb-2">
+        <div className="flex items-baseline gap-0.5">
+          <IndianRupee className="h-4 w-4 text-orange-600" />
+          <span className="text-lg font-bold text-orange-600">
+            {property.price_per_sqft?.toLocaleString('en-IN')}
+          </span>
+          <span className="text-xs text-gray-600 font-medium">/sqft</span>
+        </div>
+        {property.total_price != null && (
+  <p className="text-xs text-gray-500 mt-0.5">
+    Total: <span className="font-semibold text-gray-700">
+      ₹{property.total_price.toLocaleString('en-IN')}
+    </span>
+  </p>
+)}
+      </div>
 
           <button
             onClick={(e) => {
@@ -1042,13 +1049,22 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
         </div>
 
         <div className="p-4 flex flex-col flex-1">
-          <div className="flex items-baseline gap-1 mb-2">
-            <IndianRupee className="h-5 w-5 text-orange-600" />
-            <span className="text-2xl font-bold text-orange-600">
-              {property.price_per_sqft?.toLocaleString('en-IN')}
-            </span>
-            <span className="text-sm text-gray-600 font-medium">/sqft</span>
-          </div>
+        <div className="mb-2">
+        <div className="flex items-baseline gap-1">
+          <IndianRupee className="h-5 w-5 text-orange-600" />
+          <span className="text-2xl font-bold text-orange-600">
+            {property.price_per_sqft?.toLocaleString('en-IN')}
+          </span>
+          <span className="text-sm text-gray-600 font-medium">/sqft</span>
+        </div>
+        {property.total_price != null && (
+  <p className="text-xs text-gray-500 mt-0.5">
+    Total: <span className="font-semibold text-gray-700">
+      ₹{property.total_price.toLocaleString('en-IN')}
+    </span>
+  </p>
+)}
+      </div>
 
           <h3 className="font-bold text-gray-900 text-base mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
             {property.title}
@@ -1416,6 +1432,7 @@ function SearchResults() {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return visibleProperties.slice(start, start + ITEMS_PER_PAGE);
   }, [visibleProperties, currentPage]);
+  console.log(currentProperties,'jkdknd')
 
   const mapProperties = useMemo(() => {
     return sortedProperties
