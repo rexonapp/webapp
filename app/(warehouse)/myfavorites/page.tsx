@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { MoreVertical } from "lucide-react";
+import Link from "next/link";
 interface Favorite {
   id: string;
   user_id: string;
@@ -12,6 +13,7 @@ interface Favorite {
   price_per_sqft: number;
   price_at_favorite: number;
   created_at: string;
+  property_code: string;
 }
 
 export default function MyFavorites() {
@@ -56,6 +58,8 @@ export default function MyFavorites() {
       toast.error("Failed to remove favorite");
     }
   };
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+
 
   return (
     <div className="p-6">
@@ -73,6 +77,7 @@ export default function MyFavorites() {
                 <th className="p-3 border">Title</th>
                 <th className="p-3 border">City</th>
                 <th className="p-3 border">Property Id</th>
+                <th className="p-3 border">Property Details</th>
                 <th className="p-3 border">Type</th>
                 <th className="p-3 border">Price</th>
                 <th className="p-3 border">Favorited Price</th>
@@ -85,7 +90,16 @@ export default function MyFavorites() {
                 <tr key={item.id} className="hover:bg-gray-50">
                   <td className="p-3 border">{item.title}</td>
                   <td className="p-3 border">{item.city}</td>
-                  <td className="p-3 border">{item.id}</td>
+                  <td className="p-3 border">{item.property_code}</td>
+                  <td className="p-3 border">
+                    <Link
+                      href={`${baseUrl}/property/${item.id}`}
+                      className="text-blue-600 hover:underline"
+                    >
+                      View
+                      {/* {baseUrl}/property/{item.id} */}
+                    </Link>
+                  </td>
                   <td className="p-3 border">{item.property_type}</td>
                   <td className="p-3 border">₹ {item.price_per_sqft}</td>
                   <td className="p-3 border">
