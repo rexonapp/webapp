@@ -343,8 +343,7 @@ export default function HeroWithBanner() {
   return (
     <section
       ref={heroRef}
-      className="relative w-full h-screen min-h-[600px] max-h-[1080px] overflow-hidden"
-    >
+      className="relative w-full h-screen min-h-[600px] max-h-[1080px] overflow-hidden"    >
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full object-cover"
@@ -365,10 +364,9 @@ export default function HeroWithBanner() {
         <div className="absolute inset-x-[5%] top-[10%] bottom-[30%] bg-gradient-radial from-black/55 via-black/40 to-transparent opacity-95" />
       </div>
 
-      <div className="absolute inset-0 z-20 flex flex-col justify-start items-center px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 md:pt-12 lg:pt-10">
-        <div className="w-full max-w-7xl mx-auto space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-5">
-
-          <div className="text-center space-y-1.5 sm:space-y-2 md:space-y-2.5 animate-cinematic-entry">
+      <div className="absolute inset-0 z-20 flex flex-col items-center px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 md:pt-12 lg:pt-10 pb-28 overflow-y-auto">
+      <div className="w-full max-w-7xl mx-auto flex flex-col justify-between min-h-full gap-4 sm:gap-5 md:gap-6">
+                  <div className="text-center space-y-1.5 sm:space-y-2 md:space-y-2.5 animate-cinematic-entry">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 shadow-xl mb-2 sm:mb-3 hover:bg-white/15 hover:border-white/30 transition-all duration-300">
               <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-400 animate-pulse" />
               <span className="text-xs sm:text-sm font-medium text-white tracking-wide">
@@ -386,8 +384,8 @@ export default function HeroWithBanner() {
           </div>
 
           {/* Search Section with responsive spacing */}
-          <div className="w-full max-w-4xl mx-auto animate-slide-up-delayed-1 mt-1 py-3.5 sm:py-5 md:py-6 lg:py-[7.5rem]">
-            <div className="relative">
+          <div className="w-full max-w-4xl mx-auto animate-slide-up-delayed-1">
+                                    <div className="relative">
               <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/20 via-orange-400/30 to-orange-500/20 blur-xl opacity-60 rounded-3xl"></div>
               <div className="relative">
                 <PropertySearch />
@@ -396,9 +394,8 @@ export default function HeroWithBanner() {
           </div>
 
           {/* Cards Section with tighter top spacing on large screens */}
-          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-3 animate-slide-up-delayed-2 py-3.5 sm:py-5 md:py-6 lg:pt-6 lg:pb-10 px-2 sm:px-0">
-
-  <Card
+          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-3 animate-slide-up-delayed-2 px-2 sm:px-0">
+                        <Card
     onClick={() => router.push('/property')}
     className="group relative border-2 border-blue-400/40 hover:border-orange-500 bg-white/10 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/15 transform hover:-translate-y-1.5 hover:scale-[1.02]"
   >
@@ -410,7 +407,7 @@ export default function HeroWithBanner() {
 
     <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
+        <div className="w-7 h-7 sm:w-9 sm:h-9 bg-blue-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
           <Home className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
         </div>
         <CardTitle className="text-[11px] sm:text-sm md:text-base font-bold text-white group-hover:text-orange-200 transition-colors duration-300 text-left leading-tight">
@@ -442,7 +439,7 @@ export default function HeroWithBanner() {
 
     <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
+        <div className="w-7 h-7 sm:w-9 sm:h-9 bg-blue-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
           <Users className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
         </div>
         <CardTitle className="text-[11px] sm:text-sm md:text-base font-bold text-white group-hover:text-orange-200 transition-colors duration-300 text-left leading-tight">
@@ -474,7 +471,7 @@ export default function HeroWithBanner() {
 
     <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-7 h-7 sm:w-9 sm:h-9 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
+        <div className="w-7 h-7 sm:w-9 sm:h-9 bg-blue-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
           <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
         </div>
         <CardTitle className="text-[11px] sm:text-sm md:text-base font-bold text-white group-hover:text-orange-200 transition-colors duration-300 text-left leading-tight">

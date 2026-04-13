@@ -12,7 +12,7 @@ export default function Footer() {
           {/* Brand section */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-6 group cursor-pointer">
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 p-2 rounded-xl shadow-lg group-hover:shadow-orange-500/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+              <div className="bg-blue-700 p-2 rounded-xl shadow-lg group-hover:shadow-orange-500/50 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
                 <Home className="h-6 w-6 text-white" />
               </div>
               <span className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent">Rexon</span>

@@ -140,7 +140,7 @@ const CitySearch = memo(({
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-
+  const cityCache = useRef<Record<string, City[]>>({});
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -158,22 +158,24 @@ const CitySearch = memo(({
       return;
     }
 
+    const cacheKey = query.trim().toLowerCase();
+    if (cityCache.current[cacheKey]) {
+      setCities(cityCache.current[cacheKey]);
+      return;
+    }
+
     try {
       setIsLoadingCities(true);
       setError(null);
 
       const res = await fetch(`/api/cities?search=${encodeURIComponent(query)}`);
 
-      if (!res.ok) {
-        throw new Error('Failed to fetch cities');
-      }
+      if (!res.ok) throw new Error('Failed to fetch cities');
 
       const data = await res.json();
+      if (!Array.isArray(data)) throw new Error('Invalid data format');
 
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid data format');
-      }
-
+      cityCache.current[cacheKey] = data;
       setCities(data);
     } catch (error) {
       console.error("Error fetching cities:", error);
@@ -195,7 +197,7 @@ const CitySearch = memo(({
       } else {
         setCities([]);
       }
-    }, 300);
+    }, 150);
 
     return () => {
       if (debounceTimer.current) {
@@ -247,6 +249,11 @@ const CitySearch = memo(({
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={() => {
             setIsOpen(true);
+            if (searchQuery.trim().length >= 1) {
+              fetchCities(searchQuery);
+            }
+          }}
+          onMouseEnter={() => {
             if (searchQuery.trim().length >= 1) {
               fetchCities(searchQuery);
             }
@@ -695,6 +702,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
                 sizes="300px"
                 onError={() => setImageError(true)}
                 quality={90}
+                priority={currentImageIndex === 0}
                 unoptimized
               />
               
@@ -972,6 +980,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 onError={() => setImageError(true)}
                 quality={90}
+                priority={currentImageIndex === 0}
                 unoptimized
               />
               
@@ -1125,17 +1134,27 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
 PropertyCard.displayName = 'PropertyCard';
 
 const LoadingSkeleton = () => (
-  <div className="h-screen bg-white">
-    <div className="animate-pulse">
-      <div className="h-16 bg-gray-200"></div>
-      <div className="flex">
-        <div className="w-1/2 p-4 space-y-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded"></div>
-          ))}
-        </div>
-        <div className="w-1/2 bg-gray-200"></div>
+  <div className="h-screen flex flex-col bg-white overflow-hidden">
+    <div className="flex-shrink-0 h-16 bg-white border-b border-gray-200 animate-pulse">
+      <div className="px-4 py-3 flex gap-4 items-center">
+        <div className="h-6 w-32 bg-gray-200 rounded" />
+        <div className="h-10 w-64 bg-gray-200 rounded-lg" />
       </div>
+    </div>
+    <div className="flex flex-1 overflow-hidden">
+      <div className="w-full lg:w-1/2 p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[1,2,3,4,5,6].map(i => (
+          <div key={i} className="rounded-lg overflow-hidden border border-gray-200 animate-pulse">
+            <div className="h-40 bg-gray-200" />
+            <div className="p-3 space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
+              <div className="h-3 bg-gray-200 rounded w-1/2" />
+              <div className="h-8 bg-gray-200 rounded mt-4" />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="hidden lg:block lg:w-1/2 bg-gray-100" />
     </div>
   </div>
 );
@@ -1247,78 +1266,77 @@ function SearchResults() {
         if (distance) params.append('distance', distance);
         if (lat) params.append('lat', lat);
         if (lng) params.append('lng', lng);
-        // Forward alternate city names to the search API
         if (alternateCityNames) params.append('alternate_names', alternateCityNames);
 
-        const response = await fetch(`/api/warehouse/search?${params.toString()}`);
+        // Fire properties and favorites in parallel
+        const propertiesPromise = fetch(`/api/warehouse/search?${params.toString()}`);
+
+        const response = await propertiesPromise;
         if (!response.ok) {
           setProperties([]);
           setFilteredProperties([]);
+          setLoading(false);
           return;
         }
 
         const data = await response.json();
         if (data.success && data.properties) {
           let processedProperties = data.properties;
-          
+
           if (lat && lng) {
             const searchLat = parseFloat(lat);
             const searchLng = parseFloat(lng);
-            
             processedProperties = processedProperties.map((prop: Property) => ({
               ...prop,
-              distance: prop.latitude && prop.longitude 
+              distance: prop.latitude && prop.longitude
                 ? calculateDistance(searchLat, searchLng, prop.latitude, prop.longitude)
                 : undefined
             }));
-
             if (distance) {
               const maxDistance = parseFloat(distance);
-              processedProperties = processedProperties.filter((p: Property) => 
+              processedProperties = processedProperties.filter((p: Property) =>
                 p.distance === undefined || p.distance <= maxDistance
               );
             }
           }
 
-          // NOTE: The city filter is now handled server-side (including alternate names),
-          // so we no longer need the client-side city filter here.
-
-          try {
-            const propertyIds = processedProperties.map((p: Property) => p.id);
-        
-            if (propertyIds.length > 0) {
-              const favRes = await fetch("/api/leads/favorite/status", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ propertyIds }),
-              });
-              if (favRes.ok) {
-                const { favoriteIds } = await favRes.json();
-
-                processedProperties = processedProperties.map((p: Property) => ({
-                  ...p,
-                  isSaved: favoriteIds.includes(p.id),
-                }));
-              }
-            }
-          } catch (error) {
-            console.error("Favorite bulk fetch error:", error);
-          }
-
+          // Show properties immediately — don't wait for favorites
           setProperties(processedProperties);
           setFilteredProperties(processedProperties);
-          
           const allIds = new Set<number>(processedProperties.map((p: Property) => p.id));
           setVisiblePropertyIds(allIds);
+          setLoading(false); // ← unblock UI immediately
+
+          // Fetch favorites in background, update silently
+          const propertyIds = processedProperties.map((p: Property) => p.id);
+          if (propertyIds.length > 0) {
+            fetch("/api/leads/favorite/status", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ propertyIds }),
+            })
+              .then(res => res.ok ? res.json() : null)
+              .then(json => {
+                if (!json) return;
+                const { favoriteIds } = json;
+                setProperties(prev =>
+                  prev.map(p => ({ ...p, isSaved: favoriteIds.includes(p.id) }))
+                );
+                setFilteredProperties(prev =>
+                  prev.map(p => ({ ...p, isSaved: favoriteIds.includes(p.id) }))
+                );
+              })
+              .catch(err => console.error("Favorite bulk fetch error:", err));
+          }
         } else {
           setProperties([]);
           setFilteredProperties([]);
+          setLoading(false);
         }
       } catch (err) {
         console.error('Error fetching properties:', err);
         setProperties([]);
         setFilteredProperties([]);
-      } finally {
         setLoading(false);
       }
     };

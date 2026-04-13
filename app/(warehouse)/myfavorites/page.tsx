@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { MoreVertical } from "lucide-react";
 import Link from "next/link";
+
 interface Favorite {
   id: string;
   user_id: string;
@@ -16,10 +17,40 @@ interface Favorite {
   property_code: string;
 }
 
+const TableSkeleton = () => (
+  <div className="overflow-x-auto bg-white shadow rounded-lg">
+    <table className="min-w-full border border-gray-200">
+      <thead className="bg-gray-100 text-left">
+        <tr>
+          {["Title","City","Property Id","Property Details","Type","Price","Favorited Price","Added On","Actions"].map((h) => (
+            <th key={h} className="p-3 border">{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {[1,2,3,4,5].map((i) => (
+          <tr key={i} className="animate-pulse">
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-40" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-24" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-16" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-12" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-20" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-16" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-16" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-20" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-8" /></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
 export default function MyFavorites() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
   useEffect(() => {
     fetch("/api/leads/favorite/list")
       .then(res => res.json())
@@ -30,7 +61,6 @@ export default function MyFavorites() {
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
   }, []);
-
 
   const handleRemoveFavorite = async (userId: string, propertyId: string) => {
     try {
@@ -58,15 +88,15 @@ export default function MyFavorites() {
       toast.error("Failed to remove favorite");
     }
   };
-  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">My Favorites</h1>
 
       {loading ? (
-        <p>Loading favorites...</p>
+        <TableSkeleton />
       ) : favorites.length === 0 ? (
         <p>No favorite properties found.</p>
       ) : (
@@ -97,7 +127,6 @@ export default function MyFavorites() {
                       className="text-blue-600 hover:underline"
                     >
                       View
-                      {/* {baseUrl}/property/{item.id} */}
                     </Link>
                   </td>
                   <td className="p-3 border">{item.property_type}</td>

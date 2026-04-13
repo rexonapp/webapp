@@ -127,8 +127,8 @@ export default function HomePage() {
                     <Card className="border-2 border-blue-100 hover:border-orange-300 group premium-card backdrop-card bg-white/90 h-full">
                       <div className="absolute inset-0 bg-gradient-to-br from-orange-50/0 via-blue-50/0 to-orange-50/0 group-hover:from-orange-50/50 group-hover:via-blue-50/30 group-hover:to-orange-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg pointer-events-none" />
                       <CardHeader className="relative z-10">
-                        <div className="w-14 h-14 bg-gradient-to-br from-orange-500 via-orange-600 to-orange-700 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:shadow-2xl group-hover:shadow-orange-400/50 transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6 relative overflow-hidden shimmer-effect">
-                          <div className="absolute inset-0 bg-gradient-to-tr from-orange-400 to-orange-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="w-14 h-14 bg-blue-700 rounded-xl flex items-center justify-center mb-4 shadow-lg group-hover:shadow-2xl group-hover:shadow-orange-400/50 transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6 relative overflow-hidden shimmer-effect">
+                          <div className="absolute inset-0 bg-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                           <Icon className="h-7 w-7 text-white relative z-10 group-hover:scale-110 transition-transform duration-500" />
                         </div>
                         <CardTitle className="text-2xl text-blue-900 group-hover:text-orange-600 transition-all duration-500 font-bold">
