@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Facebook, MessageCircle } from "lucide-react";
+import { Facebook, MessageCircle, X } from "lucide-react";
 
 interface ShareModalProps {
   propertyId: any;
@@ -44,9 +44,16 @@ export default function ShareModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl p-5 w-[380px] shadow-xl"
+        className="bg-white rounded-xl p-5 w-[380px] shadow-xl relative"
         onClick={(e) => e.stopPropagation()}
       >
+         {/* ✅ CLOSE BUTTON HERE */}
+    <button
+      onClick={onClose}
+      className="absolute top-3 right-3 p-1 rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-800"
+    >
+      <X size={18} />
+    </button>
         <h3 className="text-lg font-semibold mb-3">
           Share Property
         </h3>
