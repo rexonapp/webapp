@@ -1657,7 +1657,7 @@ function SearchResults() {
 
             <div 
               className="hidden lg:block lg:w-1/2 relative bg-gray-100"
-              style={{ height: 'calc(100vh - 73px)' }}
+              style={{ height: 'calc(100vh - 136px)' }}
             >
               <Map 
                 properties={mapProperties}
@@ -1668,7 +1668,7 @@ function SearchResults() {
             </div>
           </>
         ) : layout === 'map' ? (
-          <div className="flex-1 relative" style={{ height: 'calc(100vh - 73px)' }}>
+          <div className="flex-1 relative" style={{ height: 'calc(100vh - 136px)' }}>
             <Map 
               properties={mapProperties}
               center={mapCenter}
