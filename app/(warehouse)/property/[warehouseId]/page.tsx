@@ -1,5 +1,7 @@
+import BackButton from "@/components/ui/BackButton";
 import Image from "next/image";
-
+import { Share2 } from "lucide-react";
+import PropertyHeader from "@/components/ui/PropertyHeader";
 async function getProperty(warehouseId: string) {
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
@@ -14,7 +16,7 @@ async function getProperty(warehouseId: string) {
 }
 
 
-export default async function PropertyPage({
+export default async function PropertyPage({    
   params,
 }: {
   params: Promise<{ warehouseId: string }>;
@@ -39,7 +41,10 @@ export default async function PropertyPage({
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
-      
+     <PropertyHeader
+    propertyId={warehouseId}
+    title={property.title}
+  />
       {/* 🔹 Image Gallery */}
       {images?.length > 0 && (
         <div className="grid grid-cols-4 gap-4 mb-10">
