@@ -35,6 +35,7 @@ export default async function PropertyPage({
 
   const { property, media } = data;
 
+  console.log(property, 'property');
   const images = media?.filter((m: any) =>
     m.file_type?.startsWith("image/")
   );
@@ -114,7 +115,7 @@ export default async function PropertyPage({
       </div>
 
       {/* 🔹 Highlights Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-xl mb-10">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-xl mb-6">
         <div>
           <p className="text-sm text-gray-500">Property Type</p>
           <p className="font-semibold">{property.property_type}</p>
@@ -142,8 +143,19 @@ export default async function PropertyPage({
         </div>
       </div>
 
+      <div className="mt-3">
+        <h3 className="text-xl font-semibold mb-3">
+          Amenities
+        </h3>
+        <div className="flex flex-wrap gap-1.5">
+          {property.amenities.map((a: any, idx: any) => (
+            <span key={idx} className="bg-amber-50 border border-amber-200 text-amber-600 text-sm font-semibold px-3 py-1 rounded-full"
+            >{a}</span>
+          ))}
+        </div>
+      </div>
       {/* 🔹 Description */}
-      <div className="mb-10">
+      <div className="mt-5">
         <h3 className="text-xl font-semibold mb-3">
           Description
         </h3>
@@ -155,7 +167,7 @@ export default async function PropertyPage({
       {/* 🔹 Map Section */}
       {property.latitude && property.longitude && (
         <div>
-          <h3 className="text-xl font-semibold mb-4">
+          <h3 className="text-xl font-semibold mb-4 mt-10">
             Location Map
           </h3>
 

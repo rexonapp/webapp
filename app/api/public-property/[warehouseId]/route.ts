@@ -24,7 +24,8 @@ export async function GET(
               longitude,
               is_verified,
               is_featured,
-              created_at
+              created_at,
+              amenities
        FROM warehouses
        WHERE id = $1`,
       [warehouseId]
