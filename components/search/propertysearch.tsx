@@ -145,7 +145,7 @@ function PortalDropdown({
     >
       {!isSearching && (
         <div className="flex items-center gap-1.5 px-4 pt-3.5 pb-1.5">
-          <TrendingUp className="h-3.5 w-3.5 text-orange-500" />
+          <TrendingUp className="h-3.5 w-3.5 text-[#d07648]" />
           <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
             Popular Cities
           </span>
@@ -159,7 +159,7 @@ function PortalDropdown({
         </div>
       ) : isLoading ? (
         <div className="px-4 py-4 flex items-center gap-3 text-sm text-gray-500">
-          <div className="h-4 w-4 rounded-full border-2 border-orange-400 border-t-transparent animate-spin flex-shrink-0" />
+          <div className="h-4 w-4 rounded-full border-2 border-[#d07648] border-t-transparent animate-spin flex-shrink-0" />
           Searching cities…
         </div>
       ) : isSearching && displayCities.length === 0 ? (
@@ -183,14 +183,14 @@ function PortalDropdown({
                 onPointerDown={(e) => { e.preventDefault(); onSelect(city) }}
                 className={cn(
                   'flex items-center gap-3 px-4 py-2.5 cursor-pointer select-none transition-colors',
-                  isActive    ? 'bg-orange-50' : 'hover:bg-gray-50',
-                  isSelected  && 'bg-orange-50',
+                  isActive    ? 'bg-[#d07648]/10' : 'hover:bg-gray-50',
+                  isSelected  && 'bg-[#d07648]/10',
                 )}
               >
                 <span className="w-5 flex-shrink-0 flex items-center justify-center">
                   {isSelected
-                    ? <Check  className="h-4 w-4 text-orange-500" />
-                    : <MapPin className="h-4 w-4 text-blue-400" />}
+                    ? <Check  className="h-4 w-4 text-[#d07648]" />
+                    : <MapPin className="h-4 w-4 text-[#13a8b4]" />}
                 </span>
                 <span className={cn(
                   'text-sm flex-1',
@@ -250,7 +250,6 @@ export default function PropertySearch() {
       if (!Array.isArray(data)) throw new Error('Invalid data format')
       setCities(data)
     } catch (err) {
-      console.error('❌ Error fetching cities:', err)
       setError('Unable to load cities. Please try again.')
       setCities([])
     } finally {
@@ -361,7 +360,7 @@ export default function PropertySearch() {
     <>
       <MapPin className={cn(
         'h-4 w-4 flex-shrink-0 transition-colors',
-        isOpen ? 'text-orange-500' : 'text-blue-800',
+        isOpen ? 'text-[#d07648]' : 'text-[#0f8a94]',
       )} />
       <input
         ref={inputRef}
@@ -399,7 +398,7 @@ export default function PropertySearch() {
 
   const propertyTypeSelectSM = (
     <>
-      <Building2 className="h-4 w-4 text-blue-800 flex-shrink-0" />
+      <Building2 className="h-4 w-4 text-[#0f8a94] flex-shrink-0" />
       <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
         <SelectTrigger className="flex-1 min-w-0 !border-0 p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 [&>span]:truncate">
           <SelectValue placeholder="Property Type" />
@@ -415,7 +414,7 @@ export default function PropertySearch() {
 
   const propertyTypeSelectXS = (
     <>
-      <Building2 className="h-3.5 w-3.5 text-blue-800 flex-shrink-0" />
+      <Building2 className="h-3.5 w-3.5 text-[#0f8a94] flex-shrink-0" />
       <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
         <SelectTrigger className="flex-1 min-w-0 !border-0 p-0 h-auto text-xs font-normal bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 [&>span]:truncate">
           <SelectValue placeholder="Type" />
@@ -431,10 +430,10 @@ export default function PropertySearch() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="w-full max-w-3xl mx-auto px-4">
+    <div className="w-full max-w-3xl mx-auto px-1 sm:px-4">
       <div
         ref={containerRef}
-        className="relative shadow-lg border border-gray-200/60 bg-white/95 backdrop-blur-sm rounded-xl"
+        className="relative shadow-lg border border-[#13a8b4]/25 bg-white/95 backdrop-blur-sm rounded-xl"
       >
         <PortalDropdown
           anchorEl={activeAnchorEl}
@@ -447,7 +446,7 @@ export default function PropertySearch() {
             ref={anchorDesktopRef}
             className={cn(
               'flex-[2] min-w-0 flex items-center gap-2.5 px-3 border-r border-gray-200 rounded-l-xl h-full transition-colors cursor-text',
-              isOpen && 'bg-blue-50/40',
+              isOpen && 'bg-[#13a8b4]/10',
             )}
           >
             {inputJSX}
@@ -459,7 +458,7 @@ export default function PropertySearch() {
 
           <Button
             onClick={handleSearch}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-5 !h-full rounded-none rounded-r-xl font-medium text-sm shadow-none flex items-center gap-2 transition-colors"
+            className="bg-[#d07648] hover:bg-[#c46b3f] text-white px-5 !h-full rounded-none rounded-r-xl font-semibold text-sm shadow-none flex items-center gap-2 transition-colors"
           >
             <Search className="h-4 w-4" />
             <span>Search</span>
@@ -471,7 +470,7 @@ export default function PropertySearch() {
             ref={anchorTabletRef}
             className={cn(
               'flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 rounded-t-xl transition-colors cursor-text',
-              isOpen && 'bg-blue-50/40',
+              isOpen && 'bg-[#13a8b4]/10',
             )}
           >
             {inputJSX}
@@ -483,7 +482,7 @@ export default function PropertySearch() {
             </div>
             <Button
               onClick={handleSearch}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-none rounded-br-xl font-medium text-sm shadow-none flex items-center gap-2"
+              className="bg-[#d07648] hover:bg-[#c46b3f] text-white px-6 py-3 rounded-none rounded-br-xl font-semibold text-sm shadow-none flex items-center gap-2"
             >
               <Search className="h-4 w-4" />
               <span>Search</span>
@@ -496,21 +495,21 @@ export default function PropertySearch() {
             ref={anchorMobileRef}
             className={cn(
               'flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 rounded-t-xl transition-colors cursor-text',
-              isOpen && 'bg-blue-50/40',
+              isOpen && 'bg-[#13a8b4]/10',
             )}
           >
             {inputJSX}
           </div>
 
-          <div className="grid grid-cols-2 border-b border-gray-200">
-            <div className="flex items-center gap-1.5 px-3 py-3 border-r border-gray-200">
+          <div className="border-b border-gray-200">
+            <div className="flex items-center gap-1.5 px-3 py-3">
               {propertyTypeSelectXS}
             </div>
           </div>
 
           <Button
             onClick={handleSearch}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-none rounded-b-xl font-medium text-sm shadow-none flex items-center justify-center gap-2"
+            className="w-full bg-[#d07648] hover:bg-[#c46b3f] text-white py-3 rounded-none rounded-b-xl font-semibold text-sm shadow-none flex items-center justify-center gap-2"
           >
             <Search className="h-4 w-4" />
             <span>Search Properties</span>

@@ -29,6 +29,7 @@ const CINEMATIC_PRESETS = [
 export default function HeroWithBanner() {
   const [bannerImages, setBannerImages] = useState<string[]>(DEFAULT_IMAGES);
   const [loadedImages, setLoadedImages] = useState<HTMLImageElement[]>([]);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const heroRef = useRef<HTMLElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationFrameRef = useRef<number>(0);
@@ -45,13 +46,20 @@ export default function HeroWithBanner() {
   const slideStartTime = useRef<number>(Date.now());
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = () => setPrefersReducedMotion(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
     fetchBannerImages();
   }, []);
 
   useEffect(() => {
     if (bannerImages.length === 0) return;
-
-    console.log('🖼️ Loading banner images:', bannerImages);
 
     const generatePlaceholderUrl = (src: string): string => {
       if (src.includes('unsplash.com')) {
@@ -61,8 +69,9 @@ export default function HeroWithBanner() {
       return src;
     };
 
-    const isUsingDefaultImages = JSON.stringify(bannerImages) === JSON.stringify(DEFAULT_IMAGES);
-    console.log('🎯 Using default images?', isUsingDefaultImages);
+    const isUsingDefaultImages =
+      bannerImages.length === DEFAULT_IMAGES.length &&
+      bannerImages.every((img, index) => img === DEFAULT_IMAGES[index]);
 
     const placeholderUrls = isUsingDefaultImages
       ? PLACEHOLDER_IMAGES
@@ -82,12 +91,9 @@ export default function HeroWithBanner() {
 
     Promise.all(placeholderPromises)
       .then((placeholders) => {
-        console.log('✅ Placeholder images loaded:', placeholders.length);
         setLoadedImages(placeholders); 
       })
-      .catch((error) => {
-        console.log('❌ Placeholder preload error:', error);
-      });
+      .catch(() => undefined);
 
     const highResPromises = bannerImages.map((src, index) => {
       return new Promise<HTMLImageElement>((resolve, reject) => {
@@ -101,26 +107,17 @@ export default function HeroWithBanner() {
         if (index === 0) {
           img.fetchPriority = 'high';
         }
-        img.onload = () => {
-          console.log(`✅ High-res image ${index + 1} loaded:`, src);
-          resolve(img);
-        };
-        img.onerror = (error) => {
-          console.log(`❌ Failed to load image ${index + 1}: ${src}`, error);
-          reject(error);
-        };
+        img.onload = () => resolve(img);
+        img.onerror = reject;
         img.src = src;
       });
     });
 
     Promise.all(highResPromises)
       .then((images) => {
-        console.log('✅ All high-res images loaded successfully:', images.length);
         setLoadedImages(images); 
       })
-      .catch((error) => {
-        console.log('❌ High-res image preload error:', error);
-      });
+      .catch(() => undefined);
   }, [bannerImages]);
 
   useEffect(() => {
@@ -136,12 +133,12 @@ export default function HeroWithBanner() {
     });
     if (!ctx) return;
 
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
+    const isSmallScreen = window.innerWidth < 640;
+    const frameInterval = isSmallScreen ? 66 : 40;
 
     const resizeCanvas = () => {
       // Slightly lower DPR cap to reduce fill rate cost
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const dpr = Math.min(window.devicePixelRatio || 1, isSmallScreen ? 1.1 : 1.4);
       const width = window.innerWidth;
       const height = window.innerHeight;
 
@@ -153,20 +150,33 @@ export default function HeroWithBanner() {
       // Reset transform before applying new scale to avoid accumulation
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
+      ctx.imageSmoothingQuality = isSmallScreen ? 'medium' : 'high';
       ctx.scale(dpr, dpr);
     };
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
+    if (prefersReducedMotion) {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.2);
+      const canvasWidth = canvas.width / dpr;
+      const canvasHeight = canvas.height / dpr;
+      const staticImage = loadedImages[currentSlideRef.current] || loadedImages[0];
+      if (staticImage) {
+        drawImageWithCinematicMovement(ctx, canvasWidth, canvasHeight, staticImage, 0, 0, 1);
+      }
+      return () => {
+        window.removeEventListener('resize', resizeCanvas);
+      };
+    }
+
     const animate = () => {
       if (!ctx || loadedImages.length === 0) return;
 
       const now = Date.now();
 
-      // Throttle to ~30fps to reduce CPU/GPU load
-      if (now - lastFrameTimeRef.current < 33) {
+      // Throttle for smoother battery/CPU behavior on small screens.
+      if (now - lastFrameTimeRef.current < frameInterval) {
         animationFrameRef.current = requestAnimationFrame(animate);
         return;
       }
@@ -175,7 +185,7 @@ export default function HeroWithBanner() {
       const currentImg = loadedImages[currentIndex];
       const nextImg = loadedImages[targetSlide.current];
 
-      const slideProgress = Math.min((now - slideStartTime.current) / 10000, 1);
+      const slideProgress = Math.min((now - slideStartTime.current) / (isSmallScreen ? 12000 : 10000), 1);
       const easeProgress = slideProgress; // Linear for video-like feel
 
       // If hero is not visible or tab is hidden, skip heavy drawing work
@@ -191,7 +201,7 @@ export default function HeroWithBanner() {
       ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       if (isTransitioning.current) {
-        const transitionDuration = 1500; // 1.5 seconds for seamless video-like transition
+        const transitionDuration = prefersReducedMotion ? 200 : 1200;
         const transitionProgress = Math.min((now - transitionStartTime.current) / transitionDuration, 1);
         const fadeProgress = transitionProgress; // Linear fade for video-like feel
 
@@ -218,7 +228,7 @@ export default function HeroWithBanner() {
         const nextIndex = (currentSlideRef.current + 1) % loadedImages.length;
         startTransition(nextIndex);
       }
-    }, 10000);
+    }, prefersReducedMotion ? 20000 : 10000);
 
     return () => {
       window.removeEventListener('resize', resizeCanvas);
@@ -227,7 +237,7 @@ export default function HeroWithBanner() {
       }
       clearInterval(slideInterval);
     };
-  }, [loadedImages]);
+  }, [loadedImages, prefersReducedMotion]);
 
   // Track when the hero is actually visible in the viewport, to avoid heavy work when scrolled away
   useEffect(() => {
@@ -304,31 +314,17 @@ export default function HeroWithBanner() {
 
   const fetchBannerImages = async () => {
     try {
-      console.log('🔄 Fetching banner images from API...');
       const response = await fetch('/api/banner-images');
-
-      console.log('📡 API Response status:', response.status, response.statusText);
-
       const data = await response.json();
-      console.log('📦 API Response data:', data);
 
       if (response.ok) {
         if (data.images && data.images.length > 0) {
-          console.log('✅ Loaded custom banner images from API:', data.images.length);
-          console.log('🖼️ Image URLs:', data.images);
           setBannerImages(data.images);
           return;
-        } else {
-          console.log('⚠️ API returned empty images array:', data);
         }
-      } else {
-        console.log('❌ API request failed:', response.status, data);
       }
-
-      console.log('🎨 Using default banner images');
-    } catch (error) {
-      console.log('💥 API fetch error:', error);
-      console.log('🎨 Falling back to default images');
+    } catch {
+      // Fall back to default hero images silently.
     }
   };
 
@@ -352,33 +348,33 @@ export default function HeroWithBanner() {
 
       <div className="absolute inset-0 z-10 pointer-events-none">
         {/* Global vertical darkening for legibility */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/25 to-black/45"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/22 to-black/40"></div>
 
         {/* Stronger bottom fade so cards and lower text always read well */}
-        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/60 via-black/40 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/50 via-black/34 to-transparent"></div>
 
         {/* Subtle top fade to keep navbar area readable on bright skies */}
-        <div className="absolute top-0 left-0 right-0 h-1/4 bg-gradient-to-b from-black/35 via-black/20 to-transparent"></div>
+        <div className="absolute top-0 left-0 right-0 h-1/4 bg-gradient-to-b from-black/28 via-black/15 to-transparent"></div>
 
         {/* Focused center vignette behind headline + search for busy images */}
-        <div className="absolute inset-x-[5%] top-[10%] bottom-[30%] bg-gradient-radial from-black/55 via-black/40 to-transparent opacity-95" />
+        <div className="absolute inset-x-[5%] top-[10%] bottom-[30%] bg-gradient-radial from-black/45 via-black/30 to-transparent opacity-90" />
       </div>
 
-      <div className="absolute inset-0 z-20 flex flex-col items-center px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 md:pt-12 lg:pt-10 pb-28 overflow-y-auto">
+      <div className="absolute inset-0 z-20 flex flex-col items-center px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 md:pt-12 lg:pt-10 pb-24 md:pb-28 overflow-y-auto">
       <div className="w-full max-w-7xl mx-auto flex flex-col justify-between min-h-full gap-4 sm:gap-5 md:gap-6">
-                  <div className="text-center space-y-1.5 sm:space-y-2 md:space-y-2.5 animate-cinematic-entry">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 shadow-xl mb-2 sm:mb-3 hover:bg-white/15 hover:border-white/30 transition-all duration-300">
-              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-orange-400 animate-pulse" />
-              <span className="text-xs sm:text-sm font-medium text-white tracking-wide">
+                  <div className="text-center space-y-2 sm:space-y-2.5 animate-cinematic-entry">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/12 border border-white/25 shadow-xl mb-2 sm:mb-3 hover:bg-white/18 transition-all duration-300">
+              <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#d07648] animate-pulse" />
+              <span className="text-[11px] sm:text-sm font-semibold text-white tracking-wide">
                 India's Most Advanced Property Platform
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight text-white drop-shadow-2xl tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-bold leading-tight text-white drop-shadow-2xl tracking-tight">
               List. Discover. Connect.
             </h1>
 
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg max-w-4xl mx-auto text-white/95 drop-shadow-lg font-normal">
+            <p className="text-sm sm:text-base md:text-lg max-w-4xl mx-auto text-white/95 drop-shadow-lg font-medium">
               Properties by Owners, Agents & Builders – All in One Place
             </p>
           </div>
@@ -386,7 +382,7 @@ export default function HeroWithBanner() {
           {/* Search Section with responsive spacing */}
           <div className="w-full max-w-4xl mx-auto animate-slide-up-delayed-1">
                                     <div className="relative">
-              <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/20 via-orange-400/30 to-orange-500/20 blur-xl opacity-60 rounded-3xl"></div>
+              <div className="absolute -inset-2 bg-gradient-to-r from-[#13a8b4]/20 via-[#d07648]/25 to-[#13a8b4]/20 blur-xl opacity-60 rounded-3xl"></div>
               <div className="relative">
                 <PropertySearch />
               </div>
@@ -394,33 +390,33 @@ export default function HeroWithBanner() {
           </div>
 
           {/* Cards Section with tighter top spacing on large screens */}
-          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 lg:gap-3 animate-slide-up-delayed-2 px-2 sm:px-0">
+          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5 lg:gap-4 animate-slide-up-delayed-2 px-1 sm:px-0">
                         <Card
     onClick={() => router.push('/property')}
-    className="group relative border-2 border-blue-400/40 hover:border-orange-500 bg-white/10 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/15 transform hover:-translate-y-1.5 hover:scale-[1.02]"
+    className="group relative border-2 border-[#13a8b4]/45 hover:border-[#d07648] bg-white/14 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/18 transform hover:-translate-y-1 hover:scale-[1.01]"
   >
     {/* Glow effect */}
-    <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/0 to-orange-500/0 group-hover:from-orange-500/25 group-hover:to-orange-500/25 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+    <div className="absolute -inset-1 bg-gradient-to-r from-[#d07648]/0 to-[#13a8b4]/0 group-hover:from-[#d07648]/25 group-hover:to-[#13a8b4]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
     
     {/* Glossy top shine */}
     <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl"></div>
 
     <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-7 h-7 sm:w-9 sm:h-9 bg-blue-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#0f8a94] rounded-lg flex items-center justify-center group-hover:scale-105 group-hover:rotate-2 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
           <Home className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
         </div>
-        <CardTitle className="text-[11px] sm:text-sm md:text-base font-bold text-white group-hover:text-orange-200 transition-colors duration-300 text-left leading-tight">
+        <CardTitle className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-white transition-colors duration-300 text-left leading-tight">
           Property Owner
         </CardTitle>
       </div>
     </CardHeader>
 
     <CardContent className="pb-2 px-2.5 sm:px-3.5 space-y-0.5 sm:space-y-1">
-      <CardDescription className="text-[9px] sm:text-xs leading-snug sm:leading-relaxed text-white/90 text-left line-clamp-2">
+      <CardDescription className="text-[11px] sm:text-xs leading-snug sm:leading-relaxed text-white/95 text-left line-clamp-2">
         List your warehouse or commercial property and connect with verified buyers
       </CardDescription>
-      <div className="flex items-center text-orange-200 font-semibold text-[9px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
+      <div className="flex items-center text-[#ffd7c2] font-semibold text-[11px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
         <span>Get Started</span>
         <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
       </div>
@@ -429,30 +425,30 @@ export default function HeroWithBanner() {
 
   <Card
     onClick={() => router.push('/agent/join')}
-    className="group relative border-2 border-blue-400/40 hover:border-orange-500 bg-white/10 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/15 transform hover:-translate-y-1.5 hover:scale-[1.02]"
+    className="group relative border-2 border-[#13a8b4]/45 hover:border-[#d07648] bg-white/14 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/18 transform hover:-translate-y-1 hover:scale-[1.01]"
   >
     {/* Glow effect */}
-    <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/0 to-orange-500/0 group-hover:from-orange-500/25 group-hover:to-orange-500/25 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+    <div className="absolute -inset-1 bg-gradient-to-r from-[#d07648]/0 to-[#13a8b4]/0 group-hover:from-[#d07648]/25 group-hover:to-[#13a8b4]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
     
     {/* Glossy top shine */}
     <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl"></div>
 
     <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-7 h-7 sm:w-9 sm:h-9 bg-blue-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#0f8a94] rounded-lg flex items-center justify-center group-hover:scale-105 group-hover:rotate-2 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
           <Users className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
         </div>
-        <CardTitle className="text-[11px] sm:text-sm md:text-base font-bold text-white group-hover:text-orange-200 transition-colors duration-300 text-left leading-tight">
+        <CardTitle className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-white transition-colors duration-300 text-left leading-tight">
           Real Estate Agent
         </CardTitle>
       </div>
     </CardHeader>
 
     <CardContent className="pb-2 px-2.5 sm:px-3.5 space-y-0.5 sm:space-y-1">
-      <CardDescription className="text-[9px] sm:text-xs leading-snug sm:leading-relaxed text-white/90 text-left line-clamp-2">
+      <CardDescription className="text-[11px] sm:text-xs leading-snug sm:leading-relaxed text-white/95 text-left line-clamp-2">
         Manage multiple properties and connect with potential clients efficiently
       </CardDescription>
-      <div className="flex items-center text-orange-200 font-semibold text-[9px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
+      <div className="flex items-center text-[#ffd7c2] font-semibold text-[11px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
         <span>Join Now</span>
         <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
       </div>
@@ -461,30 +457,30 @@ export default function HeroWithBanner() {
 
   <Card
     onClick={() => router.push('/customer')}
-    className="group relative border-2 border-blue-400/40 hover:border-orange-500 bg-white/10 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/15 transform hover:-translate-y-1.5 hover:scale-[1.02] sm:col-span-2 lg:col-span-1"
+    className="group relative border-2 border-[#13a8b4]/45 hover:border-[#d07648] bg-white/14 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/18 transform hover:-translate-y-1 hover:scale-[1.01] sm:col-span-2 lg:col-span-1"
   >
     {/* Glow effect */}
-    <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/0 to-orange-500/0 group-hover:from-orange-500/25 group-hover:to-orange-500/25 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
+    <div className="absolute -inset-1 bg-gradient-to-r from-[#d07648]/0 to-[#13a8b4]/0 group-hover:from-[#d07648]/25 group-hover:to-[#13a8b4]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
     
     {/* Glossy top shine */}
     <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl"></div>
 
     <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
       <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-7 h-7 sm:w-9 sm:h-9 bg-blue-700 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#0f8a94] rounded-lg flex items-center justify-center group-hover:scale-105 group-hover:rotate-2 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
           <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
         </div>
-        <CardTitle className="text-[11px] sm:text-sm md:text-base font-bold text-white group-hover:text-orange-200 transition-colors duration-300 text-left leading-tight">
+        <CardTitle className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-white transition-colors duration-300 text-left leading-tight">
           Company / Customer
         </CardTitle>
       </div>
     </CardHeader>
 
     <CardContent className="pb-2 px-2.5 sm:px-3.5 space-y-0.5 sm:space-y-1">
-      <CardDescription className="text-[9px] sm:text-xs leading-snug sm:leading-relaxed text-white/90 text-left line-clamp-2">
+      <CardDescription className="text-[11px] sm:text-xs leading-snug sm:leading-relaxed text-white/95 text-left line-clamp-2">
         Find the perfect warehouse or commercial space for your business needs
       </CardDescription>
-      <div className="flex items-center text-orange-200 font-semibold text-[9px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
+      <div className="flex items-center text-[#ffd7c2] font-semibold text-[11px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
         <span>Find Space</span>
         <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
       </div>
@@ -497,7 +493,7 @@ export default function HeroWithBanner() {
 
       <button
         onClick={scrollToNextSection}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 group cursor-pointer"
+        className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-30 group cursor-pointer"
         aria-label="Scroll to next section"
       >
         <div className="flex flex-col items-center gap-2">
@@ -584,6 +580,14 @@ export default function HeroWithBanner() {
           image-rendering: -webkit-optimize-contrast;
           will-change: transform;
           transform: translateZ(0);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .animate-cinematic-entry,
+          .animate-slide-up-delayed-1,
+          .animate-slide-up-delayed-2 {
+            animation: none;
+          }
         }
 
         /* (Glassmorphism blur on hero cards was reduced/removed for scroll performance) */

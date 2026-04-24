@@ -48,6 +48,10 @@
 
 :root {
   --radius: 0.625rem;
+  --brand-blue: #13a8b4;
+  --brand-blue-deep: #0b6f78;
+  --brand-orange: #d07648;
+  --brand-orange-deep: #a85832;
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);

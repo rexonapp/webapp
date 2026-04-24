@@ -211,7 +211,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-white/95 shadow-md sticky top-0 z-50 backdrop-blur-lg border-b border-blue-100">
+      <nav className="bg-white/95 shadow-md sticky top-0 z-50 backdrop-blur-lg border-b border-[#13a8b4]/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
@@ -229,7 +229,7 @@ export default function Navbar() {
             <div className="flex items-center space-x-3">
               {/* Agent Join Button - Desktop */}
               <Link href='/agent/join'>
-                <button className="hidden md:flex items-center space-x-2 px-4 py-2 text-blue-700 hover:text-orange-600 font-medium rounded-lg hover:bg-blue-50 transition-colors border-2 border-blue-200 hover:border-orange-300">
+                <button className="hidden md:flex items-center space-x-2 px-4 py-2 text-[#0f8a94] hover:text-[#d07648] font-medium rounded-lg hover:bg-[#13a8b4]/10 transition-colors border-2 border-[#13a8b4]/25 hover:border-[#d07648]/45">
                   <span>Join as Agent</span>
                 </button>
               </Link>
@@ -252,29 +252,29 @@ export default function Navbar() {
                     className="flex items-center space-x-3 focus:outline-none group"
                     aria-label="User menu"
                   >
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-semibold text-sm shadow-lg group-hover:shadow-blue-500/50 transition-all ring-2 ring-blue-200 group-hover:ring-orange-300">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#13a8b4] to-[#0b6f78] flex items-center justify-center text-white font-semibold text-sm shadow-lg group-hover:shadow-[#13a8b4]/35 transition-all ring-2 ring-[#13a8b4]/30 group-hover:ring-[#d07648]/45">
                       {getUserInitials()}
                     </div>
-                    <ChevronDown className="h-4 w-4 text-slate-500 hidden md:block group-hover:text-blue-700 transition-colors" />
+                    <ChevronDown className="h-4 w-4 text-slate-500 hidden md:block group-hover:text-[#0f8a94] transition-colors" />
                   </button>
 
                   {showProfileMenu && (
-                    <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border-2 border-blue-100 overflow-hidden z-50">
+                    <div className="absolute right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border-2 border-[#13a8b4]/20 overflow-hidden z-50">
                       {/* Profile Header */}
-                      <div className="p-4 bg-gradient-to-br from-blue-50 to-orange-50/30 border-b-2 border-blue-100">
+                      <div className="p-4 bg-gradient-to-br from-[#13a8b4]/10 to-[#d07648]/10 border-b-2 border-[#13a8b4]/20">
                         <div className="flex items-start space-x-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#13a8b4] to-[#0b6f78] flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0">
                             {getUserInitials()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-blue-900 truncate">
+                            <p className="text-sm font-semibold text-[#134c52] truncate">
                               {getUserFullName()}
                             </p>
                             <p className="text-xs text-slate-600 truncate mt-0.5">
                               {currentUser.email}
                             </p>
                             {currentUser.authProvider && currentUser.authProvider !== 'email' && (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 mt-1">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#d07648]/15 text-[#a85832] mt-1">
                                 {currentUser.authProvider.charAt(0).toUpperCase() + currentUser.authProvider.slice(1)}
                               </span>
                             )}
@@ -293,7 +293,7 @@ export default function Navbar() {
                           <Building2 className="h-4 w-4 text-blue-600" />
                           <span className="font-medium">My Properties</span>
                         </button> */}
-                        <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors">
+                        <button className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-[#13a8b4]/10 hover:text-[#0f8a94] transition-colors">
                           <Link href="/myfavorites">
                             <div className="flex items-center gap-3 py-2 hover:bg-gray-100 cursor-pointer">
                               <Heart className="h-4 w-4 text-red-600" />
@@ -307,17 +307,17 @@ export default function Navbar() {
                             setShowProfileMenu(false);
                             router.push('/settings/banner/upload');
                           }} 
-                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-[#13a8b4]/10 hover:text-[#0f8a94] transition-colors"
                         >
-                          <Settings className="h-4 w-4 text-blue-600" />
+                          <Settings className="h-4 w-4 text-[#0f8a94]" />
                           <span className="font-medium">Settings</span>
                         </button>
                         
-                        <div className="border-t-2 border-blue-100 my-2"></div>
+                        <div className="border-t-2 border-[#13a8b4]/20 my-2"></div>
                         
                         <button
                           onClick={handleSignOut}
-                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-orange-600 hover:bg-orange-50 transition-colors font-medium"
+                          className="w-full flex items-center space-x-3 px-4 py-2.5 text-sm text-[#d07648] hover:bg-[#d07648]/10 transition-colors font-medium"
                         >
                           <LogOut className="h-4 w-4" />
                           <span>Sign Out</span>
@@ -329,7 +329,7 @@ export default function Navbar() {
               ) : (
                 <button 
                   onClick={() => openAuthModal('signin')}
-                  className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-5 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-lg hover:shadow-blue-500/50"
+                  className="flex items-center space-x-2 bg-gradient-to-r from-[#13a8b4] to-[#0f8a94] text-white px-5 py-2 rounded-lg hover:from-[#0f8a94] hover:to-[#0b6f78] transition-all font-medium shadow-lg hover:shadow-[#13a8b4]/35"
                 >
                   <User className="h-4 w-4" />
                   <span>Sign In</span>
@@ -338,7 +338,7 @@ export default function Navbar() {
               
               {/* Mobile Menu Button */}
               <button 
-                className="lg:hidden p-2 text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                className="lg:hidden p-2 text-[#0f8a94] hover:bg-[#13a8b4]/10 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label="Toggle mobile menu"
               >
@@ -350,15 +350,15 @@ export default function Navbar() {
         
         {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t-2 border-blue-100 bg-white">
+          <div className="lg:hidden border-t-2 border-[#13a8b4]/20 bg-white">
             <div className="px-4 py-4 space-y-1">
               <div className="pt-2 pb-1 space-y-2">
-                <button className="block w-full text-left px-4 py-3 text-blue-700 hover:bg-blue-50 rounded-lg font-medium border-2 border-blue-200 transition-colors">
+                <button className="block w-full text-left px-4 py-3 text-[#0f8a94] hover:bg-[#13a8b4]/10 rounded-lg font-medium border-2 border-[#13a8b4]/25 transition-colors">
                   Join as Agent
                 </button>
                 
                 {currentUser && (
-                  <button className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg hover:from-orange-600 hover:to-orange-700 font-medium transition-all shadow-lg">
+                  <button className="flex items-center justify-center space-x-2 w-full px-4 py-3 bg-gradient-to-r from-[#d07648] to-[#c46b3f] text-white rounded-lg hover:from-[#c46b3f] hover:to-[#a85832] font-medium transition-all shadow-lg">
                     <Plus className="h-4 w-4" />
                     <span>List Property</span>
                   </button>
