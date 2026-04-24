@@ -894,13 +894,12 @@ export default function AgentRegistrationForm() {
                       touchedFields.has('termsAccepted') && fieldErrors.termsAccepted ? 'border-red-400' : ''
                     )}
                   />
-                  <Label htmlFor="termsAccepted" className="text-sm text-gray-700 leading-relaxed cursor-pointer select-none">
-                  I have read all the {' '}
+                  <Label htmlFor="termsAccepted" className="block text-sm text-gray-700 leading-relaxed cursor-pointer select-none">
+                    I have read and agree to Rexon's{' '}
                     <button type="button" onClick={openTncDialog} className="font-semibold text-[#d07648] hover:underline underline-offset-2">
                       Terms &amp; Conditions
-                    </button>
-                    {' '} of Rexon  and agreeing to all the terms.{' '}
-                    <span className="text-red-500 ml-1">*</span>
+                    </button>{' '}
+                    <span className="text-red-500 align-middle">*</span>
                   </Label>
                 </div>
                 {touchedFields.has('termsAccepted') && fieldErrors.termsAccepted && (
@@ -924,9 +923,9 @@ export default function AgentRegistrationForm() {
                       touchedFields.has('complianceAccepted') && fieldErrors.complianceAccepted ? 'border-red-400' : ''
                     )}
                   />
-                  <Label htmlFor="complianceAccepted" className="text-sm text-gray-700 leading-relaxed cursor-pointer select-none">
-                    I confirm that I will follow platform guidelines, maintain professional conduct, and comply with applicable laws.
-                    <span className="text-red-500 ml-1">*</span>
+                  <Label htmlFor="complianceAccepted" className="block text-sm text-gray-700 leading-relaxed cursor-pointer select-none">
+                    I confirm that I will follow platform guidelines, maintain professional conduct, and comply with applicable laws.{' '}
+                    <span className="text-red-500 align-middle">*</span>
                   </Label>
                 </div>
                 {touchedFields.has('complianceAccepted') && fieldErrors.complianceAccepted && (
