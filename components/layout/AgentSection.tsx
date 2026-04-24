@@ -33,7 +33,13 @@ function AgentCard({ agent }: { agent: Agent }) {
       {/* ── Big Photo Area ── */}
       <div className="ag-photo-wrap">
         {agent.profile_photo_s3_url ? (
-          <img src={agent.profile_photo_s3_url} alt={agent.full_name} className="ag-photo" />
+          <img
+            src={agent.profile_photo_s3_url}
+            alt={agent.full_name}
+            className="ag-photo"
+            loading="lazy"
+            decoding="async"
+          />
         ) : (
           <div className="ag-photo-fallback">
             <span>{initials}</span>
@@ -166,8 +172,8 @@ export default function AgentsSection() {
 
         /* soft ambient blobs — keep white bg */
         .ag-blob { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(100px); }
-        .ag-blob-1 { width: 560px; height: 560px; background: #FFF3E8; top: -160px; left: -140px; opacity: 0.65; }
-        .ag-blob-2 { width: 480px; height: 480px; background: #EBF5FF; bottom: -140px; right: -100px; opacity: 0.55; }
+        .ag-blob-1 { width: 560px; height: 560px; background: color-mix(in srgb, #d07648 20%, #ffffff); top: -160px; left: -140px; opacity: 0.65; }
+        .ag-blob-2 { width: 480px; height: 480px; background: color-mix(in srgb, #13a8b4 18%, #ffffff); bottom: -140px; right: -100px; opacity: 0.55; }
 
         .ag-inner { max-width: 1280px; margin: 0 auto; padding: 0 28px; position: relative; z-index: 2; }
 
@@ -176,23 +182,23 @@ export default function AgentsSection() {
 
         .ag-eyebrow {
           display: inline-flex; align-items: center; gap: 7px;
-          background: #FFF5EC; border: 1.5px solid #FFD9B8;
+          background: color-mix(in srgb, #d07648 14%, #fff); border: 1.5px solid color-mix(in srgb, #d07648 35%, #fff);
           border-radius: 40px; padding: 6px 16px; margin-bottom: 20px;
         }
         .ag-eyebrow-dot {
           width: 7px; height: 7px; border-radius: 50%;
-          background: linear-gradient(135deg, #F97316, #FB923C);
+          background: linear-gradient(135deg, #d07648, #bf6a41);
           animation: ag-pulse 2.2s ease-in-out infinite;
         }
         @keyframes ag-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.5);opacity:0.6} }
-        .ag-eyebrow-text { font-size: 11.5px; font-weight: 700; color: #EA580C; letter-spacing: 0.08em; text-transform: uppercase; }
+        .ag-eyebrow-text { font-size: 11.5px; font-weight: 700; color: #a85832; letter-spacing: 0.08em; text-transform: uppercase; }
 
         .ag-title { font-size: clamp(28px, 4.5vw, 46px); font-weight: 700; color: #0F172A; line-height: 1.18; letter-spacing: -0.02em; margin-bottom: 14px; }
-        .ag-title-highlight { color: #F97316; position: relative; display: inline-block; }
+        .ag-title-highlight { color: #d07648; position: relative; display: inline-block; }
         .ag-title-highlight::after {
           content: ''; position: absolute; left: 0; bottom: -4px;
           width: 100%; height: 3px;
-          background: linear-gradient(90deg, #F97316, #FDBA74);
+          background: linear-gradient(90deg, #d07648, #e5b092);
           border-radius: 3px;
         }
 
@@ -245,14 +251,14 @@ export default function AgentsSection() {
         .ag-card:hover {
           transform: translateY(-9px) scale(1.015);
           box-shadow: 0 28px 60px rgba(0,0,0,0.12);
-          border-color: #FED7AA;
+          border-color: color-mix(in srgb, #d07648 35%, #fff);
         }
 
         /* photo area — big */
         .ag-photo-wrap {
           width: 100%; height: 200px;
           position: relative; overflow: hidden;
-          background: linear-gradient(135deg, #FFF5EC, #FFE8D0);
+          background: linear-gradient(135deg, color-mix(in srgb, #d07648 12%, #fff), color-mix(in srgb, #13a8b4 10%, #fff));
           flex-shrink: 0;
         }
         .ag-photo {
@@ -265,7 +271,7 @@ export default function AgentsSection() {
         .ag-photo-fallback {
           width: 100%; height: 100%;
           display: flex; align-items: center; justify-content: center;
-          background: linear-gradient(135deg, #F97316 0%, #FB923C 60%, #FDBA74 100%);
+          background: linear-gradient(135deg, #d07648 0%, #bf6a41 60%, #a85832 100%);
         }
         .ag-photo-fallback span {
           font-size: 52px; font-weight: 800; color: rgba(255,255,255,0.9);
@@ -288,22 +294,22 @@ export default function AgentsSection() {
           border: 1px solid rgba(187,247,208,0.8);
         }
         .ag-badge-top {
-          background: rgba(255,247,237,0.92); color: #EA580C;
-          border: 1px solid rgba(254,215,170,0.8);
+          background: color-mix(in srgb, #d07648 20%, white); color: #a85832;
+          border: 1px solid color-mix(in srgb, #d07648 38%, white);
         }
-        .ag-star-icon { color: #F97316; fill: #F97316; }
+        .ag-star-icon { color: #d07648; fill: #d07648; }
 
         /* details section */
         .ag-details { padding: 16px 18px 18px; display: flex; flex-direction: column; flex: 1; gap: 0; }
 
         .ag-details-top { margin-bottom: 10px; }
         .ag-name { font-size: 15.5px; font-weight: 700; color: #0F172A; line-height: 1.3; margin-bottom: 2px; }
-        .ag-agency { font-size: 11.5px; font-weight: 600; color: #F97316; margin-bottom: 5px; }
+        .ag-agency { font-size: 11.5px; font-weight: 600; color: #d07648; margin-bottom: 5px; }
         .ag-location {
           display: flex; align-items: center; gap: 4px;
           font-size: 11px; color: #9CA3AF;
         }
-        .ag-location svg { color: #FBA96B; flex-shrink: 0; }
+        .ag-location svg { color: #13a8b4; flex-shrink: 0; }
 
         .ag-bio {
           font-size: 12px; color: #6B7280; line-height: 1.65;
@@ -315,8 +321,8 @@ export default function AgentsSection() {
         .ag-langs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
         .ag-lang {
           font-size: 10px; font-weight: 600;
-          background: #FFF5EC; color: #C2410C;
-          border: 1px solid #FDDCBC; padding: 3px 9px; border-radius: 7px;
+          background: color-mix(in srgb, #d07648 14%, #fff); color: #a85832;
+          border: 1px solid color-mix(in srgb, #d07648 30%, #fff); padding: 3px 9px; border-radius: 7px;
         }
 
         /* no bio / no langs fallback spacing */
@@ -336,7 +342,7 @@ export default function AgentsSection() {
           border: 1.5px solid #E5E7EB; color: #374151;
           background: #FAFAFA;
         }
-        .ag-btn-outline:hover { border-color: #F97316; color: #F97316; background: #FFF5EC; box-shadow: none; transform: translateY(-2px); }
+        .ag-btn-outline:hover { border-color: #d07648; color: #d07648; background: color-mix(in srgb, #d07648 14%, #fff); box-shadow: none; transform: translateY(-2px); }
 
         .ag-btn-green {
           flex: 1;
@@ -347,10 +353,10 @@ export default function AgentsSection() {
 
         .ag-btn-blue {
           flex: 1;
-          background: linear-gradient(135deg, #3B82F6, #60A5FA);
-          color: #fff; box-shadow: 0 2px 10px rgba(59,130,246,0.25);
+          background: linear-gradient(135deg, #13a8b4, #0f8a94);
+          color: #fff; box-shadow: 0 2px 10px rgba(19,168,180,0.25);
         }
-        .ag-btn-blue:hover { box-shadow: 0 6px 18px rgba(59,130,246,0.35); }
+        .ag-btn-blue:hover { box-shadow: 0 6px 18px rgba(19,168,180,0.35); }
 
         /* skeleton */
         .ag-skel-card { pointer-events: none; }
