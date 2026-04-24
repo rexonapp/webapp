@@ -55,10 +55,9 @@ export default function MyFavorites() {
     fetch("/api/leads/favorite/list")
       .then(res => res.json())
       .then(data => {
-        console.log(data, "dataa");
         setFavorites(data);
       })
-      .catch(err => console.error(err))
+      .catch(() => undefined)
       .finally(() => setLoading(false));
   }, []);
 
@@ -124,7 +123,7 @@ export default function MyFavorites() {
                   <td className="p-3 border">
                     <Link
                       href={`${baseUrl}/property/${item.id}`}
-                      className="text-blue-600 hover:underline"
+                      className="text-[#0f8a94] hover:underline"
                     >
                       View
                     </Link>

@@ -35,7 +35,6 @@ export default async function PropertyPage({
 
   const { property, media } = data;
 
-  console.log(property, 'property');
   const images = media?.filter((m: any) =>
     m.file_type?.startsWith("image/")
   );
@@ -105,11 +104,11 @@ export default async function PropertyPage({
       </p>
 
       {/* 🔹 Price Section */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 mb-8">
+      <div className="bg-[#13a8b4]/10 border border-[#13a8b4]/20 rounded-xl p-6 mb-8">
         <p className="text-sm text-gray-500 mb-1">
           {property.price_type}
         </p>
-        <h2 className="text-2xl font-bold text-blue-700">
+        <h2 className="text-2xl font-bold text-[#0f8a94]">
           ₹ {Number(property.price_per_sqft).toLocaleString()} / sqft
         </h2>
       </div>
