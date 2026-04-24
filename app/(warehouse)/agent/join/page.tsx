@@ -895,7 +895,7 @@ export default function AgentRegistrationForm() {
                     )}
                   />
                   <Label htmlFor="termsAccepted" className="text-sm text-gray-700 leading-relaxed cursor-pointer select-none">
-                  i have read all the {' '}
+                  I have read all the {' '}
                     <button type="button" onClick={openTncDialog} className="font-semibold text-[#d07648] hover:underline underline-offset-2">
                       Terms &amp; Conditions
                     </button>
