@@ -123,13 +123,13 @@ export default function LoginForm({
         <div className="absolute inset-0 backdrop-blur-sm" onClick={handleClose} aria-hidden="true" />
 
         <div
-          className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[96vh] overflow-hidden border-2 border-blue-100 flex flex-col"
+          className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[96vh] overflow-hidden border-2 border-[#13a8b4]/20 flex flex-col"
           role="dialog"
           aria-modal="true"
         >
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-blue-700 hover:bg-blue-50 rounded-full transition-all z-10"
+            className="absolute top-4 right-4 p-2 text-slate-400 hover:text-[#0f8a94] hover:bg-[#13a8b4]/10 rounded-full transition-all z-10"
             aria-label="Close modal"
           >
             <X className="h-5 w-5" />
@@ -143,7 +143,7 @@ export default function LoginForm({
                 <>
                   <button
                     onClick={() => { setView('auth'); setForgotError(''); setForgotEmail('') }}
-                    className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-700 transition-colors mb-6 -mt-1"
+                    className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#0f8a94] transition-colors mb-6 -mt-1"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Back to Sign In
@@ -153,7 +153,7 @@ export default function LoginForm({
                     <div className="flex justify-center">
                       <img src="/rexon-logo.png" alt="Rexon" className="h-20 w-auto object-contain" />
                     </div>
-                    <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent mb-2">
+                    <h2 className="text-2xl font-bold bg-gradient-to-r from-[#0f8a94] to-[#0b6f78] bg-clip-text text-transparent mb-2">
                       Forgot Password?
                     </h2>
                     <p className="text-slate-500 text-sm leading-relaxed">
@@ -162,9 +162,9 @@ export default function LoginForm({
                   </div>
 
                   {forgotError && (
-                    <div className="mb-5 p-3.5 bg-orange-50 border-2 border-orange-200 rounded-lg flex items-start gap-2.5">
-                      <AlertCircle className="h-5 w-5 text-orange-600 shrink-0 mt-0.5" />
-                      <p className="text-sm text-orange-700 font-medium">{forgotError}</p>
+                    <div className="mb-5 p-3.5 bg-[#d07648]/10 border-2 border-[#d07648]/25 rounded-lg flex items-start gap-2.5">
+                      <AlertCircle className="h-5 w-5 text-[#a85832] shrink-0 mt-0.5" />
+                      <p className="text-sm text-[#a85832] font-medium">{forgotError}</p>
                     </div>
                   )}
 
@@ -174,7 +174,7 @@ export default function LoginForm({
                         Email Address
                       </label>
                       <div className="relative">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f8a94] pointer-events-none" />
                         <input
                           id="forgot-email"
                           type="email"
@@ -183,7 +183,7 @@ export default function LoginForm({
                           placeholder="you@example.com"
                           required
                           autoFocus
-                          className="w-full pl-12 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all text-sm"
+                          className="w-full pl-12 pr-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl focus:border-[#13a8b4] focus:ring-2 focus:ring-[#13a8b4]/25 focus:outline-none transition-all text-sm"
                         />
                       </div>
                     </div>
@@ -191,7 +191,7 @@ export default function LoginForm({
                     <button
                       type="submit"
                       disabled={forgotLoading}
-                      className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-semibold shadow-lg hover:shadow-orange-500/50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      className="w-full bg-gradient-to-r from-[#d07648] to-[#bf6a41] text-white py-3 rounded-xl hover:from-[#bf6a41] hover:to-[#a85832] transition-all font-semibold shadow-lg hover:shadow-[#d07648]/35 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                     >
                       {forgotLoading ? 'Sending...' : 'Send Reset Link'}
                     </button>
@@ -207,17 +207,17 @@ export default function LoginForm({
                       <CheckCircle2 className="h-8 w-8 text-green-600" />
                     </div>
                   </div>
-                  <h2 className="text-2xl font-bold text-blue-900 mb-2">Check your inbox</h2>
+                  <h2 className="text-2xl font-bold text-[#134c52] mb-2">Check your inbox</h2>
                   <p className="text-slate-500 text-sm leading-relaxed mb-1">
                     A reset link has been sent to
                   </p>
-                  <p className="text-blue-700 font-semibold text-sm mb-6">{forgotEmail}</p>
-                  <div className="mb-6 p-3.5 bg-orange-50 border-2 border-orange-100 rounded-xl text-left">
+                  <p className="text-[#0f8a94] font-semibold text-sm mb-6">{forgotEmail}</p>
+                  <div className="mb-6 p-3.5 bg-[#d07648]/10 border-2 border-[#d07648]/20 rounded-xl text-left">
                     <p className="text-xs text-slate-500 leading-relaxed">
-                      ⏱ The link expires in <span className="font-semibold text-orange-600">1 hour</span>. Didn't receive it?{' '}
+                      ⏱ The link expires in <span className="font-semibold text-[#d07648]">1 hour</span>. Didn't receive it?{' '}
                       <button
                         onClick={() => { setView('forgot'); setForgotError(''); }}
-                        className="text-blue-600 font-semibold hover:underline"
+                        className="text-[#0f8a94] font-semibold hover:underline"
                       >
                         Try again
                       </button>{' '}
@@ -226,7 +226,7 @@ export default function LoginForm({
                   </div>
                   <button
                     onClick={() => { setView('auth'); setForgotEmail(''); setForgotError('') }}
-                    className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-700 transition-colors mx-auto"
+                    className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#0f8a94] transition-colors mx-auto"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Back to Sign In
@@ -242,7 +242,7 @@ export default function LoginForm({
                     <div className="flex justify-center">
                       <img src="/rexon-logo.png" alt="Rexon" className="h-28 w-auto object-contain" />
                     </div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-blue-900 bg-clip-text text-transparent mb-2">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-[#0f8a94] to-[#0b6f78] bg-clip-text text-transparent mb-2">
                       {authMode === 'signin' ? 'Welcome Back' : 'Create Account'}
                     </h2>
                     <p className="text-slate-600 text-sm leading-relaxed">
@@ -251,11 +251,11 @@ export default function LoginForm({
                   </div>
 
                   {/* Toggle Tabs */}
-                  <div className="flex bg-blue-50 rounded-lg p-1.5 mb-7 border-2 border-blue-100 gap-2">
+                  <div className="flex bg-[#13a8b4]/10 rounded-lg p-1.5 mb-7 border-2 border-[#13a8b4]/20 gap-2">
                     <button
                       onClick={() => handleAuthModeChange('signin')}
                       className={`flex-1 py-2.5 px-4 rounded-lg font-semibold transition-all text-sm ${
-                        authMode === 'signin' ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg' : 'text-slate-600 hover:text-blue-700'
+                        authMode === 'signin' ? 'bg-gradient-to-r from-[#13a8b4] to-[#0f8a94] text-white shadow-lg' : 'text-slate-600 hover:text-[#0f8a94]'
                       }`}
                     >
                       Sign In
@@ -263,7 +263,7 @@ export default function LoginForm({
                     <button
                       onClick={() => handleAuthModeChange('signup')}
                       className={`flex-1 py-2.5 px-4 rounded-lg font-semibold transition-all text-sm ${
-                        authMode === 'signup' ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg' : 'text-slate-600 hover:text-blue-700'
+                        authMode === 'signup' ? 'bg-gradient-to-r from-[#13a8b4] to-[#0f8a94] text-white shadow-lg' : 'text-slate-600 hover:text-[#0f8a94]'
                       }`}
                     >
                       Sign Up
@@ -272,9 +272,9 @@ export default function LoginForm({
 
                   {/* Error */}
                   {error && (
-                    <div className="mb-6 p-3.5 bg-orange-50 border-2 border-orange-200 rounded-lg flex items-start space-x-2.5">
-                      <AlertCircle className="h-5 w-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-orange-700 font-medium">{error}</p>
+                    <div className="mb-6 p-3.5 bg-[#d07648]/10 border-2 border-[#d07648]/25 rounded-lg flex items-start space-x-2.5">
+                      <AlertCircle className="h-5 w-5 text-[#a85832] flex-shrink-0 mt-0.5" />
+                      <p className="text-sm text-[#a85832] font-medium">{error}</p>
                     </div>
                   )}
 
@@ -283,7 +283,7 @@ export default function LoginForm({
                     <button
                       onClick={() => { setError(''); onGoogleSignIn() }}
                       disabled={loading}
-                      className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md text-sm"
+                      className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl hover:border-[#13a8b4]/50 hover:bg-[#13a8b4]/10 transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md text-sm"
                     >
                       <svg className="h-5 w-5" viewBox="0 0 24 24">
                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -296,7 +296,7 @@ export default function LoginForm({
                     <button
                       onClick={() => { setError(''); onMicrosoftSignIn() }}
                       disabled={loading}
-                      className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-blue-200 rounded-xl hover:border-blue-400 hover:bg-blue-50 transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md text-sm"
+                      className="w-full flex items-center justify-center space-x-3 px-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl hover:border-[#13a8b4]/50 hover:bg-[#13a8b4]/10 transition-all font-medium text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md text-sm"
                     >
                       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="#00A4EF">
                         <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zm12.6 0H12.6V0H24v11.4z"/>
@@ -308,7 +308,7 @@ export default function LoginForm({
                   {/* Divider */}
                   <div className="relative my-6">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t-2 border-blue-100"></div>
+                      <div className="w-full border-t-2 border-[#13a8b4]/20"></div>
                     </div>
                     <div className="relative flex justify-center text-xs">
                       <span className="px-4 bg-white text-slate-500 font-medium">Or continue with email</span>
@@ -321,7 +321,7 @@ export default function LoginForm({
                       <div>
                         <label htmlFor="signin-email" className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
                         <div className="relative">
-                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
+                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f8a94] pointer-events-none" />
                           <input
                             id="signin-email"
                             type="email"
@@ -329,7 +329,7 @@ export default function LoginForm({
                             onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
                             placeholder="you@example.com"
                             required
-                            className="w-full pl-12 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all text-sm"
+                            className="w-full pl-12 pr-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl focus:border-[#13a8b4] focus:ring-2 focus:ring-[#13a8b4]/25 focus:outline-none transition-all text-sm"
                           />
                         </div>
                       </div>
@@ -337,7 +337,7 @@ export default function LoginForm({
                       <div>
                         <label htmlFor="signin-password" className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
                         <div className="relative">
-                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f8a94] pointer-events-none" />
                           <input
                             id="signin-password"
                             type="password"
@@ -345,7 +345,7 @@ export default function LoginForm({
                             onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
                             placeholder="••••••••"
                             required
-                            className="w-full pl-12 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all text-sm"
+                            className="w-full pl-12 pr-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl focus:border-[#13a8b4] focus:ring-2 focus:ring-[#13a8b4]/25 focus:outline-none transition-all text-sm"
                           />
                         </div>
                       </div>
@@ -357,7 +357,7 @@ export default function LoginForm({
                             type="checkbox"
                             checked={signInData.rememberMe}
                             onChange={(e) => setSignInData({ ...signInData, rememberMe: e.target.checked })}
-                            className="w-4 h-4 text-blue-600 border-blue-300 rounded focus:ring-blue-500 cursor-pointer"
+                            className="w-4 h-4 text-[#13a8b4] border-[#13a8b4]/45 rounded focus:ring-[#13a8b4]/35 cursor-pointer"
                           />
                           <span className="text-slate-700 font-medium">Remember me</span>
                         </label>
@@ -365,7 +365,7 @@ export default function LoginForm({
                         <button
                           type="button"
                           onClick={() => { setView('forgot'); setForgotEmail(signInData.email); setForgotError('') }}
-                          className="text-orange-600 hover:text-orange-700 font-semibold hover:underline transition-colors"
+                          className="text-[#d07648] hover:text-[#a85832] font-semibold hover:underline transition-colors"
                         >
                           Forgot password?
                         </button>
@@ -374,7 +374,7 @@ export default function LoginForm({
                       <button
                         onClick={handleSignInSubmit}
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-semibold shadow-lg hover:shadow-orange-500/50 disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-4"
+                        className="w-full bg-gradient-to-r from-[#d07648] to-[#bf6a41] text-white py-3 rounded-xl hover:from-[#bf6a41] hover:to-[#a85832] transition-all font-semibold shadow-lg hover:shadow-[#d07648]/35 disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-4"
                       >
                         {loading ? 'Signing In...' : 'Sign In'}
                       </button>
@@ -388,7 +388,7 @@ export default function LoginForm({
                         <div>
                           <label htmlFor="firstName" className="block text-sm font-semibold text-slate-700 mb-2">First Name</label>
                           <div className="relative">
-                            <UserCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
+                            <UserCircle className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f8a94] pointer-events-none" />
                             <input
                               id="firstName"
                               type="text"
@@ -396,7 +396,7 @@ export default function LoginForm({
                               onChange={(e) => setSignUpData({ ...signUpData, firstName: e.target.value })}
                               placeholder="John"
                               required
-                              className="w-full pl-12 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all text-sm"
+                              className="w-full pl-12 pr-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl focus:border-[#13a8b4] focus:ring-2 focus:ring-[#13a8b4]/25 focus:outline-none transition-all text-sm"
                             />
                           </div>
                         </div>
@@ -409,7 +409,7 @@ export default function LoginForm({
                             onChange={(e) => setSignUpData({ ...signUpData, lastName: e.target.value })}
                             placeholder="Doe"
                             required
-                            className="w-full px-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all text-sm"
+                            className="w-full px-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl focus:border-[#13a8b4] focus:ring-2 focus:ring-[#13a8b4]/25 focus:outline-none transition-all text-sm"
                           />
                         </div>
                       </div>
@@ -417,7 +417,7 @@ export default function LoginForm({
                       <div>
                         <label htmlFor="signup-email" className="block text-sm font-semibold text-slate-700 mb-2">Email Address</label>
                         <div className="relative">
-                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
+                          <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f8a94] pointer-events-none" />
                           <input
                             id="signup-email"
                             type="email"
@@ -425,7 +425,7 @@ export default function LoginForm({
                             onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
                             placeholder="you@example.com"
                             required
-                            className="w-full pl-12 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all text-sm"
+                            className="w-full pl-12 pr-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl focus:border-[#13a8b4] focus:ring-2 focus:ring-[#13a8b4]/25 focus:outline-none transition-all text-sm"
                           />
                         </div>
                       </div>
@@ -433,14 +433,14 @@ export default function LoginForm({
                       <div>
                         <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">Phone Number (Optional)</label>
                         <div className="relative">
-                          <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
+                          <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f8a94] pointer-events-none" />
                           <input
                             id="phone"
                             type="tel"
                             value={signUpData.phone}
                             onChange={(e) => setSignUpData({ ...signUpData, phone: e.target.value })}
                             placeholder="+91 98765 43210"
-                            className="w-full pl-12 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all text-sm"
+                            className="w-full pl-12 pr-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl focus:border-[#13a8b4] focus:ring-2 focus:ring-[#13a8b4]/25 focus:outline-none transition-all text-sm"
                           />
                         </div>
                       </div>
@@ -448,7 +448,7 @@ export default function LoginForm({
                       <div>
                         <label htmlFor="signup-password" className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
                         <div className="relative">
-                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-blue-600 pointer-events-none" />
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f8a94] pointer-events-none" />
                           <input
                             id="signup-password"
                             type="password"
@@ -457,7 +457,7 @@ export default function LoginForm({
                             placeholder="••••••••"
                             required
                             minLength={8}
-                            className="w-full pl-12 pr-4 py-3 border-2 border-blue-200 rounded-xl focus:border-orange-500 focus:ring-2 focus:ring-orange-200 focus:outline-none transition-all text-sm"
+                            className="w-full pl-12 pr-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl focus:border-[#13a8b4] focus:ring-2 focus:ring-[#13a8b4]/25 focus:outline-none transition-all text-sm"
                           />
                         </div>
                         <p className="text-xs text-slate-500 mt-2 font-medium">Must be at least 8 characters</p>
@@ -466,7 +466,7 @@ export default function LoginForm({
                       <button
                         onClick={handleSignUpSubmit}
                         disabled={loading}
-                        className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 active:from-orange-700 active:to-orange-800 transition-all font-semibold shadow-lg hover:shadow-orange-500/50 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-5"
+                        className="w-full bg-gradient-to-r from-[#d07648] to-[#bf6a41] text-white py-3 rounded-xl hover:from-[#bf6a41] hover:to-[#a85832] active:from-[#a85832] active:to-[#924729] transition-all font-semibold shadow-lg hover:shadow-[#d07648]/35 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-5"
                       >
                         {loading ? 'Creating Account...' : 'Create Account'}
                       </button>
