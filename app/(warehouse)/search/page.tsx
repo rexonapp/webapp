@@ -42,7 +42,7 @@ const Map = dynamic(() => import('./map'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-gray-100">
-      <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+      <Loader2 className="h-8 w-8 animate-spin text-[#d07648]" />
     </div>
   ),
 });
@@ -259,12 +259,12 @@ const CitySearch = memo(({
             }
           }}
           placeholder="Search by city..."
-          className="w-full pl-10 pr-20 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+          className="w-full pl-10 pr-20 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4] focus:border-transparent transition-all"
           autoComplete="off"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
           {isLoadingCities && (
-            <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+            <Loader2 className="h-4 w-4 animate-spin text-[#d07648]" />
           )}
           {searchQuery && !isLoadingCities && (
             <button
@@ -281,14 +281,14 @@ const CitySearch = memo(({
       {isOpen && (
         <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto">
           {error ? (
-            <div className="px-4 py-3 text-sm text-orange-600">
+            <div className="px-4 py-3 text-sm text-[#d07648]">
               <div className="font-semibold">Error loading cities</div>
               <div className="text-xs mt-1">{error}</div>
             </div>
           ) : isLoadingCities ? (
             <div className="px-4 py-3 text-sm text-gray-600">
               <div className="flex items-center gap-2">
-                <div className="animate-spin h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                <div className="animate-spin h-4 w-4 border-2 border-[#d07648] border-t-transparent rounded-full"></div>
                 Searching cities...
               </div>
             </div>
@@ -315,18 +315,18 @@ const CitySearch = memo(({
                   <button
                     key={city.id || city.city}
                     onClick={() => handleCitySelect(city)}
-                    className="w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3"
+                    className="w-full px-4 py-3 text-left hover:bg-[#d07648]/10 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3"
                   >
                     <CheckCircle2
                       className={cn(
-                        "h-4 w-4 text-orange-600 flex-shrink-0",
+                        "h-4 w-4 text-[#d07648] flex-shrink-0",
                         selectedCity?.city === city.city &&
                         (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
                           ? "opacity-100"
                           : "opacity-0"
                       )}
                     />
-                    <MapPin className="h-4 w-4 text-blue-800/70 flex-shrink-0" />
+                    <MapPin className="h-4 w-4 text-[#0f8a94]/80 flex-shrink-0" />
                     <div className="min-w-0">
                       <div className="font-medium text-gray-900">
                         {city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}
@@ -408,7 +408,7 @@ const FilterPanel = memo(({
       
       <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300">
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-orange-600 to-orange-700">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#13a8b4] to-[#0f8a94]">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <SlidersHorizontal className="h-5 w-5" />
               Filters
@@ -424,7 +424,7 @@ const FilterPanel = memo(({
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <IndianRupee className="h-4 w-4 text-orange-600" />
+                <IndianRupee className="h-4 w-4 text-[#d07648]" />
                 Price per sqft
               </h3>
               <div className="grid grid-cols-2 gap-3">
@@ -435,7 +435,7 @@ const FilterPanel = memo(({
                     value={priceRange.min}
                     onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
                     placeholder="₹ 0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4]"
                   />
                 </div>
                 <div>
@@ -445,7 +445,7 @@ const FilterPanel = memo(({
                     value={priceRange.max}
                     onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
                     placeholder="₹ Any"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4]"
                   />
                 </div>
               </div>
@@ -453,7 +453,7 @@ const FilterPanel = memo(({
 
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Ruler className="h-4 w-4 text-orange-600" />
+                <Ruler className="h-4 w-4 text-[#d07648]" />
                 Space Available (sqft)
               </h3>
               <div className="grid grid-cols-2 gap-3">
@@ -464,7 +464,7 @@ const FilterPanel = memo(({
                     value={sizeRange.min}
                     onChange={(e) => setSizeRange({ ...sizeRange, min: e.target.value })}
                     placeholder="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4]"
                   />
                 </div>
                 <div>
@@ -474,7 +474,7 @@ const FilterPanel = memo(({
                     value={sizeRange.max}
                     onChange={(e) => setSizeRange({ ...sizeRange, max: e.target.value })}
                     placeholder="Any"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4]"
                   />
                 </div>
               </div>
@@ -482,7 +482,7 @@ const FilterPanel = memo(({
 
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-orange-600" />
+                <Building2 className="h-4 w-4 text-[#d07648]" />
                 Property Type
               </h3>
               <div className="space-y-2">
@@ -492,9 +492,9 @@ const FilterPanel = memo(({
                       type="checkbox"
                       checked={propertyTypes.includes(type)}
                       onChange={() => togglePropertyType(type)}
-                      className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                      className="w-5 h-5 text-[#d07648] border-gray-300 rounded focus:ring-[#13a8b4]"
                     />
-                    <span className="text-gray-700 group-hover:text-orange-600 transition-colors">{type}</span>
+                    <span className="text-gray-700 group-hover:text-[#d07648] transition-colors">{type}</span>
                   </label>
                 ))}
               </div>
@@ -502,7 +502,7 @@ const FilterPanel = memo(({
 
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-orange-600" />
+                <Building2 className="h-4 w-4 text-[#d07648]" />
                 Price Type
               </h3>
               <div className="space-y-2">
@@ -512,9 +512,9 @@ const FilterPanel = memo(({
                       type="checkbox"
                       checked={priceTypes.includes(type)}
                       onChange={() => togglePriceType(type)}
-                      className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                      className="w-5 h-5 text-[#d07648] border-gray-300 rounded focus:ring-[#13a8b4]"
                     />
-                    <span className="text-gray-700 group-hover:text-orange-600 transition-colors">{type}</span>
+                    <span className="text-gray-700 group-hover:text-[#d07648] transition-colors">{type}</span>
                   </label>
                 ))}
               </div>
@@ -524,7 +524,7 @@ const FilterPanel = memo(({
           <div className="border-t border-gray-200 p-6 bg-gray-50 space-y-3">
             <button
               onClick={handleApply}
-              className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-3 rounded-lg shadow-lg transition-all"
+              className="w-full bg-gradient-to-r from-[#13a8b4] to-[#d07648] hover:from-[#0f8a94] hover:to-[#a85832] text-white font-semibold py-3 rounded-lg shadow-lg transition-all"
             >
               Apply Filters
             </button>
@@ -682,7 +682,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
     <>
     <Link href={`/property/${property.id}`}>
       <div 
-        className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-orange-400 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col"
+        className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-[#d07648]/45 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -735,7 +735,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
                   {isHovered && (
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
                       <div 
-                        className="h-full bg-orange-500 transition-all duration-100"
+                        className="h-full bg-[#d07648] transition-all duration-100"
                         style={{ width: `${scrollProgress * 100}%` }}
                       />
                     </div>
@@ -753,8 +753,8 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
             <div className="flex gap-1.5">
               <span className={`text-xs font-bold px-2 py-1 rounded shadow-md ${
                 property.price_type === 'Sale' 
-                  ? 'bg-orange-600 text-white' 
-                  : 'bg-blue-600 text-white'
+                  ? 'bg-[#d07648] text-white'
+                  : 'bg-[#13a8b4] text-white'
               }`}>
                 {property.price_type}
               </span>
@@ -788,19 +788,19 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
         </div>
 
         <div className="p-3 flex flex-col flex-1">
-          <h3 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-orange-600 transition-colors leading-snug">
+          <h3 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-[#d07648] transition-colors leading-snug">
             {property.title}
           </h3>
 
           <div className="flex items-center gap-1 mb-2">
-            <MapPin className="h-3.5 w-3.5 text-orange-500 flex-shrink-0" />
+            <MapPin className="h-3.5 w-3.5 text-[#d07648] flex-shrink-0" />
             <p className="text-xs text-gray-600 line-clamp-1">
               {property.city}, {property.state}
             </p>
           </div>
 
           <div className="flex items-center gap-1.5 mb-2 text-xs">
-            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">
+            <span className="bg-[#13a8b4]/10 text-[#0f8a94] px-2 py-0.5 rounded font-medium">
               {property.property_type}
             </span>
             {property.is_verified && (
@@ -830,8 +830,8 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
 
         <div className="mb-2">
         <div className="flex items-baseline gap-0.5">
-          <IndianRupee className="h-4 w-4 text-orange-600" />
-          <span className="text-lg font-bold text-orange-600">
+          <IndianRupee className="h-4 w-4 text-[#d07648]" />
+          <span className="text-lg font-bold text-[#d07648]">
             {property.price_per_sqft?.toLocaleString('en-IN')}
           </span>
           <span className="text-xs text-gray-600 font-medium">/sqft</span>
@@ -850,7 +850,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
               e.preventDefault();
               window.location.href = `tel:${property.contact_person_phone}`;
             }}
-            className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
+            className="w-full bg-gradient-to-r from-[#13a8b4] to-[#d07648] hover:from-[#0f8a94] hover:to-[#a85832] text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
           >
             <Phone className="h-3.5 w-3.5" />
             Contact Now
@@ -958,7 +958,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
   return (
     <Link href={`/property/${property.id}`}>
       <div 
-        className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-orange-300 hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col"
+        className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-[#d07648]/35 hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -1012,7 +1012,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                   {isHovered && (
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
                       <div 
-                        className="h-full bg-orange-500 transition-all duration-100"
+                        className="h-full bg-[#d07648] transition-all duration-100"
                         style={{ width: `${scrollProgress * 100}%` }}
                       />
                     </div>
@@ -1030,8 +1030,8 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
             <div className="flex gap-2">
               <span className={`text-xs font-bold px-2.5 py-1 rounded shadow-md ${
                 property.price_type === 'Sale' 
-                  ? 'bg-orange-600 text-white' 
-                  : 'bg-blue-600 text-white'
+                  ? 'bg-[#d07648] text-white'
+                  : 'bg-[#13a8b4] text-white'
               }`}>
                 {property.price_type}
               </span>
@@ -1060,8 +1060,8 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
         <div className="p-4 flex flex-col flex-1">
         <div className="mb-2">
         <div className="flex items-baseline gap-1">
-          <IndianRupee className="h-5 w-5 text-orange-600" />
-          <span className="text-2xl font-bold text-orange-600">
+          <IndianRupee className="h-5 w-5 text-[#d07648]" />
+          <span className="text-2xl font-bold text-[#d07648]">
             {property.price_per_sqft?.toLocaleString('en-IN')}
           </span>
           <span className="text-sm text-gray-600 font-medium">/sqft</span>
@@ -1075,7 +1075,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
 )}
       </div>
 
-          <h3 className="font-bold text-gray-900 text-base mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
+          <h3 className="font-bold text-gray-900 text-base mb-2 line-clamp-2 group-hover:text-[#d07648] transition-colors">
             {property.title}
           </h3>
 
@@ -1087,7 +1087,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
           </div>
 
           <div className="flex items-center gap-2 mb-3 text-sm">
-            <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded font-medium">
+            <span className="bg-[#13a8b4]/10 text-[#0f8a94] px-2 py-1 rounded font-medium">
               {property.property_type}
             </span>
             {property.is_verified && (
@@ -1120,7 +1120,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
               e.preventDefault();
               window.location.href = `tel:${property.contact_person_phone}`;
             }}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+            className="w-full bg-[#d07648] hover:bg-[#a85832] text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <Phone className="h-4 w-4" />
             Contact Now
@@ -1169,7 +1169,7 @@ const ViewToggle = memo(({ layout, onLayoutChange }: {
         onClick={() => onLayoutChange('split')}
         className={`px-3 py-2 text-sm font-medium transition-colors ${
           layout === 'split'
-            ? 'bg-orange-600 text-white'
+            ? 'bg-[#d07648] text-white'
             : 'text-gray-600 hover:bg-gray-50'
         }`}
         title="Split view"
@@ -1180,7 +1180,7 @@ const ViewToggle = memo(({ layout, onLayoutChange }: {
         onClick={() => onLayoutChange('grid')}
         className={`px-3 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
           layout === 'grid'
-            ? 'bg-orange-600 text-white'
+            ? 'bg-[#d07648] text-white'
             : 'text-gray-600 hover:bg-gray-50'
         }`}
         title="Grid view"
@@ -1191,7 +1191,7 @@ const ViewToggle = memo(({ layout, onLayoutChange }: {
         onClick={() => onLayoutChange('map')}
         className={`px-3 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
           layout === 'map'
-            ? 'bg-orange-600 text-white'
+            ? 'bg-[#d07648] text-white'
             : 'text-gray-600 hover:bg-gray-50'
         }`}
         title="Map view"
@@ -1531,7 +1531,7 @@ function SearchResults() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer transition-all"
+                  className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white hover:border-[#d07648] focus:outline-none focus:ring-2 focus:ring-[#13a8b4] focus:border-transparent cursor-pointer transition-all"
                 >
                   <option value="newest">Newest First</option>
                   <option value="price-low">Price: Low to High</option>
@@ -1544,7 +1544,7 @@ function SearchResults() {
 
               <button
                 onClick={() => setShowFilters(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:border-[#d07648] hover:bg-[#d07648]/10 transition-all shadow-sm"
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 <span className="text-sm font-medium">Filters</span>
@@ -1604,7 +1604,7 @@ function SearchResults() {
                       className={`p-2.5 rounded-lg transition-all border ${
                         currentPage === 1
                           ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
-                          : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                          : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                       }`}
                     >
                       <ChevronLeft className="h-5 w-5" />
@@ -1629,8 +1629,8 @@ function SearchResults() {
                             onClick={() => handlePageChange(pageNum)}
                             className={`min-w-[42px] h-11 rounded-lg font-semibold transition-all border ${
                               currentPage === pageNum
-                                ? 'bg-gradient-to-r from-orange-600 to-orange-700 text-white shadow-lg border-orange-700'
-                                : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                                ? 'bg-gradient-to-r from-[#13a8b4] to-[#d07648] text-white shadow-lg border-[#a85832]'
+                                : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                             }`}
                           >
                             {pageNum}
@@ -1645,7 +1645,7 @@ function SearchResults() {
                       className={`p-2.5 rounded-lg transition-all border ${
                         currentPage === totalPages
                           ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
-                          : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                          : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                       }`}
                     >
                       <ChevronRight className="h-5 w-5" />
@@ -1693,7 +1693,7 @@ function SearchResults() {
                     className={`p-2.5 rounded-lg transition-all border ${
                       currentPage === 1
                         ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
-                        : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                        : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                     }`}
                   >
                     <ChevronLeft className="h-5 w-5" />
@@ -1718,8 +1718,8 @@ function SearchResults() {
                           onClick={() => handlePageChange(pageNum)}
                           className={`min-w-[42px] h-11 rounded-lg font-semibold transition-all border ${
                             currentPage === pageNum
-                              ? 'bg-gradient-to-r from-orange-600 to-orange-700 text-white shadow-lg border-orange-700'
-                              : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                              ? 'bg-gradient-to-r from-[#13a8b4] to-[#d07648] text-white shadow-lg border-[#a85832]'
+                              : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                           }`}
                         >
                           {pageNum}
@@ -1734,7 +1734,7 @@ function SearchResults() {
                     className={`p-2.5 rounded-lg transition-all border ${
                       currentPage === totalPages
                         ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
-                        : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                        : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                       }`}
                   >
                     <ChevronRight className="h-5 w-5" />
