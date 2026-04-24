@@ -443,7 +443,7 @@ export default function WarehouseUploadForm() {
   const remainingImages = imagePreviews.length - visibleImageCount;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#13a8b4]/5 via-white to-[#d07648]/10 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -459,12 +459,12 @@ export default function WarehouseUploadForm() {
         </div>
 
         {uploading && (
-          <Card className="mb-6 border-orange-200 bg-orange-50">
+          <Card className="mb-6 border-[#d07648]/30 bg-[#d07648]/10">
             <CardContent className="pt-6">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="font-medium text-orange-900">Uploading property...</span>
-                  <span className="text-orange-700">{uploadProgress}%</span>
+                  <span className="font-medium text-[#7a3e24]">Uploading property...</span>
+                  <span className="text-[#a85832]">{uploadProgress}%</span>
                 </div>
                 <Progress value={uploadProgress} className="h-2" />
               </div>
@@ -480,7 +480,7 @@ export default function WarehouseUploadForm() {
             <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                  <div className="w-10 h-10 bg-[#13a8b4] rounded-lg flex items-center justify-center mr-3">
                     <FileText className="h-5 w-5 text-white" />
                   </div>
                   <CardTitle>Basic Information</CardTitle>
@@ -497,7 +497,7 @@ export default function WarehouseUploadForm() {
                     onChange={(e) => handleFieldChange('title', e.target.value)}
                     onBlur={() => handleFieldBlur('title')}
                     placeholder="e.g., Green Valley Warehousing Complex"
-                    className={`border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                    className={`border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                       touchedFields.has('title') && fieldErrors.title ? 'border-orange-500' : ''
                     }`}
                   />
@@ -520,7 +520,7 @@ export default function WarehouseUploadForm() {
                     >
                       <SelectTrigger
                         id="propertyType"
-                        className={`w-full h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                        className={`w-full h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                           touchedFields.has('propertyType') && fieldErrors.propertyType ? 'border-orange-500' : ''
                         }`}
                       >
@@ -553,7 +553,7 @@ export default function WarehouseUploadForm() {
                         onChange={(e) => handleFieldChange('totalArea', e.target.value)}
                         onBlur={() => handleFieldBlur('totalArea')}
                         placeholder="0"
-                        className={`flex-1 border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                        className={`flex-1 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                           touchedFields.has('totalArea') && fieldErrors.totalArea ? 'border-orange-500' : ''
                         }`}
                       />
@@ -561,7 +561,7 @@ export default function WarehouseUploadForm() {
                         value={formData.sizeUnit}
                         onValueChange={(value: 'sqft' | 'sqm') => setFormData({ ...formData, sizeUnit: value })}
                       >
-                        <SelectTrigger className="w-28 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                        <SelectTrigger className="w-28 h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4]">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -587,7 +587,7 @@ export default function WarehouseUploadForm() {
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={4}
                     placeholder="Provide a detailed description of your property..."
-                    className="border-gray-300 focus:border-orange-500 focus:ring-orange-500 resize-none"
+                    className="border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] resize-none"
                   />
                 </div>
               </CardContent>
@@ -597,7 +597,7 @@ export default function WarehouseUploadForm() {
             <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                  <div className="w-10 h-10 bg-[#13a8b4] rounded-lg flex items-center justify-center mr-3">
                     <IndianRupee className="h-5 w-5 text-white" />
                   </div>
                   <CardTitle>Availability & Pricing</CardTitle>
@@ -616,7 +616,7 @@ export default function WarehouseUploadForm() {
                       value={formData.availableFrom}
                       onChange={(e) => handleFieldChange('availableFrom', e.target.value)}
                       onBlur={() => handleFieldBlur('availableFrom')}
-                      className={`h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                      className={`h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                         touchedFields.has('availableFrom') && fieldErrors.availableFrom ? 'border-orange-500' : ''
                       }`}
                     />
@@ -636,7 +636,7 @@ export default function WarehouseUploadForm() {
                       value={formData.listingType}
                       onValueChange={(value: 'sale' | 'rent') => setFormData({ ...formData, listingType: value })}
                     >
-                      <SelectTrigger id="listingType" className="h-11 w-full border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                      <SelectTrigger id="listingType" className="h-11 w-full border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className='max-w-[calc(100vw-2rem)]'>
@@ -661,7 +661,7 @@ export default function WarehouseUploadForm() {
                       value={formData.pricePerSqFt}
                       onChange={(e) => handleFieldChange('pricePerSqFt', e.target.value)}
                       onBlur={() => handleFieldBlur('pricePerSqFt')}
-                      className={`pl-8 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                      className={`pl-8 h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                         touchedFields.has('pricePerSqFt') && fieldErrors.pricePerSqFt ? 'border-orange-500' : ''
                       }`}
                       placeholder="0.00"
@@ -685,7 +685,7 @@ export default function WarehouseUploadForm() {
                       min={0}
                       value={formData.totalPrice}
                       onChange={(e) => setFormData({ ...formData, totalPrice: e.target.value })}
-                      className="pl-8 h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      className="pl-8 h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4]"
                       placeholder="0.00"
                     />
                   </div>
@@ -697,7 +697,7 @@ export default function WarehouseUploadForm() {
             <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                  <div className="w-10 h-10 bg-[#13a8b4] rounded-lg flex items-center justify-center mr-3">
                     <MapPin className="h-5 w-5 text-white" />
                   </div>
                   <CardTitle>Location Details</CardTitle>
@@ -715,7 +715,7 @@ export default function WarehouseUploadForm() {
                     onChange={(e) => handleAddressChange(e.target.value)}
                     onBlur={() => handleFieldBlur('address')}
                     placeholder="Enter full street address"
-                    className={`border-gray-300 focus:border-orange-500 focus:ring-orange-500 resize-none ${
+                    className={`border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] resize-none ${
                       touchedFields.has('address') && fieldErrors.address ? 'border-orange-500' : ''
                     }`}
                     rows={2}
@@ -739,7 +739,7 @@ export default function WarehouseUploadForm() {
                       onChange={(e) => handleFieldChange('city', e.target.value)}
                       onBlur={() => handleFieldBlur('city')}
                       placeholder="e.g., Mumbai"
-                      className={`h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                      className={`h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                         touchedFields.has('city') && fieldErrors.city ? 'border-orange-500' : ''
                       }`}
                     />
@@ -761,7 +761,7 @@ export default function WarehouseUploadForm() {
                     >
                       <SelectTrigger
                         id="state"
-                        className={`h-11 w-full border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                        className={`h-11 w-full border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                           touchedFields.has('state') && fieldErrors.state ? 'border-orange-500' : ''
                         }`}
                       >
@@ -792,7 +792,7 @@ export default function WarehouseUploadForm() {
                       onBlur={() => handleFieldBlur('pincode')}
                       placeholder="400001"
                       maxLength={6}
-                      className={`h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                      className={`h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                         touchedFields.has('pincode') && fieldErrors.pincode ? 'border-orange-500' : ''
                       }`}
                     />
@@ -810,7 +810,7 @@ export default function WarehouseUploadForm() {
                       value={formData.roadConnectivity}
                       onValueChange={(value) => setFormData({ ...formData, roadConnectivity: value })}
                     >
-                      <SelectTrigger id="roadConnectivity" className="h-11 w-full border-gray-300 focus:border-orange-500 focus:ring-orange-500">
+                      <SelectTrigger id="roadConnectivity" className="h-11 w-full border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4]">
                         <SelectValue placeholder="Select road type..." />
                       </SelectTrigger>
                       <SelectContent className='max-w-[calc(100vw-2rem)]'>
@@ -831,7 +831,7 @@ export default function WarehouseUploadForm() {
                       value={formData.latitude}
                       onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
                       placeholder="19.0760"
-                      className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      className="h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4]"
                     />
                   </div>
                   
@@ -842,7 +842,7 @@ export default function WarehouseUploadForm() {
                       value={formData.longitude}
                       onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
                       placeholder="72.8777"
-                      className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      className="h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4]"
                     />
                   </div>
                 </div>
@@ -852,7 +852,7 @@ export default function WarehouseUploadForm() {
                   <Button
                     type="button"
                     onClick={() => setShowMap(!showMap)}
-                    className="bg-orange-600 hover:bg-orange-700 h-11"
+                    className="bg-[#d07648] hover:bg-[#a85832] h-11"
                   >
                     <MapPin className="h-4 w-4 mr-2" />
                     {showMap ? 'Hide Map' : 'Select Location on Map'}
@@ -884,7 +884,7 @@ export default function WarehouseUploadForm() {
               <CardHeader className="">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                    <div className="w-10 h-10 bg-[#13a8b4] rounded-lg flex items-center justify-center mr-3">
                       <Building2 className="h-5 w-5 text-white" />
                     </div>
                     <CardTitle>Features & Amenities</CardTitle>
@@ -897,12 +897,12 @@ export default function WarehouseUploadForm() {
                   <Label className="text-sm font-semibold">Select Amenities</Label>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2">
                     {AMENITIES.map((amenity) => (
-                      <div key={amenity} className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:border-orange-300 hover:bg-orange-50 transition-colors">
+                      <div key={amenity} className="flex items-center space-x-2 p-3 rounded-lg border border-gray-200 hover:border-[#d07648]/40 hover:bg-[#d07648]/10 transition-colors">
                         <Checkbox
                           id={amenity}
                           checked={formData.amenities.includes(amenity)}
                           onCheckedChange={() => toggleAmenity(amenity)}
-                          className="data-[state=checked]:bg-orange-600 data-[state=checked]:border-orange-600"
+                          className="data-[state=checked]:bg-[#13a8b4] data-[state=checked]:border-[#13a8b4]"
                         />
                         <Label
                           htmlFor={amenity}
@@ -921,7 +921,7 @@ export default function WarehouseUploadForm() {
             <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader className="">
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center mr-3">
+                  <div className="w-10 h-10 bg-[#13a8b4] rounded-lg flex items-center justify-center mr-3">
                     <User className="h-5 w-5 text-white" />
                   </div>
                   <CardTitle>Contact Information</CardTitle>
@@ -936,7 +936,7 @@ export default function WarehouseUploadForm() {
                       value={formData.contactPersonName}
                       onChange={(e) => setFormData({ ...formData, contactPersonName: e.target.value })}
                       placeholder="Contact person name"
-                      className="h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      className="h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4]"
                     />
                   </div>
 
@@ -949,7 +949,7 @@ export default function WarehouseUploadForm() {
                       onChange={(e) => handleFieldChange('contactPersonEmail', e.target.value)}
                       onBlur={() => handleFieldBlur('contactPersonEmail')}
                       placeholder="email@example.com"
-                      className={`h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                      className={`h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                         touchedFields.has('contactPersonEmail') && fieldErrors.contactPersonEmail ? 'border-orange-500' : ''
                       }`}
                     />
@@ -974,7 +974,7 @@ export default function WarehouseUploadForm() {
                     onChange={(e) => handleFieldChange('contactPersonPhone', e.target.value)}
                     onBlur={() => handleFieldBlur('contactPersonPhone')}
                     placeholder="+91 98765 43210"
-                    className={`h-11 border-gray-300 focus:border-orange-500 focus:ring-orange-500 ${
+                    className={`h-11 border-gray-300 focus:border-[#13a8b4] focus:ring-[#13a8b4] ${
                       touchedFields.has('contactPersonPhone') && fieldErrors.contactPersonPhone ? 'border-orange-500' : ''
                     }`}
                   />
@@ -997,9 +997,9 @@ export default function WarehouseUploadForm() {
                 <CardHeader className="">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <ImageIcon className="h-5 w-5 text-orange-600 mr-2" />
+                      <ImageIcon className="h-5 w-5 text-[#13a8b4] mr-2" />
                       <CardTitle className="text-lg">Property Images</CardTitle>
-                      <span className='text-orange-600 mx-3'>*</span>
+                      <span className='text-[#d07648] mx-3'>*</span>
                     </div>
                   </div>
                   <CardDescription className="text-xs">
@@ -1024,7 +1024,7 @@ export default function WarehouseUploadForm() {
                             className="hidden"
                           />
                           <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Upload className="h-8 w-8 text-orange-600" />
+                            <Upload className="h-8 w-8 text-[#13a8b4]" />
                           </div>
                           <p className="text-sm font-semibold text-gray-900 mb-1">Click to upload images</p>
                           <p className="text-xs text-gray-500">JPG, JPEG, PNG, WEBP, GIF up to 5MB</p>
@@ -1075,8 +1075,8 @@ export default function WarehouseUploadForm() {
                             onClick={() => setShowImageGallery(true)}
                           >
                             <div className="text-center">
-                              <p className="text-2xl font-bold text-gray-700 group-hover:text-orange-600">+{remainingImages}</p>
-                              <p className="text-xs text-gray-500 group-hover:text-orange-600">more</p>
+                              <p className="text-2xl font-bold text-gray-700 group-hover:text-[#d07648]">+{remainingImages}</p>
+                              <p className="text-xs text-gray-500 group-hover:text-[#d07648]">more</p>
                             </div>
                           </div>
                         )}
@@ -1092,7 +1092,7 @@ export default function WarehouseUploadForm() {
                                 onChange={handleImageChange}
                                 className="hidden"
                               />
-                              <Plus className="h-8 w-8 text-orange-500 group-hover:text-orange-600 group-hover:scale-110 transition-transform" />
+                              <Plus className="h-8 w-8 text-[#d07648] group-hover:text-[#a85832] group-hover:scale-110 transition-transform" />
                             </div>
                           </Label>
                         )}
@@ -1105,7 +1105,7 @@ export default function WarehouseUploadForm() {
                           variant="ghost"
                           size="sm"
                           onClick={() => setShowImageGallery(true)}
-                          className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 h-7"
+                          className="text-[#13a8b4] hover:text-[#0f8a94] hover:bg-[#13a8b4]/10 h-7"
                         >
                           View All
                         </Button>
@@ -1126,7 +1126,7 @@ export default function WarehouseUploadForm() {
                 <CardHeader className="">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <Video className="h-5 w-5 text-orange-600 mr-2" />
+                      <Video className="h-5 w-5 text-[#13a8b4] mr-2" />
                       <CardTitle className="text-lg">Property Videos</CardTitle>
                     </div>
                     <Badge variant="secondary" className="bg-gray-200">Optional</Badge>
@@ -1153,7 +1153,7 @@ export default function WarehouseUploadForm() {
                             className="hidden"
                           />
                           <div className="w-12 h-12 bg-gradient-to-br from-orange-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <Video className="h-6 w-6 text-orange-600" />
+                            <Video className="h-6 w-6 text-[#13a8b4]" />
                           </div>
                           <p className="text-sm font-medium text-gray-900 mb-1">Click to upload</p>
                           <p className="text-xs text-gray-500">
@@ -1205,7 +1205,7 @@ export default function WarehouseUploadForm() {
               </Card>
 
               {/* Quick Summary */}
-              <Card className="shadow-md hover:shadow-lg transition-shadow border-orange-100">
+              <Card className="shadow-md hover:shadow-lg transition-shadow border-[#d07648]/20">
                 <CardHeader className="">
                   <CardTitle className="text-lg">Quick Summary</CardTitle>
                 </CardHeader>
@@ -1246,7 +1246,7 @@ export default function WarehouseUploadForm() {
                 <Button
                   onClick={handleSubmit}
                   disabled={uploading}
-                  className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white py-6 text-base font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                  className="w-full bg-gradient-to-r from-[#13a8b4] to-[#d07648] hover:from-[#0f8a94] hover:to-[#a85832] text-white py-6 text-base font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
                 >
                   {uploading ? (
                     <>
@@ -1342,8 +1342,8 @@ export default function WarehouseUploadForm() {
                       onClick={() => setSelectedImageIndex(index)}
                       className={`relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-md sm:rounded-lg overflow-hidden transition-all ${
                         index === selectedImageIndex
-                          ? 'ring-2 sm:ring-4 ring-orange-500 scale-105 shadow-lg'
-                          : 'ring-1 sm:ring-2 ring-gray-200 hover:ring-orange-300 hover:scale-105'
+                          ? 'ring-2 sm:ring-4 ring-[#13a8b4] scale-105 shadow-lg'
+                          : 'ring-1 sm:ring-2 ring-gray-200 hover:ring-[#d07648]/40 hover:scale-105'
                       }`}
                     >
                       <img
@@ -1352,7 +1352,7 @@ export default function WarehouseUploadForm() {
                         className="w-full h-full object-cover"
                       />
                       {index === selectedImageIndex && (
-                        <div className="absolute inset-0 bg-orange-500/20" />
+                        <div className="absolute inset-0 bg-[#13a8b4]/20" />
                       )}
                     </button>
                   ))}
@@ -1378,7 +1378,7 @@ export default function WarehouseUploadForm() {
               onClick={() => {
                 if (imageToDelete !== null) removeImage(imageToDelete);
               }}
-              className="bg-orange-600 hover:bg-orange-700"
+              className="bg-[#d07648] hover:bg-[#a85832]"
             >
               Delete
             </AlertDialogAction>

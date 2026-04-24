@@ -1,4 +1,4 @@
-import { Home, Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from 'lucide-react'
+import { Facebook, Twitter, Linkedin, Instagram, Mail, Phone, MapPin } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -12,10 +12,7 @@ export default function Footer() {
           {/* Brand section */}
           <div className="lg:col-span-1">
             <div className="flex items-center space-x-2 mb-6 group cursor-pointer">
-              <div className="bg-[#0f8a94] p-2 rounded-xl shadow-lg group-hover:shadow-[#d07648]/35 transition-all duration-300 group-hover:scale-105 group-hover:rotate-3">
-                <Home className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-[#0f8a94] to-[#0b6f78] bg-clip-text text-transparent">Rexon</span>
+              <img src="/rexon-logo.png" alt="Rexon" className="h-20 md:h-24 w-auto object-contain" />
             </div>
             <p className="hp-footer-text text-slate-600 mb-6">
               Rexon is redefining real estate in India. Get commercial property buying and selling help from a team of experts committed to your success.

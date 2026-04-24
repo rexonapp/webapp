@@ -134,6 +134,7 @@ export default function AgentsSection() {
   const stripRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const posRef = useRef(0);
+  const interactionResumeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     fetch('/api/agents?limit=12&status=approved')
@@ -159,6 +160,24 @@ export default function AgentsSection() {
     rafRef.current = requestAnimationFrame(tick);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
   }, [agents, paused]);
+
+  useEffect(() => {
+    return () => {
+      if (interactionResumeTimeoutRef.current) {
+        clearTimeout(interactionResumeTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const pauseAndResumeAutoplay = () => {
+    setPaused(true);
+    if (interactionResumeTimeoutRef.current) {
+      clearTimeout(interactionResumeTimeoutRef.current);
+    }
+    interactionResumeTimeoutRef.current = setTimeout(() => {
+      setPaused(false);
+    }, 900);
+  };
 
   return (
     <>
@@ -195,13 +214,6 @@ export default function AgentsSection() {
 
         .ag-title { font-size: clamp(28px, 4.5vw, 46px); font-weight: 700; color: #0F172A; line-height: 1.18; letter-spacing: -0.02em; margin-bottom: 14px; }
         .ag-title-highlight { color: #d07648; position: relative; display: inline-block; }
-        .ag-title-highlight::after {
-          content: ''; position: absolute; left: 0; bottom: -4px;
-          width: 100%; height: 3px;
-          background: linear-gradient(90deg, #d07648, #e5b092);
-          border-radius: 3px;
-        }
-
         .ag-subtitle { font-size: 15px; color: #64748B; line-height: 1.75; max-width: 500px; margin: 0 auto; }
 
         /* stats */
@@ -231,10 +243,11 @@ export default function AgentsSection() {
         }
         .ag-strip {
           display: flex; gap: 22px;
-          overflow-x: hidden; padding: 18px 2px 24px;
-          scrollbar-width: none; -ms-overflow-style: none;
+          overflow-x: auto; padding: 18px 2px 24px;
+          overscroll-behavior-x: contain;
+          scroll-behavior: smooth;
+          -webkit-overflow-scrolling: touch;
         }
-        .ag-strip::-webkit-scrollbar { display: none; }
 
         /* ── Card ── */
         .ag-card {
@@ -457,6 +470,13 @@ export default function AgentsSection() {
                 onMouseLeave={() => setPaused(false)}
                 onTouchStart={() => setPaused(true)}
                 onTouchEnd={() => setPaused(false)}
+                onWheel={(e) => {
+                  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                    e.currentTarget.scrollLeft += e.deltaY;
+                  }
+                  pauseAndResumeAutoplay();
+                }}
+                onPointerDown={pauseAndResumeAutoplay}
               >
                 {[...agents, ...agents].map((agent, idx) => (
                   <AgentCard key={`${agent.id}-${idx}`} agent={agent} />

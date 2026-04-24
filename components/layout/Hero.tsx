@@ -393,7 +393,7 @@ export default function HeroWithBanner() {
           <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-4 animate-slide-up-delayed-2 px-0 sm:px-0">
             <Card
               onClick={() => router.push('/property')}
-              className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white/45 text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/50 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25"
+              className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white/60 text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/65 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 rounded-t-[inherit] bg-gradient-to-b from-white/30 to-transparent" aria-hidden />
               <div className="absolute -inset-1 -z-10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:bg-white/25 group-hover:opacity-100" />
@@ -413,7 +413,7 @@ export default function HeroWithBanner() {
                 <CardDescription className="home-hero-card-body text-slate-800/95 font-medium">
                   List your warehouse or commercial property and connect with verified buyers
                 </CardDescription>
-                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#c46b3f]  transition-all duration-300 group-hover:gap-2 group-hover:text-[#a85832]">
+                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#a85832] font-semibold transition-all duration-300 group-hover:gap-2 group-hover:text-[#8e4c2d]">
                   <span>Get Started</span>
                   <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
@@ -422,7 +422,7 @@ export default function HeroWithBanner() {
 
             <Card
               onClick={() => router.push('/agent/join')}
-              className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white/45 text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/50 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25"
+              className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white/60 text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/65 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 rounded-t-[inherit] bg-gradient-to-b from-white/30 to-transparent" aria-hidden />
               <div className="absolute -inset-1 -z-10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:bg-white/25 group-hover:opacity-100" />
@@ -442,7 +442,7 @@ export default function HeroWithBanner() {
                 <CardDescription className="home-hero-card-body text-slate-800/95 font-medium">
                   Manage multiple properties and connect with potential clients efficiently
                 </CardDescription>
-                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#c46b3f]  transition-all duration-300 group-hover:gap-2 group-hover:text-[#a85832]">
+                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#a85832] font-semibold transition-all duration-300 group-hover:gap-2 group-hover:text-[#8e4c2d]">
                   <span>Join Now</span>
                   <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
@@ -451,7 +451,7 @@ export default function HeroWithBanner() {
 
             <Card
               onClick={() => router.push('/customer')}
-              className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white/45 text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/50 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25 sm:col-span-2 lg:col-span-1"
+              className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white/60 text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/65 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25 sm:col-span-2 lg:col-span-1"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 rounded-t-[inherit] bg-gradient-to-b from-white/30 to-transparent" aria-hidden />
               <div className="absolute -inset-1 -z-10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:bg-white/25 group-hover:opacity-100" />
@@ -471,7 +471,7 @@ export default function HeroWithBanner() {
                 <CardDescription className="home-hero-card-body text-slate-800/95 font-medium">
                   Find the perfect warehouse or commercial space for your business needs
                 </CardDescription>
-                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#c46b3f]  transition-all duration-300 group-hover:gap-2 group-hover:text-[#a85832]">
+                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#a85832] font-semibold transition-all duration-300 group-hover:gap-2 group-hover:text-[#8e4c2d]">
                   <span>Find Space</span>
                   <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
