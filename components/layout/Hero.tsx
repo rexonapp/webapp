@@ -390,104 +390,95 @@ export default function HeroWithBanner() {
           </div>
 
           {/* Cards Section with tighter top spacing on large screens */}
-          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-3.5 lg:gap-4 animate-slide-up-delayed-2 px-1 sm:px-0">
-                        <Card
-    onClick={() => router.push('/property')}
-    className="group relative border-2 border-[#13a8b4]/45 hover:border-[#d07648] bg-white/14 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/18 transform hover:-translate-y-1 hover:scale-[1.01]"
-  >
-    {/* Glow effect */}
-    <div className="absolute -inset-1 bg-gradient-to-r from-[#d07648]/0 to-[#13a8b4]/0 group-hover:from-[#d07648]/25 group-hover:to-[#13a8b4]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
-    
-    {/* Glossy top shine */}
-    <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl"></div>
+          <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-4 animate-slide-up-delayed-2 px-0 sm:px-0">
+            <Card
+              onClick={() => router.push('/property')}
+              className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white/45 text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/50 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25"
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 rounded-t-[inherit] bg-gradient-to-b from-white/30 to-transparent" aria-hidden />
+              <div className="absolute -inset-1 -z-10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:bg-white/25 group-hover:opacity-100" />
 
-    <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#0f8a94] rounded-lg flex items-center justify-center group-hover:scale-105 group-hover:rotate-2 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
-          <Home className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
-        </div>
-        <CardTitle className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-white transition-colors duration-300 text-left leading-tight">
-          Property Owner
-        </CardTitle>
-      </div>
-    </CardHeader>
+              <CardHeader className="relative space-y-0 pb-2 pt-4 px-4 sm:px-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#13a8b4]/30 bg-[#13a8b4] shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-[#13a8b4] group-hover:border-[#13a8b4]/55 sm:h-11 sm:w-11">
+                    <Home className="h-5 w-5 text-white sm:h-5 sm:w-5" />
+                  </div>
+                  <CardTitle className="home-hero-card-title min-w-0 pt-0.5 group-hover:text-slate-900">
+                    Property Owner
+                  </CardTitle>
+                </div>
+              </CardHeader>
 
-    <CardContent className="pb-2 px-2.5 sm:px-3.5 space-y-0.5 sm:space-y-1">
-      <CardDescription className="text-[11px] sm:text-xs leading-snug sm:leading-relaxed text-white/95 text-left line-clamp-2">
-        List your warehouse or commercial property and connect with verified buyers
-      </CardDescription>
-      <div className="flex items-center text-[#ffd7c2] font-semibold text-[11px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
-        <span>Get Started</span>
-        <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
-      </div>
-    </CardContent>
-  </Card>
+              <CardContent className="relative space-y-3 px-4 pb-4 pt-0 sm:px-4">
+                <CardDescription className="home-hero-card-body text-slate-800/95 font-medium">
+                  List your warehouse or commercial property and connect with verified buyers
+                </CardDescription>
+                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#c46b3f]  transition-all duration-300 group-hover:gap-2 group-hover:text-[#a85832]">
+                  <span>Get Started</span>
+                  <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+                </div>
+              </CardContent>
+            </Card>
 
-  <Card
-    onClick={() => router.push('/agent/join')}
-    className="group relative border-2 border-[#13a8b4]/45 hover:border-[#d07648] bg-white/14 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/18 transform hover:-translate-y-1 hover:scale-[1.01]"
-  >
-    {/* Glow effect */}
-    <div className="absolute -inset-1 bg-gradient-to-r from-[#d07648]/0 to-[#13a8b4]/0 group-hover:from-[#d07648]/25 group-hover:to-[#13a8b4]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
-    
-    {/* Glossy top shine */}
-    <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl"></div>
+            <Card
+              onClick={() => router.push('/agent/join')}
+              className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white/45 text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/50 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25"
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 rounded-t-[inherit] bg-gradient-to-b from-white/30 to-transparent" aria-hidden />
+              <div className="absolute -inset-1 -z-10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:bg-white/25 group-hover:opacity-100" />
 
-    <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#0f8a94] rounded-lg flex items-center justify-center group-hover:scale-105 group-hover:rotate-2 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
-          <Users className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
-        </div>
-        <CardTitle className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-white transition-colors duration-300 text-left leading-tight">
-          Real Estate Agent
-        </CardTitle>
-      </div>
-    </CardHeader>
+              <CardHeader className="relative space-y-0 pb-2 pt-4 px-4 sm:px-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#13a8b4]/30 bg-[#13a8b4] shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-[#13a8b4] group-hover:border-[#13a8b4]/55 sm:h-11 sm:w-11">
+                    <Users className="h-5 w-5 text-white sm:h-5 sm:w-5" />
+                  </div>
+                  <CardTitle className="home-hero-card-title min-w-0 pt-0.5 group-hover:text-slate-900">
+                    Real Estate Agent
+                  </CardTitle>
+                </div>
+              </CardHeader>
 
-    <CardContent className="pb-2 px-2.5 sm:px-3.5 space-y-0.5 sm:space-y-1">
-      <CardDescription className="text-[11px] sm:text-xs leading-snug sm:leading-relaxed text-white/95 text-left line-clamp-2">
-        Manage multiple properties and connect with potential clients efficiently
-      </CardDescription>
-      <div className="flex items-center text-[#ffd7c2] font-semibold text-[11px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
-        <span>Join Now</span>
-        <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
-      </div>
-    </CardContent>
-  </Card>
+              <CardContent className="relative space-y-3 px-4 pb-4 pt-0 sm:px-4">
+                <CardDescription className="home-hero-card-body text-slate-800/95 font-medium">
+                  Manage multiple properties and connect with potential clients efficiently
+                </CardDescription>
+                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#c46b3f]  transition-all duration-300 group-hover:gap-2 group-hover:text-[#a85832]">
+                  <span>Join Now</span>
+                  <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+                </div>
+              </CardContent>
+            </Card>
 
-  <Card
-    onClick={() => router.push('/customer')}
-    className="group relative border-2 border-[#13a8b4]/45 hover:border-[#d07648] bg-white/14 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-400 cursor-pointer overflow-hidden hover:bg-white/18 transform hover:-translate-y-1 hover:scale-[1.01] sm:col-span-2 lg:col-span-1"
-  >
-    {/* Glow effect */}
-    <div className="absolute -inset-1 bg-gradient-to-r from-[#d07648]/0 to-[#13a8b4]/0 group-hover:from-[#d07648]/25 group-hover:to-[#13a8b4]/20 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
-    
-    {/* Glossy top shine */}
-    <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl"></div>
+            <Card
+              onClick={() => router.push('/customer')}
+              className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white/45 text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/50 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25 sm:col-span-2 lg:col-span-1"
+            >
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 rounded-t-[inherit] bg-gradient-to-b from-white/30 to-transparent" aria-hidden />
+              <div className="absolute -inset-1 -z-10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:bg-white/25 group-hover:opacity-100" />
 
-    <CardHeader className="pb-1 pt-2 px-2.5 sm:px-3.5">
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#0f8a94] rounded-lg flex items-center justify-center group-hover:scale-105 group-hover:rotate-2 transition-all duration-500 shadow-xl flex-shrink-0 border border-white/20">
-          <Building2 className="h-3 w-3 sm:h-4 sm:w-4 text-white drop-shadow-lg" />
-        </div>
-        <CardTitle className="text-xs sm:text-sm md:text-base font-bold text-white group-hover:text-white transition-colors duration-300 text-left leading-tight">
-          Company / Customer
-        </CardTitle>
-      </div>
-    </CardHeader>
+              <CardHeader className="relative space-y-0 pb-2 pt-4 px-4 sm:px-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#13a8b4]/30 bg-[#13a8b4] shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-[#13a8b4] group-hover:border-[#13a8b4]/55 sm:h-11 sm:w-11">
+                    <Building2 className="h-5 w-5 text-white sm:h-5 sm:w-5" />
+                  </div>
+                  <CardTitle className="home-hero-card-title min-w-0 pt-0.5 group-hover:text-slate-900">
+                    Company / Customer
+                  </CardTitle>
+                </div>
+              </CardHeader>
 
-    <CardContent className="pb-2 px-2.5 sm:px-3.5 space-y-0.5 sm:space-y-1">
-      <CardDescription className="text-[11px] sm:text-xs leading-snug sm:leading-relaxed text-white/95 text-left line-clamp-2">
-        Find the perfect warehouse or commercial space for your business needs
-      </CardDescription>
-      <div className="flex items-center text-[#ffd7c2] font-semibold text-[11px] sm:text-xs group-hover:gap-1.5 gap-1 transition-all duration-300 pt-0.5">
-        <span>Find Space</span>
-        <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
-      </div>
-    </CardContent>
-  </Card>
+              <CardContent className="relative space-y-3 px-4 pb-4 pt-0 sm:px-4">
+                <CardDescription className="home-hero-card-body text-slate-800/95 font-medium">
+                  Find the perfect warehouse or commercial space for your business needs
+                </CardDescription>
+                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#c46b3f]  transition-all duration-300 group-hover:gap-2 group-hover:text-[#a85832]">
+                  <span>Find Space</span>
+                  <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+                </div>
+              </CardContent>
+            </Card>
 
-</div>
+          </div>
         </div>
       </div>
 

@@ -80,22 +80,28 @@ export default function HomePage() {
 
         {/* Stats */}
         <section className="py-14 md:py-20 bg-white border-y border-[#13a8b4]/15 relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute -top-20 left-1/2 h-44 w-44 -translate-x-1/2 rounded-full bg-[#13a8b4]/10 blur-3xl" />
+            <div className="absolute -bottom-20 right-0 h-52 w-52 rounded-full bg-[#d07648]/10 blur-3xl" />
+          </div>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {stats.map((stat, index) => {
                 const Icon = stat.icon;
                 return (
                   <div key={index} id={`stat-${index}`} data-animate
-                    className={`text-center group fade-in-up stagger-${index + 1} ${isVisible[`stat-${index}`] ? 'visible' : ''}`}
+                    className={`hp-stat-card text-center group fade-in-up stagger-${index + 1} ${isVisible[`stat-${index}`] ? 'visible' : ''}`}
                   >
-                    <div className="inline-flex items-center justify-center w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-[#13a8b4] via-[#0f8a94] to-[#0b6f78] rounded-2xl mb-3 md:mb-4 shadow-lg group-hover:shadow-2xl group-hover:shadow-[#13a8b4]/35 transition-all duration-500 group-hover:scale-105 relative overflow-hidden shimmer-effect">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-[#0b6f78] to-[#13a8b4] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <Icon className="h-8 w-8 text-white relative z-10" style={{ animationDelay: `${index * 0.2}s` }} />
+                    <div className="hp-stat-icon-wrap mx-auto">
+                      <div className="inline-flex items-center justify-center w-12 h-12 md:w-14 md:h-14 bg-gradient-to-br from-[#13a8b4] via-[#0f8a94] to-[#0b6f78] rounded-xl shadow-lg group-hover:shadow-[#13a8b4]/35 transition-all duration-500 group-hover:scale-105 relative overflow-hidden shimmer-effect">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-[#0b6f78] to-[#13a8b4] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <Icon className="h-6 w-6 md:h-7 md:w-7 text-white relative z-10" style={{ animationDelay: `${index * 0.2}s` }} />
+                      </div>
                     </div>
                     <div className={`stat-number hp-stat-value ${isVisible[`stat-${index}`] ? 'visible' : ''}`}>
                       {stat.value}
                     </div>
-                    <div className="hp-card-body text-slate-600 group-hover:text-[#0f8a94] transition-colors duration-300">
+                    <div className="hp-stat-label group-hover:text-[#0f8a94] transition-colors duration-300">
                       {stat.label}
                     </div>
                   </div>

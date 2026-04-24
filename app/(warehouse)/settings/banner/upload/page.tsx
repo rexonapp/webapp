@@ -307,9 +307,9 @@ export default function BannerUploadAdmin() {
           )}
 
           {/* Guidelines */}
-          <div className="mt-8 p-6 bg-blue-50 rounded-xl border border-blue-200">
-            <h3 className="font-bold text-blue-900 mb-3">Image Guidelines</h3>
-            <ul className="space-y-2 text-sm text-blue-800">
+          <div className="mt-8 p-6 bg-[#13a8b4]/10 rounded-xl border border-[#13a8b4]/25">
+            <h3 className="font-bold text-[#134c52] mb-3">Image Guidelines</h3>
+            <ul className="space-y-2 text-sm text-[#0b6f78]">
               <li>• Recommended dimensions: 1920x1080 (16:9 ratio)</li>
               <li>• Maximum file size: 5MB</li>
               <li>• Supported formats: JPEG, PNG, WebP</li>

@@ -42,6 +42,45 @@ html {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  margin-top: 0.7rem;
+  margin-bottom: 0.3rem;
+}
+
+.hp-stat-card {
+  position: relative;
+  padding: 1rem 0.9rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--brand-blue) 20%, white);
+  border-radius: 1rem;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(248, 252, 253, 0.88)),
+    linear-gradient(180deg, rgba(19, 168, 180, 0.04), rgba(208, 118, 72, 0.04));
+  box-shadow:
+    0 8px 24px rgba(15, 23, 42, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+}
+
+.hp-stat-card:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--brand-orange) 42%, white);
+  box-shadow:
+    0 16px 30px rgba(15, 23, 42, 0.09),
+    0 8px 20px rgba(19, 168, 180, 0.14);
+}
+
+.hp-stat-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  padding: 0.26rem;
+  border-radius: 0.9rem;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.75), rgba(19, 168, 180, 0.1));
+}
+
+.hp-stat-label {
+  font-size: 0.95rem;
+  font-weight: 620;
+  color: #475569;
+  line-height: 1.45;
 }
 
 .hp-cta-title {
