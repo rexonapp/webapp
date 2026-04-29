@@ -127,7 +127,7 @@ export default function Footer() {
         </div> */}
         
         {/* Bottom section */}
-        <div className="border-t border-[#13a8b4]/20 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+        <div className="border-[#13a8b4]/20 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <div className="flex flex-wrap justify-center md:justify-start gap-6 text-xs">
             <a href="#" className="text-slate-500 hover:text-[#d07648] transition-colors duration-300">Privacy Policy</a>
             <a href="#" className="text-slate-500 hover:text-[#d07648] transition-colors duration-300">Terms of Service</a>
