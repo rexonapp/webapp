@@ -61,7 +61,7 @@ export default function Footer() {
         </div>
         
         {/* Links section */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+        {/* <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
           <div>
             <h3 className="text-[#134c52] font-bold mb-4 text-sm flex items-center gap-2">
               <span className="w-1 h-5 bg-gradient-to-b from-[#d07648] to-[#a85832] rounded-full"></span>
@@ -124,7 +124,7 @@ export default function Footer() {
               </a>
             </div>
           </div>
-        </div>
+        </div> */}
         
         {/* Bottom section */}
         <div className="border-t border-[#13a8b4]/20 pt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
