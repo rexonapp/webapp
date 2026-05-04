@@ -560,6 +560,10 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
   const [showShareCard, setShowShareCard] = useState(false);
 
   useEffect(() => {
+    setIsSaved(property.isSaved || false);
+  }, [property.isSaved]);
+
+  useEffect(() => {
     if (isHovered && hasImages && totalImages > 1) {
       const duration = 3000;
       
@@ -599,6 +603,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
       setScrollProgress(0);
     }
   }, [isHovered, hasImages, totalImages]);
+
 
   const nextImage = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -677,6 +682,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
     setIsHovered(false);
     onHover?.(null);
   }, [onHover]);
+
 
   return (
     <>
@@ -885,7 +891,6 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
   const hasImages = property.images && property.images.length > 0;
   const currentImage = hasImages ? property.images![currentImageIndex] : null;
   const totalImages = property.images?.length || 0;
-
   useEffect(() => {
     if (isHovered && hasImages && totalImages > 1) {
       const duration = 3000;
@@ -1450,7 +1455,6 @@ function SearchResults() {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     return visibleProperties.slice(start, start + ITEMS_PER_PAGE);
   }, [visibleProperties, currentPage]);
-  console.log(currentProperties,'jkdknd')
 
   const mapProperties = useMemo(() => {
     return sortedProperties

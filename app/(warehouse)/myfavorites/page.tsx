@@ -55,6 +55,7 @@ export default function MyFavorites() {
     fetch("/api/leads/favorite/list")
       .then(res => res.json())
       .then(data => {
+        console.log(data, 'dataaa')
         setFavorites(data);
       })
       .catch(() => undefined)
@@ -129,9 +130,9 @@ export default function MyFavorites() {
                     </Link>
                   </td>
                   <td className="p-3 border">{item.property_type}</td>
-                  <td className="p-3 border">₹ {item.price_per_sqft}</td>
+                  <td className="p-3 border">₹ {item.total_price}</td>
                   <td className="p-3 border">
-                    ₹ {item.price_at_favorite}
+                    ₹ {item.total_price}
                   </td>
                   <td className="p-3 border">
                     {new Date(item.created_at).toLocaleDateString()}

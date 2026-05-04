@@ -30,6 +30,7 @@ export async function GET() {
           w.title,
           w.state_code,
           w.property_code,
+          w.total_price,
           la.price_at_favorite,
           la.created_at,
           la.user_id
