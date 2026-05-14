@@ -1044,14 +1044,14 @@ export default function AgentRegistrationForm() {
                 <Button
                   onClick={handleSubmit}
                   disabled={uploading}
-                  className="w-full bg-[#d07648] hover:bg-[#a85832] text-white h-12 text-base font-bold shadow-sm hover:shadow-md transition-all"
+                  className="w-full bg-[#23D5D5] hover:bg-[#39AAAA] text-white h-12 text-base font-bold shadow-sm hover:shadow-md transition-all"
                 >
                   {uploading
                     ? <><Loader2 className="h-5 w-5 animate-spin mr-2" />Registering…</>
                     : 'Register as Agent'
                   }
                 </Button>
-                <Button type="button" variant="outline" onClick={() => router.back()} className="w-full h-11 text-sm font-medium text-gray-600">
+                <Button type="button" variant="outline" onClick={() => router.back()} className="w-full bg-[#d07648] hover:bg-[#a85832] h-11 text-sm font-medium text-gray-600">
                   Cancel
                 </Button>
               </div>
