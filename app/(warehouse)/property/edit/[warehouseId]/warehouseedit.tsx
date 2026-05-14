@@ -75,8 +75,10 @@ interface FieldErrors {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PROPERTY_TYPES = [
-  'Warehouse', 'Cold Storage', 'Industrial Shed', 'Manufacturing Unit',
-  'Godown', 'Factory Space', 'Logistics Hub', 'Distribution Center'
+  'Warehouse', 'Cold Storage', 'Industrial Shed',
+  //  'Manufacturing Unit',
+  // 'Godown',
+   'Factory Space', 'Logistics Hub', 'Distribution Center'
 ];
 
 const AMENITIES = ['Parking', 'Security', 'CCTV'];

@@ -47,15 +47,15 @@ const TOP_CITIES: City[] = [
 const PROPERTY_TYPES: PropertyType[] = [
   { id: 'warehouse',          label: 'Warehouse' },
   { id: 'farm land',          label: 'Farm Land' },
-  { id: 'factory',            label: 'Factory' },
+  // { id: 'factory',            label: 'Factory' },
   { id: 'industrial',         label: 'Industrial' },
   { id: 'cold-storage',       label: 'Cold Storage' },
-  { id: 'commercial-land',    label: 'Commercial Land' },
+  { id: 'commercial-land',    label: 'Commercial Space' },
   { id: 'office-space',       label: 'Office Space' },
-  { id: 'showroom',           label: 'Showroom' },
-  { id: 'retail-space',       label: 'Retail Space' },
-  { id: 'manufacturing-unit', label: 'Manufacturing Unit' },
-  { id: 'godown',             label: 'Godown' },
+  // { id: 'showroom',           label: 'Showroom' },
+  // { id: 'retail-space',       label: 'Retail Space' },
+  // { id: 'manufacturing-unit', label: 'Manufacturing Unit' },
+  // { id: 'godown',             label: 'Godown' },
 ]
 
 type Breakpoint = 'desktop' | 'tablet' | 'mobile'

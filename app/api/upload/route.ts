@@ -176,9 +176,9 @@ export async function POST(request: NextRequest) {
     const propertyTypeMap: { [key: string]: string } = {
       'Warehouse': 'Warehouse',
       'Cold Storage': 'Warehouse',
-      'Godown': 'Warehouse',
+      // 'Godown': 'Warehouse',
       'Industrial Shed': 'Industrial',
-      'Manufacturing Unit': 'Industrial',
+      // 'Manufacturing Unit': 'Industrial',
       'Factory Space': 'Industrial',
       'Logistics Hub': 'Commercial',
       'Distribution Center': 'Commercial',

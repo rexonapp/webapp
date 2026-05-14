@@ -62,8 +62,8 @@ const PROPERTY_TYPES = [
   'Warehouse',
   'Cold Storage',
   'Industrial Shed',
-  'Manufacturing Unit',
-  'Godown',
+  // 'Manufacturing Unit',
+  // 'Godown',
   'Factory Space',
   'Logistics Hub',
   'Distribution Center'
