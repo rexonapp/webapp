@@ -60,8 +60,8 @@ interface FieldErrors {
 
 const PROPERTY_TYPES = [
   'Warehouse',
-  'Cold Storage',
-  'Industrial Shed',
+  // 'Cold Storage',
+  // 'Industrial Shed',
   // 'Manufacturing Unit',
   // 'Godown',
   'Factory Space',

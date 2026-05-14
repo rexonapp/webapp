@@ -75,7 +75,8 @@ interface FieldErrors {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PROPERTY_TYPES = [
-  'Warehouse', 'Cold Storage', 'Industrial Shed',
+  'Warehouse', 'Cold Storage',
+  //  'Industrial Shed',
   //  'Manufacturing Unit',
   // 'Godown',
    'Factory Space', 'Logistics Hub', 'Distribution Center'
@@ -104,7 +105,9 @@ const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
 
 // Reverse map DB values → frontend display values
 const PROPERTY_TYPE_REVERSE: Record<string, string> = {
-  'Warehouse': 'Warehouse', 'Industrial': 'Industrial Shed', 'Commercial': 'Logistics Hub',
+  'Warehouse': 'Warehouse',
+  //  'Industrial': 'Industrial Shed', 
+   'Commercial': 'Logistics Hub',
 };
 const PRICE_TYPE_REVERSE: Record<string, 'sale' | 'rent' | 'lease'> = {
   'Rent': 'rent', 'Sale': 'sale', 'Lease': 'lease',

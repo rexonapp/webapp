@@ -175,9 +175,9 @@ export async function POST(request: NextRequest) {
     // Database constraint only allows: 'Warehouse', 'Industrial', 'Commercial'
     const propertyTypeMap: { [key: string]: string } = {
       'Warehouse': 'Warehouse',
-      'Cold Storage': 'Warehouse',
+      // 'Cold Storage': 'Warehouse',
       // 'Godown': 'Warehouse',
-      'Industrial Shed': 'Industrial',
+      // 'Industrial Shed': 'Industrial',
       // 'Manufacturing Unit': 'Industrial',
       'Factory Space': 'Industrial',
       'Logistics Hub': 'Commercial',

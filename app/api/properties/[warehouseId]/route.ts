@@ -157,9 +157,10 @@ export async function PATCH(
 
     // Map property type
     const propertyTypeMap: Record<string, string> = {
-      'Warehouse': 'Warehouse', 'Cold Storage': 'Warehouse',
+      'Warehouse': 'Warehouse', 
+      // 'Cold Storage': 'Warehouse',
       //  'Godown': 'Warehouse',
-      'Industrial Shed': 'Industrial', 
+      // 'Industrial Shed': 'Industrial', 
       // 'Manufacturing Unit': 'Industrial', 
       'Factory Space': 'Industrial',
       'Logistics Hub': 'Commercial', 'Distribution Center': 'Commercial',
