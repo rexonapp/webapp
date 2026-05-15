@@ -843,8 +843,8 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
           <span className="text-xs text-gray-600 font-medium">/sqft</span>
         </div>
         {property.total_price != null && (
-  <p className="text-xs font-bold text-gray-900 mt-0.5">
-    Total Price: <span className="font-bold text-[#d07648]">
+  <p className="text-md font-bold text-gray-900 mt-0.5">
+    Total Price: <span className=" text-md font-bold text-[#d07648]">
       ₹{property.total_price.toLocaleString('en-IN')}
     </span>
   </p>

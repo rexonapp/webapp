@@ -25,7 +25,8 @@ export async function GET(
               is_verified,
               is_featured,
               created_at,
-              amenities
+              amenities,
+              total_price
        FROM warehouses
        WHERE id = $1`,
       [warehouseId]
