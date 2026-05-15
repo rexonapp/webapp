@@ -1199,7 +1199,7 @@ export default function WarehouseEditForm({ warehouseId, initialData }: Props) {
                 <Button
                   type="button" variant="outline" disabled={uploading}
                   onClick={() => router.push('/mylistings')}
-                  className="w-full py-6 text-base font-medium border-2 hover:bg-gray-50"
+                  className="w-full  bg-[#da7948] hover:bg-[#da7948] py-6 text-base font-medium border-2 hover:bg-gray-50"
                 >
                   Cancel
                 </Button>
