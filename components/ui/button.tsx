@@ -12,6 +12,12 @@ const buttonVariants = cva(
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
         destructive:
           "bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
+        /** Affirmative actions: submit, save, apply, confirm, accept */
+        confirm:
+          "border-0 bg-gradient-to-r from-[#13a8b4] to-[#0f8a94] text-white shadow-md hover:from-[#0f8a94] hover:to-[#0b6f78] hover:shadow-lg hover:shadow-[#13a8b4]/25 focus-visible:ring-[#13a8b4]/40 dark:focus-visible:ring-[#13a8b4]/50",
+        /** Dismissive actions: cancel, close without saving, reset filters */
+        cancel:
+          "border-0 bg-gradient-to-r from-[#d07648] to-[#c46b3f] text-white shadow-md hover:from-[#c46b3f] hover:to-[#a85832] hover:shadow-lg hover:shadow-[#d07648]/30 focus-visible:ring-[#d07648]/40 dark:focus-visible:ring-[#d07648]/50",
         outline:
           "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
         secondary:

@@ -259,11 +259,13 @@ export default function MyListingsPage() {
             <AlertDescription className="text-base">{error}</AlertDescription>
           </Alert>
           <div className="flex gap-3">
-            <Button onClick={handleRefresh} className="bg-orange-600 hover:bg-orange-700 shadow-md">
+            <Button onClick={handleRefresh} variant="confirm" className="shadow-md">
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Refreshing...' : 'Try Again'}
             </Button>
-            <Link href="/"><Button variant="outline" className="border-slate-300">Go to Home</Button></Link>
+            <Button asChild variant="cancel">
+              <Link href="/">Go to Home</Link>
+            </Button>
           </div>
         </div>
       </div>
@@ -286,16 +288,16 @@ export default function MyListingsPage() {
               <p className="text-lg text-slate-600 max-w-2xl">Manage and track all your property listings in one unified dashboard</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button onClick={handleRefresh} disabled={isRefreshing} variant="outline"
-                className="border-slate-300 hover:border-orange-600 hover:text-orange-600 hover:bg-orange-50 transition-all duration-200 h-11 px-6">
+              <Button onClick={handleRefresh} disabled={isRefreshing} variant="confirm"
+                className="transition-all duration-200 h-11 px-6">
                 <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                 {isRefreshing ? 'Refreshing...' : 'Refresh'}
               </Button>
-              <Link href="/property">
-                <Button className="bg-orange-600 hover:bg-orange-700 shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6">
-                  <Building2 className="h-4 w-4 mr-2" />Add Property
-                </Button>
-              </Link>
+              <Button asChild variant="confirm" className="inline-flex shadow-lg hover:shadow-xl transition-all duration-200 h-11 px-6">
+                <Link href="/property">
+                  <Building2 className="h-4 w-4 mr-2 shrink-0" />Add Property
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -385,7 +387,7 @@ export default function MyListingsPage() {
                     <SheetTitle className="flex items-center justify-between text-xl">
                       <span>Advanced Filters</span>
                       {hasActiveFilters() && (
-                        <Button variant="ghost" size="sm" onClick={clearFilters} className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 -mr-2">
+                        <Button variant="cancel" size="sm" onClick={clearFilters} className="-mr-2">
                           <X className="h-4 w-4 mr-1" />Clear All
                         </Button>
                       )}
@@ -499,15 +501,15 @@ export default function MyListingsPage() {
 
                   <div className="sticky bottom-0 bg-white border-t border-slate-200 px-6 py-4">
                     <div className="flex gap-3">
-                      <Button onClick={clearFilters} variant="outline" className="flex-1 h-11 border-slate-300 hover:bg-slate-50">Reset Filters</Button>
-                      <Button onClick={() => setIsFilterOpen(false)} className="flex-1 h-11 bg-orange-600 hover:bg-orange-700 shadow-sm">Apply Filters</Button>
+                      <Button onClick={clearFilters} variant="cancel" className="flex-1 h-11">Reset Filters</Button>
+                      <Button onClick={() => setIsFilterOpen(false)} variant="confirm" className="flex-1 h-11 shadow-sm">Apply Filters</Button>
                     </div>
                   </div>
                 </SheetContent>
               </Sheet>
 
               {hasActiveFilters() && (
-                <Button onClick={clearFilters} variant="ghost" className="h-12 text-orange-600 hover:text-orange-700 hover:bg-orange-50 px-6">
+                <Button onClick={clearFilters} variant="cancel" className="h-12 px-6">
                   <X className="h-4 w-4 mr-2" />Clear
                 </Button>
               )}
@@ -598,13 +600,13 @@ export default function MyListingsPage() {
                     : 'Try adjusting your filters to see more results'}
                 </p>
                 {properties.length === 0 ? (
-                  <Link href="/property">
-                    <Button className="bg-orange-600 hover:bg-orange-700 shadow-lg h-12 px-8">
-                      <Building2 className="h-5 w-5 mr-2" />Add New Property
-                    </Button>
-                  </Link>
+                  <Button asChild variant="confirm" className="inline-flex shadow-lg h-12 px-8">
+                    <Link href="/property">
+                      <Building2 className="h-5 w-5 mr-2 shrink-0" />Add New Property
+                    </Link>
+                  </Button>
                 ) : (
-                  <Button onClick={clearFilters} variant="outline" className="border-orange-600 text-orange-600 hover:bg-orange-50 h-12 px-8">
+                  <Button onClick={clearFilters} variant="cancel" className="h-12 px-8">
                     <X className="h-5 w-5 mr-2" />Clear All Filters
                   </Button>
                 )}

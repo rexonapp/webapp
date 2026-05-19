@@ -46,7 +46,7 @@ export default function RegistrationSuccess() {
           {/* Actions */}
           <div className="flex flex-col gap-2">
             <Button
-              variant="outline"
+              variant="cancel"
               className="w-full"
               onClick={() => router.push('/')}
             >

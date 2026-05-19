@@ -1,5 +1,7 @@
+import BackButton from "@/components/ui/BackButton";
 import Image from "next/image";
-
+import { Share2 } from "lucide-react";
+import PropertyHeader from "@/components/ui/PropertyHeader";
 async function getProperty(warehouseId: string) {
   const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
 
@@ -14,7 +16,7 @@ async function getProperty(warehouseId: string) {
 }
 
 
-export default async function PropertyPage({
+export default async function PropertyPage({    
   params,
 }: {
   params: Promise<{ warehouseId: string }>;
@@ -39,7 +41,10 @@ export default async function PropertyPage({
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
-      
+     <PropertyHeader
+    propertyId={warehouseId}
+    title={property.title}
+  />
       {/* 🔹 Image Gallery */}
       {images?.length > 0 && (
         <div className="grid grid-cols-4 gap-4 mb-10">
@@ -99,17 +104,17 @@ export default async function PropertyPage({
       </p>
 
       {/* 🔹 Price Section */}
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 mb-8">
+      <div className="bg-[#13a8b4]/10 border border-[#13a8b4]/20 rounded-xl p-6 mb-8">
         <p className="text-sm text-gray-500 mb-1">
           {property.price_type}
         </p>
-        <h2 className="text-2xl font-bold text-blue-700">
+        <h2 className="text-2xl font-bold text-[#0f8a94]">
           ₹ {Number(property.price_per_sqft).toLocaleString()} / sqft
         </h2>
       </div>
 
       {/* 🔹 Highlights Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-xl mb-10">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-xl mb-6">
         <div>
           <p className="text-sm text-gray-500">Property Type</p>
           <p className="font-semibold">{property.property_type}</p>
@@ -137,8 +142,19 @@ export default async function PropertyPage({
         </div>
       </div>
 
+      <div className="mt-3">
+        <h3 className="text-xl font-semibold mb-3">
+          Amenities
+        </h3>
+        <div className="flex flex-wrap gap-1.5">
+          {property.amenities.map((a: any, idx: any) => (
+            <span key={idx} className="bg-amber-50 border border-amber-200 text-amber-600 text-sm font-semibold px-3 py-1 rounded-full"
+            >{a}</span>
+          ))}
+        </div>
+      </div>
       {/* 🔹 Description */}
-      <div className="mb-10">
+      <div className="mt-5">
         <h3 className="text-xl font-semibold mb-3">
           Description
         </h3>
@@ -150,7 +166,7 @@ export default async function PropertyPage({
       {/* 🔹 Map Section */}
       {property.latitude && property.longitude && (
         <div>
-          <h3 className="text-xl font-semibold mb-4">
+          <h3 className="text-xl font-semibold mb-4 mt-10">
             Location Map
           </h3>
 

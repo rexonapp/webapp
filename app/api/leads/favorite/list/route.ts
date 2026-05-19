@@ -28,9 +28,13 @@ export async function GET() {
           w.is_verified,
           w.is_featured,
           w.title,
+          w.state_code,
+          w.property_code,
+          w.total_price,
           la.price_at_favorite,
           la.created_at,
           la.user_id
+
       
         FROM lead_activity la
         JOIN warehouses w ON w.id::varchar = la.property_id

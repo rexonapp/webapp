@@ -220,17 +220,17 @@ const Map = ({ properties = [], bounds, center, zoom, onBoundsChange }: MapProps
                 }}
               />
             </Link>
-            <h4 style={{ margin: '8px 0 4px', fontSize: '1em' }}>
+            <h4 style={{ margin: '8px 0 4px', fontSize: '1em', color: '#134c52' }}>
               {selectedProperty.UnparsedAddress || 'No address provided'}
             </h4>
-            <p style={{ margin: '0', fontSize: '0.85em' }}>
+            <p style={{ margin: '0', fontSize: '0.85em', color: '#0f8a94' }}>
               {selectedProperty.City}, {selectedProperty.StateOrProvince}{' '}
               {selectedProperty.PostalCode}
             </p>
-            <p style={{ color: '#ea580c', margin: '4px 0', fontWeight: 'bold' }}>
+            <p style={{ color: '#d07648', margin: '4px 0', fontWeight: 'bold' }}>
               ₹{selectedProperty.ListPrice.toLocaleString('en-IN')}
             </p>
-            <p style={{ fontSize: '0.8em', color: '#555', margin: '4px 0 0' }}>
+            <p style={{ fontSize: '0.8em', color: '#475569', margin: '4px 0 0' }}>
               {selectedProperty.LivingArea.toLocaleString('en-IN')} sqft • {selectedProperty.PropertyType}
             </p>
           </div>

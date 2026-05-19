@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { MapPin, Search, Building2, Ruler, Check, ChevronsUpDown } from 'lucide-react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { MapPin, Search, Building2, Check, ChevronDown, TrendingUp, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
@@ -9,476 +10,481 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue
+  SelectValue,
 } from '@/components/ui/select'
-import {
-  Popover,
-  PopoverAnchor,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 interface City {
-  id?: string;
-  city: string;
-  stateCode?: string; // Optional since API might not always provide it
-  latitude?: number;
-  longitude?: number;
+  id?: string
+  city: string
+  stateCode?: string
+  latitude?: number
+  longitude?: number
+  alternate_name?: string
+  all_names?: string[]
 }
 
 interface PropertyType {
-  id: string;
-  label: string;
+  id: string
+  label: string
 }
 
-// interface Distance {
-//   id: string;
-//   label: string;
-//   value: number; // in metres
-// }
+const TOP_CITIES: City[] = [
+  { id: 'bengaluru-KA',     city: 'Bengaluru',     stateCode: 'KA', latitude: 12.9716, longitude: 77.5946, all_names: ['Bengaluru', 'Bangalore'] },
+  { id: 'chennai-TN',       city: 'Chennai',       stateCode: 'TN', latitude: 13.0827, longitude: 80.2707 },
+  { id: 'delhi-DL',         city: 'Delhi',         stateCode: 'DL', latitude: 28.6139, longitude: 77.2090 },
+  { id: 'hyderabad-TS',     city: 'Hyderabad',     stateCode: 'TS', latitude: 17.3850, longitude: 78.4867 },
+  { id: 'vijayawada-AP',    city: 'Vijayawada',    stateCode: 'AP', latitude: 16.5062, longitude: 80.6480 },
+  { id: 'visakhapatnam-AP', city: 'Visakhapatnam', stateCode: 'AP', latitude: 17.6868, longitude: 83.2185, all_names: ['Visakhapatnam', 'Vishakhapatnam', 'Vizag'] },
+  { id: 'tirupati-AP',      city: 'Tirupati',      stateCode: 'AP', latitude: 13.6288, longitude: 79.4192 },
+  { id: 'indore-MP',        city: 'Indore',        stateCode: 'MP', latitude: 22.7196, longitude: 75.8577 },
+  { id: 'kolkata-WB',       city: 'Kolkata',       stateCode: 'WB', latitude: 22.5726, longitude: 88.3639, all_names: ['Kolkata', 'Calcutta'] },
+  { id: 'bhopal-MP',        city: 'Bhopal',        stateCode: 'MP', latitude: 23.2599, longitude: 77.4126 },
+  { id: 'mumbai-MH',        city: 'Mumbai',        stateCode: 'MH', latitude: 19.0760, longitude: 72.8777, all_names: ['Mumbai', 'Bombay'] },
+  { id: 'ahmedabad-GJ',     city: 'Ahmedabad',     stateCode: 'GJ', latitude: 23.0225, longitude: 72.5714 },
+]
+
+const PROPERTY_TYPES: PropertyType[] = [
+  { id: 'warehouse',          label: 'Warehouse' },
+  { id: 'farm land',          label: 'Farm Land' },
+  // { id: 'factory',            label: 'Factory' },
+  // { id: 'industrial',         label: 'Industrial' },
+  // { id: 'cold-storage',       label: 'Cold Storage' },
+  { id: 'commercial-land',    label: 'Commercial Space' },
+  // { id: 'office-space',       label: 'Office Space' },
+  // { id: 'showroom',           label: 'Showroom' },
+  // { id: 'retail-space',       label: 'Retail Space' },
+  // { id: 'manufacturing-unit', label: 'Manufacturing Unit' },
+  // { id: 'godown',             label: 'Godown' },
+]
+
+type Breakpoint = 'desktop' | 'tablet' | 'mobile'
+
+function useBreakpoint(): Breakpoint {
+  const get = (): Breakpoint => {
+    if (typeof window === 'undefined') return 'desktop'
+    if (window.innerWidth >= 1024) return 'desktop'
+    if (window.innerWidth >= 768)  return 'tablet'
+    return 'mobile'
+  }
+  const [bp, setBp] = useState<Breakpoint>(get)
+  useEffect(() => {
+    const handler = () => setBp(get())
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
+  return bp
+}
+
+// Single instance rendered into document.body — escapes every stacking context.
+// Animation: opacity + translateY only (no scale) so it always slides DOWN
+// from the input, never from above.
+interface PortalDropdownProps {
+  anchorEl:       HTMLElement | null
+  isOpen:         boolean
+  isSearching:    boolean
+  displayCities:  City[]
+  isLoading:      boolean
+  error:          string | null
+  searchQuery:    string
+  activeIndex:    number
+  selectedCity:   City | null
+  listRef:        React.RefObject<HTMLUListElement | null>
+  onSelect:       (city: City) => void
+  dropdownWidth?: number
+}
+
+function PortalDropdown({
+  anchorEl, isOpen, isSearching, displayCities,
+  isLoading, error, searchQuery, activeIndex,
+  selectedCity, listRef, onSelect, dropdownWidth,
+}: PortalDropdownProps) {
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 })
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  useEffect(() => {
+    if (!isOpen || !anchorEl) return
+    const update = () => {
+      const r = anchorEl.getBoundingClientRect()
+      setCoords({
+        top:   r.bottom + window.scrollY + 4,  
+        left:  r.left   + window.scrollX,
+        width: dropdownWidth ?? r.width,
+      })
+    }
+    update()
+    window.addEventListener('resize', update)
+    window.addEventListener('scroll', update, true)
+    return () => {
+      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', update, true)
+    }
+  }, [isOpen, anchorEl, dropdownWidth])
+
+  if (!mounted || !anchorEl) return null
+
+  return createPortal(
+    <div
+      aria-hidden={!isOpen}
+      style={{
+        position:      'absolute',
+        top:           coords.top,
+        left:          coords.left,
+        width:         coords.width,
+        maxWidth:      560,  
+        zIndex:        99999,
+        pointerEvents: isOpen ? 'auto' : 'none',
+        transform:     isOpen ? 'translateY(0)'   : 'translateY(-8px)',
+        opacity:       isOpen ? 1                 : 0,
+        transition:    'opacity 140ms ease, transform 140ms ease',
+      }}
+      className="bg-white rounded-xl border border-gray-200 shadow-[0_8px_30px_rgba(0,0,0,0.13)] overflow-hidden"
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      {!isSearching && (
+        <div className="flex items-center gap-1.5 px-4 pt-3.5 pb-1.5">
+          <TrendingUp className="h-3.5 w-3.5 text-[#d07648]" />
+          <span className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">
+            Popular Cities
+          </span>
+        </div>
+      )}
+
+      {error && isSearching ? (
+        <div className="px-4 py-4 text-sm text-red-500 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-red-400 inline-block flex-shrink-0" />
+          {error}
+        </div>
+      ) : isLoading ? (
+        <div className="px-4 py-4 flex items-center gap-3 text-sm text-gray-500">
+          <div className="h-4 w-4 rounded-full border-2 border-[#d07648] border-t-transparent animate-spin flex-shrink-0" />
+          Searching cities…
+        </div>
+      ) : isSearching && displayCities.length === 0 ? (
+        <div className="px-4 py-4 text-sm text-gray-500">
+          No cities found for{' '}
+          <span className="font-medium text-gray-700">&ldquo;{searchQuery}&rdquo;</span>
+        </div>
+      ) : (
+        <ul ref={listRef} className="py-1.5 max-h-[220px] overflow-y-auto" role="listbox">
+          {displayCities.map((city, i) => {
+            const isSelected =
+              selectedCity?.city === city.city &&
+              (selectedCity?.stateCode === city.stateCode ||
+                (!selectedCity?.stateCode && !city.stateCode))
+            const isActive = activeIndex === i
+            return (
+              <li
+                key={city.id || city.city}
+                role="option"
+                aria-selected={isSelected}
+                onPointerDown={(e) => { e.preventDefault(); onSelect(city) }}
+                className={cn(
+                  'flex items-center gap-3 px-4 py-2.5 cursor-pointer select-none transition-colors',
+                  isActive    ? 'bg-[#d07648]/10' : 'hover:bg-gray-50',
+                  isSelected  && 'bg-[#d07648]/10',
+                )}
+              >
+                <span className="w-5 flex-shrink-0 flex items-center justify-center">
+                  {isSelected
+                    ? <Check  className="h-4 w-4 text-[#d07648]" />
+                    : <MapPin className="h-4 w-4 text-[#13a8b4]" />}
+                </span>
+                <span className={cn(
+                  'text-sm flex-1',
+                  isSelected ? 'font-semibold text-gray-900' : 'font-normal text-gray-700',
+                )}>
+                  {city.city}
+                  {city.stateCode && (
+                    <span className="ml-1 text-gray-400 font-normal">{city.stateCode}</span>
+                  )}
+                </span>
+               
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </div>,
+    document.body,
+  )
+}
 
 export default function PropertySearch() {
-  const [openDesktop, setOpenDesktop] = useState(false);
-  const [openTablet, setOpenTablet] = useState(false);
-  const [openMobile, setOpenMobile] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCity, setSelectedCity] = useState<City | null>(null);
-  const [selectedPropertyType, setSelectedPropertyType] = useState('');
-  // const [selectedDistance, setSelectedDistance] = useState('');
-  const router = useRouter();
-  const [cities, setCities] = useState<City[]>([]);
-  const [isLoadingCities, setIsLoadingCities] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [isOpen,              setIsOpen]              = useState(false)
+  const [searchQuery,         setSearchQuery]         = useState('')
+  const [selectedCity,        setSelectedCity]        = useState<City | null>(null)
+  const [selectedPropertyType,setSelectedPropertyType]= useState('')
+  const [activeIndex,         setActiveIndex]         = useState(-1)
+  const [cities,              setCities]              = useState<City[]>([])
+  const [isLoadingCities,     setIsLoadingCities]     = useState(false)
+  const [error,               setError]               = useState<string | null>(null)
 
-  // Property types for commercial real estate
-  const propertyTypes: PropertyType[] = [
-    { id: 'warehouse', label: 'Warehouse' },
-    {id:'farm land', label:'Farm Land'},
-    { id: 'factory', label: 'Factory' },
-    { id: 'industrial-shed', label: 'Industrial Shed' },
-    { id: 'cold-storage', label: 'Cold Storage' },
-    { id: 'commercial-land', label: 'Commercial Land' },
-    { id: 'office-space', label: 'Office Space' },
-    { id: 'showroom', label: 'Showroom' },
-    { id: 'retail-space', label: 'Retail Space' },
-    { id: 'manufacturing-unit', label: 'Manufacturing Unit' },
-    { id: 'godown', label: 'Godown' }
-  ];
+  const router     = useRouter()
+  const breakpoint = useBreakpoint()
 
-  // Distance options in metres
-  // const distanceOptions: Distance[] = [
-  //   { id: '500', label: '500 metres or less', value: 500 },
-  //   { id: '1000', label: '1000 metres or less', value: 1000 },
-  //   { id: '2000', label: '2000 metres or less', value: 2000 },
-  //   { id: '5000', label: '5000 metres or less', value: 5000 },
-  //   { id: '10000', label: '10000 metres or above', value: 10000 }
-  // ];
+  const containerRef    = useRef<HTMLDivElement>(null)
+  const inputRef        = useRef<HTMLInputElement>(null)
+  const listRef         = useRef<HTMLUListElement>(null)
+  const debounceTimer   = useRef<NodeJS.Timeout | null>(null)
 
-  // Debounce timer ref
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const anchorDesktopRef = useRef<HTMLDivElement>(null)
+  const anchorTabletRef  = useRef<HTMLDivElement>(null)
+  const anchorMobileRef  = useRef<HTMLDivElement>(null)
 
-  // Fetch cities from API based on search query with debouncing
+  const activeAnchorEl: HTMLElement | null =
+    breakpoint === 'desktop' ? anchorDesktopRef.current :
+    breakpoint === 'tablet'  ? anchorTabletRef.current  :
+                               anchorMobileRef.current
+
   const fetchCities = useCallback(async (query: string) => {
-    // Don't search if query is too short
-    if (query.trim().length < 1) {
-      setCities([]);
-      return;
-    }
-
+    if (query.trim().length < 1) { setCities([]); return }
     try {
-      setIsLoadingCities(true);
-      setError(null);
-
-      const res = await fetch(`/api/cities?search=${encodeURIComponent(query)}`);
-
-      if (!res.ok) {
-        throw new Error('Failed to fetch cities');
-      }
-
-      const data = await res.json();
-
-      // Validate data structure
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid data format');
-      }
-
-      setCities(data);
-      console.log(`✅ Loaded ${data.length} cities matching "${query}"`);
-    } catch (error) {
-      console.error("❌ Error fetching cities:", error);
-      setError('Unable to load cities. Please try again.');
-      setCities([]);
+      setIsLoadingCities(true)
+      setError(null)
+      const res = await fetch(`/api/cities?search=${encodeURIComponent(query)}`)
+      if (!res.ok) throw new Error('Failed to fetch cities')
+      const data = await res.json()
+      if (!Array.isArray(data)) throw new Error('Invalid data format')
+      setCities(data)
+    } catch (err) {
+      setError('Unable to load cities. Please try again.')
+      setCities([])
     } finally {
-      setIsLoadingCities(false);
+      setIsLoadingCities(false)
     }
-  }, []);
+  }, [])
 
-  // Debounced search effect - ALWAYS triggers on EVERY searchQuery change
-  // This ensures API calls work in ALL scenarios:
-  // 1. Initial typing
-  // 2. Deleting letters after selection
-  // 3. Select-all and delete
-  // 4. Re-typing after selection
-  // 5. Letter-by-letter changes
   useEffect(() => {
-    // Clear existing timer
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
-    }
-
-    // Set new timer for debounced search
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
     debounceTimer.current = setTimeout(() => {
-      if (searchQuery.trim().length >= 1) {
-        // ALWAYS fetch cities on ANY non-empty search query
-        // No conditions, no blocks - just fetch!
-        fetchCities(searchQuery);
-      } else {
-        // Clear cities when search is completely empty
-        setCities([]);
-      }
-    }, 300); // 300ms debounce
+      searchQuery.trim().length >= 1 ? fetchCities(searchQuery) : setCities([])
+    }, 300)
+    return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current) }
+  }, [searchQuery, fetchCities])
 
-    // Cleanup
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-    };
-  }, [searchQuery, fetchCities]); // ONLY depends on searchQuery - nothing else!
-
-  const handleSearch = () => {
-    // Build query parameters
-    const params = new URLSearchParams();
-
-    if (selectedCity && selectedCity.city) {
-      params.append('city', selectedCity.city);
-      // Only append state if it exists
-      if (selectedCity.stateCode) {
-        params.append('state', selectedCity.stateCode);
-      }
-      // Append geocodes if they exist - important for location-based search
-      if (selectedCity.latitude !== undefined && selectedCity.longitude !== undefined) {
-        params.append('lat', selectedCity.latitude.toString());
-        params.append('lng', selectedCity.longitude.toString());
+  useEffect(() => {
+    const handler = (e: PointerEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+        setActiveIndex(-1)
       }
     }
+    document.addEventListener('pointerdown', handler)
+    return () => document.removeEventListener('pointerdown', handler)
+  }, [])
 
-    if (selectedPropertyType) {
-      params.append('type', selectedPropertyType);
+  const isSearching   = searchQuery.trim().length >= 1
+  const displayCities = isSearching ? cities : TOP_CITIES
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isOpen) { setIsOpen(true); return }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setActiveIndex(i => Math.min(i + 1, displayCities.length - 1))
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setActiveIndex(i => Math.max(i - 1, 0))
+    } else if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault()
+      handleCitySelect(displayCities[activeIndex])
+    } else if (e.key === 'Escape') {
+      setIsOpen(false)
+      setActiveIndex(-1)
     }
+  }
 
-    // if (selectedDistance) {
-    //   params.append('distance', selectedDistance);
-    // }
-
-    // Navigate to search results page with all filters
-    router.push(`/search?${params.toString()}`);
-    // Close all dropdowns
-    setOpenDesktop(false);
-    setOpenTablet(false);
-    setOpenMobile(false);
-  };
+  useEffect(() => {
+    if (activeIndex >= 0 && listRef.current) {
+      const item = listRef.current.children[activeIndex] as HTMLElement
+      item?.scrollIntoView({ block: 'nearest' })
+    }
+  }, [activeIndex])
 
   const handleCitySelect = (city: City) => {
-    if (!city || !city.city) return; // Safety check
+    if (!city?.city) return
+    setSelectedCity(city)
+    setSearchQuery(city.stateCode ? `${city.city}, ${city.stateCode}` : city.city)
+    setIsOpen(false)
+    setActiveIndex(-1)
+  }
 
-    setSelectedCity(city);
-    // Update search query to show selected city
-    const displayText = city.stateCode
-      ? `${city.city}, ${city.stateCode}`
-      : city.city;
-    setSearchQuery(displayText);
-    // Close all dropdowns
-    setOpenDesktop(false);
-    setOpenTablet(false);
-    setOpenMobile(false);
-  };
+  const handleClear = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSearchQuery('')
+    setSelectedCity(null)
+    setCities([])
+    setIsOpen(true)
+    inputRef.current?.focus()
+  }
 
-  // Clear selected city when user modifies the search query
-  // This runs AFTER the search query changes
+  const handleSearch = () => {
+    if (!selectedCity) { setIsOpen(true); inputRef.current?.focus(); return }
+    const params = new URLSearchParams()
+    params.append('city', selectedCity.city)
+    if (selectedCity.stateCode)  params.append('state', selectedCity.stateCode)
+    if (selectedCity.latitude  !== undefined) params.append('lat', selectedCity.latitude.toString())
+    if (selectedCity.longitude !== undefined) params.append('lng', selectedCity.longitude.toString())
+    const allNames   = selectedCity.all_names || []
+    const alternates = allNames.filter(n => n.toLowerCase() !== selectedCity.city.toLowerCase())
+    selectedCity.alternate_name?.split(',').forEach(n => {
+      const t = n.trim()
+      if (t && !alternates.map(a => a.toLowerCase()).includes(t.toLowerCase())) alternates.push(t)
+    })
+    if (alternates.length)     params.append('alternate_names', alternates.join(','))
+    if (selectedPropertyType)  params.append('type', selectedPropertyType)
+    router.push(`/search?${params.toString()}`)
+    setIsOpen(false)
+  }
+
   useEffect(() => {
-    if (selectedCity && searchQuery) {
-      const currentDisplay = selectedCity.stateCode
-        ? `${selectedCity.city}, ${selectedCity.stateCode}`
-        : selectedCity.city;
-      
-      // If user types anything different from selected city, clear selection
-      if (searchQuery !== currentDisplay) {
-        setSelectedCity(null);
-      }
-    } else if (selectedCity && !searchQuery) {
-      // If search query is empty but we have a selected city, clear it
-      setSelectedCity(null);
-    }
-  }, [searchQuery, selectedCity]);
+    if (!selectedCity) return
+    const display = selectedCity.stateCode
+      ? `${selectedCity.city}, ${selectedCity.stateCode}`
+      : selectedCity.city
+    if (searchQuery !== display) setSelectedCity(null)
+  }, [searchQuery]) 
 
-  // Get display text for selected city
-  const getDisplayText = () => {
-    if (selectedCity) {
-      return selectedCity.stateCode
-        ? `${selectedCity.city}, ${selectedCity.stateCode}`
-        : selectedCity.city;
-    }
-    return '';
-  };
+  const portalProps = {
+    isOpen, isSearching, displayCities,
+    isLoading: isLoadingCities,
+    error, searchQuery, activeIndex, selectedCity,
+    listRef, onSelect: handleCitySelect,
+  }
 
+
+
+  const inputJSX = (
+    <>
+      <MapPin className={cn(
+        'h-4 w-4 flex-shrink-0 transition-colors',
+        isOpen ? 'text-[#d07648]' : 'text-[#0f8a94]',
+      )} />
+      <input
+        ref={inputRef}
+        type="text"
+        id="hero-search"
+        value={searchQuery}
+        onChange={(e) => { setSearchQuery(e.target.value); setActiveIndex(-1) }}
+        onFocus={() => setIsOpen(true)}
+        onKeyDown={handleKeyDown}
+        placeholder="Search city…"
+        className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-400 text-gray-800 min-w-0"
+        autoComplete="off"
+        role="combobox"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
+        aria-autocomplete="list"
+      />
+      {searchQuery ? (
+        <button
+          onPointerDown={(e) => e.preventDefault()} 
+          onClick={handleClear}
+          className="p-0.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
+          aria-label="Clear"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      ) : (
+        <ChevronDown className={cn(
+          'h-4 w-4 text-gray-400 flex-shrink-0 transition-transform duration-200',
+          isOpen && 'rotate-180',
+        )} />
+      )}
+    </>
+  )
+
+  const propertyTypeSelectSM = (
+    <>
+      <Building2 className="h-4 w-4 text-[#0f8a94] flex-shrink-0" />
+      <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
+        <SelectTrigger className="flex-1 min-w-0 !border-0 p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 [&>span]:truncate">
+          <SelectValue placeholder="Property Type" />
+        </SelectTrigger>
+        <SelectContent position="popper" align="start" sideOffset={8} className="max-h-[250px]">
+          {PROPERTY_TYPES.map(t => (
+            <SelectItem key={t.id} value={t.id} className="text-sm">{t.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </>
+  )
+
+  const propertyTypeSelectXS = (
+    <>
+      <Building2 className="h-3.5 w-3.5 text-[#0f8a94] flex-shrink-0" />
+      <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
+        <SelectTrigger className="flex-1 min-w-0 !border-0 p-0 h-auto text-xs font-normal bg-transparent shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 [&>span]:truncate">
+          <SelectValue placeholder="Type" />
+        </SelectTrigger>
+        <SelectContent position="popper" align="start" sideOffset={8} className="max-h-[250px]">
+          {PROPERTY_TYPES.map(t => (
+            <SelectItem key={t.id} value={t.id} className="text-xs">{t.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </>
+  )
+
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div className="w-full max-w-4xl mx-auto px-4">
-      <div className="relative shadow-lg border border-gray-200/50 bg-white/95 backdrop-blur-sm rounded-lg">
-        {/* Desktop Layout - Hidden on mobile */}
-        <div className="hidden lg:flex items-stretch h-14">
-          {/* City Typeahead */}
-          <Popover open={openDesktop} onOpenChange={setOpenDesktop}>
-            <PopoverAnchor asChild>
-              <div className="flex-[2] min-w-0 flex items-center gap-2.5 px-4 border-r border-gray-200 relative h-full">
-                <MapPin className="h-4 w-4 text-blue-800 flex-shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setOpenDesktop(true)}
-                  placeholder="Type to search cities..."
-                  className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
-                  autoComplete="off"
-                />
-                <ChevronsUpDown className="h-4 w-4 text-gray-400 flex-shrink-0" />
-              </div>
-            </PopoverAnchor>
-            <PopoverContent
-              className="w-[400px] p-0"
-              align="start"
-              sideOffset={4}
-              onOpenAutoFocus={(e) => e.preventDefault()}
-            >
-              <Command shouldFilter={false}>
-                <CommandList>
-                  {error ? (
-                    <div className="px-4 py-3 text-sm text-orange-600">
-                      <div className="font-semibold">Error loading cities</div>
-                      <div className="text-xs mt-1">{error}</div>
-                    </div>
-                  ) : isLoadingCities ? (
-                    <div className="px-4 py-3 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
-                        Searching cities...
-                      </div>
-                    </div>
-                  ) : searchQuery.trim().length < 1 ? (
-                    <div className="px-4 py-3 text-sm text-gray-600">
-                      Start typing to search cities...
-                    </div>
-                  ) : cities.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-gray-600">
-                      No cities found matching "{searchQuery}"
-                    </div>
-                  ) : (
-                    <CommandGroup>
-                      {cities.map((city) => (
-                        <CommandItem
-                          key={city.id || city.city}
-                          value={`${city.city}-${city.stateCode || ''}`}
-                          onSelect={() => handleCitySelect(city)}
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
-                          <Check
-                            className={cn(
-                              "h-4 w-4 text-orange-600",
-                              selectedCity?.city === city.city &&
-                              (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          <MapPin className="h-4 w-4 text-blue-800/70" />
-                          <span>{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  )}
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+    <div className="w-full max-w-3xl mx-auto px-1 sm:px-4">
+      <div
+        ref={containerRef}
+        className="relative shadow-lg border border-[#13a8b4]/25 bg-white/95 backdrop-blur-sm rounded-xl"
+      >
+        <PortalDropdown
+          anchorEl={activeAnchorEl}
+          // dropdownWidth={breakpoint === 'desktop' ? 360 : undefined}
+          {...portalProps}
+        />
 
-          {/* Property Type Dropdown */}
-          <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 border-r border-gray-200 h-full">
-            <Building2 className="h-4 w-4 text-blue-800 flex-shrink-0" />
-            <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
-              <SelectTrigger className="flex-1 min-w-0 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:truncate">
-                <SelectValue placeholder="Property Type" className="text-gray-500" />
-              </SelectTrigger>
-              {/* Position dropdown so its left edge starts roughly under the Property Type icon on desktop */}
-              <SelectContent
-                position="popper"
-                align="start"
-                sideOffset={4}
-                className="max-h-[250px] -translate-x-10 mt-1.5"
-              >
-                {propertyTypes.map((type) => (
-                  <SelectItem key={type.id} value={type.id} className="text-sm ">
-                    {type.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <div className="hidden lg:flex items-stretch h-12">
+          <div
+            ref={anchorDesktopRef}
+            className={cn(
+              'flex-[2] min-w-0 flex items-center gap-2.5 px-3 border-r border-gray-200 rounded-l-xl h-full transition-colors cursor-text',
+              isOpen && 'bg-[#13a8b4]/10',
+            )}
+          >
+            {inputJSX}
           </div>
 
-          {/* Distance Dropdown */}
-          {/* <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 border-r border-gray-200 h-full">
-            <Ruler className="h-4 w-4 text-blue-800 flex-shrink-0" />
-            <Select value={selectedDistance} onValueChange={setSelectedDistance}>
-              <SelectTrigger className="flex-1 min-w-0 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0 [&>span]:truncate">
-                <SelectValue placeholder="Distance" className="text-gray-500" />
-              </SelectTrigger>
-              <SelectContent
-                position="popper"
-                align="start"
-                sideOffset={4}
-                className="max-h-[250px] -translate-x-10 mt-1.5"
-              >
-                {distanceOptions.map((distance) => (
-                  <SelectItem key={distance.id} value={distance.id} className="text-sm">
-                    {distance.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div> */}
+          <div className="flex-1 min-w-0 flex items-center gap-2 px-3.5 border-r border-gray-200 h-full">
+            {propertyTypeSelectSM}
+          </div>
 
-          {/* Search Button */}
           <Button
+            variant="confirm"
             onClick={handleSearch}
-            className="bg-orange-600 hover:bg-orange-700 text-white px-6 !h-full rounded-none rounded-r-lg font-medium text-sm shadow-none flex items-center justify-center gap-2 transition-colors"
-            aria-label="Search properties"
+            className="px-5 !h-full rounded-none rounded-r-xl font-semibold text-sm shadow-none flex items-center gap-2 transition-colors"
           >
             <Search className="h-4 w-4" />
             <span>Search</span>
           </Button>
         </div>
 
-        {/* Tablet Layout - Hidden on mobile and desktop */}
         <div className="hidden md:flex lg:hidden flex-col">
-          {/* City Typeahead */}
-          <Popover open={openTablet} onOpenChange={setOpenTablet}>
-            <PopoverAnchor asChild>
-              <div className="flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 relative">
-                <MapPin className="h-4 w-4 text-blue-800 shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setOpenTablet(true)}
-                  placeholder="Type to search cities..."
-                  className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
-                  autoComplete="off"
-                />
-                <ChevronsUpDown className="h-4 w-4 text-gray-400 shrink-0" />
-              </div>
-            </PopoverAnchor>
-            <PopoverContent
-              className="w-[calc(100vw-2rem)] max-w-md p-0"
-              align="start"
-              sideOffset={4}
-              onOpenAutoFocus={(e) => e.preventDefault()}
-            >
-              <Command shouldFilter={false}>
-                <CommandList>
-                  {error ? (
-                    <div className="px-4 py-3 text-sm text-orange-600">
-                      <div className="font-semibold">Error loading cities</div>
-                      <div className="text-xs mt-1">{error}</div>
-                    </div>
-                  ) : isLoadingCities ? (
-                    <div className="px-4 py-3 text-sm text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
-                        Searching cities...
-                      </div>
-                    </div>
-                  ) : searchQuery.trim().length < 1 ? (
-                    <div className="px-4 py-3 text-sm text-gray-600">
-                      Start typing to search cities...
-                    </div>
-                  ) : cities.length === 0 ? (
-                    <div className="px-4 py-3 text-sm text-gray-600">
-                      No cities found matching "{searchQuery}"
-                    </div>
-                  ) : (
-                    <CommandGroup>
-                      {cities.map((city) => (
-                        <CommandItem
-                          key={city.id || city.city}
-                          value={`${city.city}-${city.stateCode || ''}`}
-                          onSelect={() => handleCitySelect(city)}
-                          className="flex items-center gap-2 cursor-pointer"
-                        >
-                          <Check
-                            className={cn(
-                              "h-4 w-4 text-orange-600",
-                              selectedCity?.city === city.city &&
-                              (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          <MapPin className="h-4 w-4 text-blue-800/70" />
-                          <span>{city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}</span>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  )}
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <div
+            ref={anchorTabletRef}
+            className={cn(
+              'flex items-center gap-2.5 px-4 py-3 border-b border-gray-200 rounded-t-xl transition-colors cursor-text',
+              isOpen && 'bg-[#13a8b4]/10',
+            )}
+          >
+            {inputJSX}
+          </div>
 
-          {/* Filters and Search Row */}
           <div className="flex items-center">
             <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
-              <Building2 className="h-4 w-4 text-blue-800 shrink-0" />
-              <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
-                <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
-                  <SelectValue placeholder="Property Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {propertyTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id} className="text-sm">
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {propertyTypeSelectSM}
             </div>
-
-            {/* <div className="flex-1 flex items-center gap-2 px-3.5 py-3 border-r border-gray-200">
-              <Ruler className="h-4 w-4 text-blue-800 shrink-0" />
-              <Select value={selectedDistance} onValueChange={setSelectedDistance}>
-                <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-sm font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
-                  <SelectValue placeholder="Distance" />
-                </SelectTrigger>
-                <SelectContent>
-                  {distanceOptions.map((distance) => (
-                    <SelectItem key={distance.id} value={distance.id} className="text-sm">
-                      {distance.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
-
             <Button
+              variant="confirm"
               onClick={handleSearch}
-              className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-3 rounded-none rounded-br-lg font-medium text-sm shadow-none flex items-center justify-center gap-2"
+              className="px-6 py-3 rounded-none rounded-br-xl font-semibold text-sm shadow-none flex items-center gap-2"
             >
               <Search className="h-4 w-4" />
               <span>Search</span>
@@ -486,140 +492,34 @@ export default function PropertySearch() {
           </div>
         </div>
 
-        {/* Mobile Layout - Visible only on mobile */}
         <div className="md:hidden">
-          {/* City Typeahead */}
-          <Popover open={openMobile} onOpenChange={setOpenMobile}>
-            <PopoverAnchor asChild>
-              <div className="flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 relative">
-                <MapPin className="h-4 w-4 text-blue-800 shrink-0" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setOpenMobile(true)}
-                  placeholder="Type to search..."
-                  className="flex-1 text-sm font-normal bg-transparent focus:outline-none placeholder:text-gray-500"
-                  autoComplete="off"
-                />
-                <ChevronsUpDown className="h-4 w-4 text-gray-400 shrink-0" />
-              </div>
-            </PopoverAnchor>
-            <PopoverContent
-              className="w-[var(--radix-popover-trigger-width)] max-w-[calc(100vw-2rem)] p-0"
-              align="start"
-              sideOffset={4}
-              onOpenAutoFocus={(e) => e.preventDefault()}
-            >
-              <Command shouldFilter={false}>
-                <CommandList>
-                  {error ? (
-                    <div className="px-3.5 py-3 text-xs text-orange-600">
-                      <div className="font-semibold">Error loading cities</div>
-                      <div className="text-[10px] mt-1">{error}</div>
-                    </div>
-                  ) : isLoadingCities ? (
-                    <div className="px-3.5 py-3 text-xs text-gray-600">
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin h-3 w-3 border-2 border-orange-500 border-t-transparent rounded-full"></div>
-                        Searching...
-                      </div>
-                    </div>
-                  ) : searchQuery.trim().length < 1 ? (
-                    <div className="px-3.5 py-3 text-xs text-gray-600">
-                      Start typing to search...
-                    </div>
-                  ) : cities.length === 0 ? (
-                    <div className="px-3.5 py-3 text-xs text-gray-600">
-                      No cities found matching "{searchQuery}"
-                    </div>
-                  ) : (
-                    <CommandGroup>
-                      {cities.map((city) => (
-                        <CommandItem
-                          key={city.id || city.city}
-                          value={`${city.city}-${city.stateCode || ''}`}
-                          onSelect={() => handleCitySelect(city)}
-                          className="flex items-center gap-2 text-xs cursor-pointer"
-                        >
-                          <Check
-                            className={cn(
-                              "h-3.5 w-3.5 text-orange-600",
-                              selectedCity?.city === city.city &&
-                              (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          <MapPin className="h-3.5 w-3.5 text-blue-800/70" />
-                          <span className="font-medium text-gray-800">
-                            {city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}
-                          </span>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  )}
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-
-          {/* Filters Row */}
-          <div className="grid grid-cols-2 border-b border-gray-200">
-            <div className="flex items-center gap-1.5 px-3 py-3 border-r border-gray-200">
-              <Building2 className="h-3.5 w-3.5 text-blue-800 shrink-0" />
-              <Select value={selectedPropertyType} onValueChange={setSelectedPropertyType}>
-                <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-xs font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
-                  <SelectValue placeholder="Type" />
-                </SelectTrigger>
-                {/* Mobile: position dropdown so it starts under the Type icon */}
-                <SelectContent
-                  position="popper"
-                  align="start"
-                  sideOffset={4}
-                  className="max-h-[250px] -translate-x-6"
-                >
-                  {propertyTypes.map((type) => (
-                    <SelectItem key={type.id} value={type.id} className="text-xs">
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* <div className="flex items-center gap-1.5 px-3 py-3">
-              <Ruler className="h-3.5 w-3.5 text-blue-800 shrink-0" />
-              <Select value={selectedDistance} onValueChange={setSelectedDistance}>
-                <SelectTrigger className="flex-1 !border-0 border-transparent p-0 h-auto text-xs font-normal bg-transparent shadow-none focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 data-[state=open]:ring-0 data-[state=open]:ring-offset-0">
-                  <SelectValue placeholder="Distance" />
-                </SelectTrigger>
-                <SelectContent
-                  position="popper"
-                  align="start"
-                  sideOffset={4}
-                  className="max-h-[250px] -translate-x-6"
-                >
-                  {distanceOptions.map((distance) => (
-                    <SelectItem key={distance.id} value={distance.id} className="text-xs">
-                      {distance.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
+          <div
+            ref={anchorMobileRef}
+            className={cn(
+              'flex items-center gap-2 px-3.5 py-3 border-b border-gray-200 rounded-t-xl transition-colors cursor-text',
+              isOpen && 'bg-[#13a8b4]/10',
+            )}
+          >
+            {inputJSX}
           </div>
 
-          {/* Mobile Search Button */}
+          <div className="border-b border-gray-200">
+            <div className="flex items-center gap-1.5 px-3 py-3">
+              {propertyTypeSelectXS}
+            </div>
+          </div>
+
           <Button
+            variant="confirm"
             onClick={handleSearch}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-none rounded-b-lg font-medium text-sm shadow-none flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-none rounded-b-xl font-semibold text-sm shadow-none flex items-center justify-center gap-2"
           >
             <Search className="h-4 w-4" />
             <span>Search Properties</span>
           </Button>
         </div>
+
       </div>
     </div>
-  );
+  )
 }

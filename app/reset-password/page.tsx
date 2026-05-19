@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, AlertCircle, Lock, CheckCircle2, XCircle, LogIn } from 'lucide-react'
 import Link from 'next/link'
+import { Button } from '@/components/ui/button'
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams()
@@ -71,12 +72,9 @@ function ResetPasswordForm() {
           This reset link has expired or has already been used. Links are valid for <span className="font-semibold text-slate-700">1 hour</span>.
         </p>
         {/* No dedicated page — open sign-in modal instead via home page */}
-        <Link
-          href="/?reset=expired"
-          className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl text-sm font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg"
-        >
-          Back to Home
-        </Link>
+        <Button asChild variant="cancel" className="w-full max-w-xs mx-auto px-6 py-2.5 text-sm font-semibold rounded-xl shadow-md">
+          <Link href="/?reset=expired">Back to Home</Link>
+        </Button>
       </div>
     )
   }
@@ -104,13 +102,12 @@ function ResetPasswordForm() {
           ))}
         </div>
 
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 w-full justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl text-sm font-semibold hover:from-orange-600 hover:to-orange-700 transition-all shadow-lg hover:shadow-orange-500/50"
-        >
-          <LogIn className="h-4 w-4" />
-          Sign In Now
-        </Link>
+        <Button asChild variant="confirm" className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold shadow-md">
+          <Link href="/">
+            <LogIn className="h-4 w-4 shrink-0" />
+            Sign In Now
+          </Link>
+        </Button>
         <p className="mt-3 text-xs text-slate-400">
           You'll be taken to the home page — click Sign In to log in.
         </p>
@@ -181,10 +178,11 @@ function ResetPasswordForm() {
           )}
         </div>
 
-        <button
+        <Button
           type="submit"
+          variant="confirm"
           disabled={loading}
-          className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all font-semibold shadow-lg hover:shadow-orange-500/50 disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-2"
+          className="w-full py-3 rounded-xl text-sm font-semibold shadow-md mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
@@ -195,7 +193,7 @@ function ResetPasswordForm() {
               Updating Password...
             </span>
           ) : 'Update Password'}
-        </button>
+        </Button>
       </form>
     </>
   )

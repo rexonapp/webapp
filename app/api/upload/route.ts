@@ -4,6 +4,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { query } from '@/lib/db';
 import { getSession } from '@/lib/session';
 import { randomBytes } from 'crypto';
+import { getAutoApprovalFlags } from '@/lib/getAutoApprovalFlag';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'ap-south-2',
@@ -174,10 +175,10 @@ export async function POST(request: NextRequest) {
     // Database constraint only allows: 'Warehouse', 'Industrial', 'Commercial'
     const propertyTypeMap: { [key: string]: string } = {
       'Warehouse': 'Warehouse',
-      'Cold Storage': 'Warehouse',
-      'Godown': 'Warehouse',
-      'Industrial Shed': 'Industrial',
-      'Manufacturing Unit': 'Industrial',
+      // 'Cold Storage': 'Warehouse',
+      // 'Godown': 'Warehouse',
+      // 'Industrial Shed': 'Industrial',
+      // 'Manufacturing Unit': 'Industrial',
       'Factory Space': 'Industrial',
       'Logistics Hub': 'Commercial',
       'Distribution Center': 'Commercial',
@@ -200,6 +201,11 @@ export async function POST(request: NextRequest) {
     const normalizedRoadConnectivity = roadConnectivity
       ? roadConnectivityMap[roadConnectivity] || 'Other'
       : null;
+
+      const { autoApproveListings} = await getAutoApprovalFlags();
+      console.log('autoApprovaListings:', autoApproveListings);
+      const initialStatus = autoApproveListings ? 'Active' : 'Pending';
+      console.log(initialStatus,'inital status')
 
     // Insert warehouse record
     const warehouseResult = await query(
@@ -236,7 +242,7 @@ export async function POST(request: NextRequest) {
         latitude ? parseFloat(latitude) : null,
         longitude ? parseFloat(longitude) : null,
         JSON.stringify(amenities),
-        'Pending'
+       initialStatus
       ]
     );
 

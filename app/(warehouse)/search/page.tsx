@@ -37,12 +37,13 @@ import dynamic from 'next/dynamic';
 import { cn } from "@/lib/utils"
 import ShareModal from '@/components/ui/shareModel';
 import LoginForm from '@/components/layout/LoginForm';
+import { Button } from '@/components/ui/button';
 
 const Map = dynamic(() => import('./map'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-gray-100">
-      <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+      <Loader2 className="h-8 w-8 animate-spin text-[#d07648]" />
     </div>
   ),
 });
@@ -87,6 +88,28 @@ interface Property {
   images?: PropertyImage[];
   distance?: number;
   isSaved?: boolean;
+  total_price: number; 
+}
+
+function formatShortDate(iso: string) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/** Listed / updated line for property cards */
+function propertyListingDateLine(p: Property) {
+  const listed = formatShortDate(p.created_at);
+  const updated = formatShortDate(p.updated_at);
+  const sameDay =
+    p.created_at &&
+    p.updated_at &&
+    p.created_at.slice(0, 10) === p.updated_at.slice(0, 10);
+  if (p.updated_at && !sameDay && listed && updated) {
+    return `Listed ${listed} · Updated ${updated}`;
+  }
+  return listed ? `Listed ${listed}` : '';
 }
 
 interface City {
@@ -95,6 +118,11 @@ interface City {
   stateCode?: string;
   latitude?: number;
   longitude?: number;
+  // Comma-separated alternate spellings at the same lat/long
+  // e.g. "Bengaluru,Bangalore Urban" when user searched "Bangalore"
+  alternate_name?: string;
+  // Full deduplicated list of all name variants (primary + alternates)
+  all_names?: string[];
 }
 
 // Interface for map bounds
@@ -134,7 +162,7 @@ const CitySearch = memo(({
   const [isOpen, setIsOpen] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
-
+  const cityCache = useRef<Record<string, City[]>>({});
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -152,22 +180,24 @@ const CitySearch = memo(({
       return;
     }
 
+    const cacheKey = query.trim().toLowerCase();
+    if (cityCache.current[cacheKey]) {
+      setCities(cityCache.current[cacheKey]);
+      return;
+    }
+
     try {
       setIsLoadingCities(true);
       setError(null);
 
       const res = await fetch(`/api/cities?search=${encodeURIComponent(query)}`);
 
-      if (!res.ok) {
-        throw new Error('Failed to fetch cities');
-      }
+      if (!res.ok) throw new Error('Failed to fetch cities');
 
       const data = await res.json();
+      if (!Array.isArray(data)) throw new Error('Invalid data format');
 
-      if (!Array.isArray(data)) {
-        throw new Error('Invalid data format');
-      }
-
+      cityCache.current[cacheKey] = data;
       setCities(data);
     } catch (error) {
       console.error("Error fetching cities:", error);
@@ -189,7 +219,7 @@ const CitySearch = memo(({
       } else {
         setCities([]);
       }
-    }, 300);
+    }, 150);
 
     return () => {
       if (debounceTimer.current) {
@@ -245,13 +275,18 @@ const CitySearch = memo(({
               fetchCities(searchQuery);
             }
           }}
+          onMouseEnter={() => {
+            if (searchQuery.trim().length >= 1) {
+              fetchCities(searchQuery);
+            }
+          }}
           placeholder="Search by city..."
-          className="w-full pl-10 pr-20 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+          className="w-full pl-10 pr-20 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4] focus:border-transparent transition-all"
           autoComplete="off"
         />
         <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
           {isLoadingCities && (
-            <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+            <Loader2 className="h-4 w-4 animate-spin text-[#d07648]" />
           )}
           {searchQuery && !isLoadingCities && (
             <button
@@ -268,14 +303,14 @@ const CitySearch = memo(({
       {isOpen && (
         <div className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto">
           {error ? (
-            <div className="px-4 py-3 text-sm text-orange-600">
+            <div className="px-4 py-3 text-sm text-[#d07648]">
               <div className="font-semibold">Error loading cities</div>
               <div className="text-xs mt-1">{error}</div>
             </div>
           ) : isLoadingCities ? (
             <div className="px-4 py-3 text-sm text-gray-600">
               <div className="flex items-center gap-2">
-                <div className="animate-spin h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full"></div>
+                <div className="animate-spin h-4 w-4 border-2 border-[#d07648] border-t-transparent rounded-full"></div>
                 Searching cities...
               </div>
             </div>
@@ -289,34 +324,50 @@ const CitySearch = memo(({
             </div>
           ) : (
             <div>
-              {cities.map((city) => (
-                <button
-                  key={city.id || city.city}
-                  onClick={() => handleCitySelect(city)}
-                  className="w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3"
-                >
-                  <CheckCircle2
-                    className={cn(
-                      "h-4 w-4 text-orange-600 flex-shrink-0",
-                      selectedCity?.city === city.city &&
-                      (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
-                        ? "opacity-100"
-                        : "opacity-0"
-                    )}
-                  />
-                  <MapPin className="h-4 w-4 text-blue-800/70 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}
-                    </div>
-                    {city.latitude && city.longitude && (
-                      <div className="text-xs text-gray-500">
-                        {Number(city.latitude).toFixed(4)}, {Number(city.longitude).toFixed(4)}
+              {cities.map((city) => {
+                // Show alternate names as a hint so the user knows
+                // this entry covers e.g. "Bangalore" too
+                const altHint = city.all_names && city.all_names.length > 1
+                  ? city.all_names.filter(
+                      (n) => n.toLowerCase() !== city.city.toLowerCase()
+                    ).join(', ')
+                  : city.alternate_name || '';
+
+                return (
+                  <button
+                    key={city.id || city.city}
+                    onClick={() => handleCitySelect(city)}
+                    className="w-full px-4 py-3 text-left hover:bg-[#d07648]/10 transition-colors border-b border-gray-100 last:border-b-0 flex items-center gap-3"
+                  >
+                    <CheckCircle2
+                      className={cn(
+                        "h-4 w-4 text-[#d07648] flex-shrink-0",
+                        selectedCity?.city === city.city &&
+                        (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
+                          ? "opacity-100"
+                          : "opacity-0"
+                      )}
+                    />
+                    <MapPin className="h-4 w-4 text-[#0f8a94]/80 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <div className="font-medium text-gray-900">
+                        {city.stateCode ? `${city.city}, ${city.stateCode}` : city.city}
                       </div>
-                    )}
-                  </div>
-                </button>
-              ))}
+                      {/* Show alternate names below the primary name */}
+                      {altHint && (
+                        <div className="text-xs text-gray-400 truncate">
+                          Also: {altHint}
+                        </div>
+                      )}
+                      {city.latitude && city.longitude && (
+                        <div className="text-xs text-gray-500">
+                          {Number(city.latitude).toFixed(4)}, {Number(city.longitude).toFixed(4)}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -379,7 +430,7 @@ const FilterPanel = memo(({
       
       <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300">
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-orange-600 to-orange-700">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#13a8b4] to-[#0f8a94]">
             <h2 className="text-xl font-bold text-white flex items-center gap-2">
               <SlidersHorizontal className="h-5 w-5" />
               Filters
@@ -395,7 +446,7 @@ const FilterPanel = memo(({
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <IndianRupee className="h-4 w-4 text-orange-600" />
+                <IndianRupee className="h-4 w-4 text-[#d07648]" />
                 Price per sqft
               </h3>
               <div className="grid grid-cols-2 gap-3">
@@ -406,7 +457,7 @@ const FilterPanel = memo(({
                     value={priceRange.min}
                     onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
                     placeholder="₹ 0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4]"
                   />
                 </div>
                 <div>
@@ -416,7 +467,7 @@ const FilterPanel = memo(({
                     value={priceRange.max}
                     onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
                     placeholder="₹ Any"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4]"
                   />
                 </div>
               </div>
@@ -424,7 +475,7 @@ const FilterPanel = memo(({
 
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Ruler className="h-4 w-4 text-orange-600" />
+                <Ruler className="h-4 w-4 text-[#d07648]" />
                 Space Available (sqft)
               </h3>
               <div className="grid grid-cols-2 gap-3">
@@ -435,7 +486,7 @@ const FilterPanel = memo(({
                     value={sizeRange.min}
                     onChange={(e) => setSizeRange({ ...sizeRange, min: e.target.value })}
                     placeholder="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4]"
                   />
                 </div>
                 <div>
@@ -445,7 +496,7 @@ const FilterPanel = memo(({
                     value={sizeRange.max}
                     onChange={(e) => setSizeRange({ ...sizeRange, max: e.target.value })}
                     placeholder="Any"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#13a8b4]"
                   />
                 </div>
               </div>
@@ -453,7 +504,7 @@ const FilterPanel = memo(({
 
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-orange-600" />
+                <Building2 className="h-4 w-4 text-[#d07648]" />
                 Property Type
               </h3>
               <div className="space-y-2">
@@ -463,9 +514,9 @@ const FilterPanel = memo(({
                       type="checkbox"
                       checked={propertyTypes.includes(type)}
                       onChange={() => togglePropertyType(type)}
-                      className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                      className="w-5 h-5 text-[#d07648] border-gray-300 rounded focus:ring-[#13a8b4]"
                     />
-                    <span className="text-gray-700 group-hover:text-orange-600 transition-colors">{type}</span>
+                    <span className="text-gray-700 group-hover:text-[#d07648] transition-colors">{type}</span>
                   </label>
                 ))}
               </div>
@@ -473,7 +524,7 @@ const FilterPanel = memo(({
 
             <div>
               <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                <Building2 className="h-4 w-4 text-orange-600" />
+                <Building2 className="h-4 w-4 text-[#d07648]" />
                 Price Type
               </h3>
               <div className="space-y-2">
@@ -483,9 +534,9 @@ const FilterPanel = memo(({
                       type="checkbox"
                       checked={priceTypes.includes(type)}
                       onChange={() => togglePriceType(type)}
-                      className="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500"
+                      className="w-5 h-5 text-[#d07648] border-gray-300 rounded focus:ring-[#13a8b4]"
                     />
-                    <span className="text-gray-700 group-hover:text-orange-600 transition-colors">{type}</span>
+                    <span className="text-gray-700 group-hover:text-[#d07648] transition-colors">{type}</span>
                   </label>
                 ))}
               </div>
@@ -493,18 +544,12 @@ const FilterPanel = memo(({
           </div>
 
           <div className="border-t border-gray-200 p-6 bg-gray-50 space-y-3">
-            <button
-              onClick={handleApply}
-              className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-3 rounded-lg shadow-lg transition-all"
-            >
+            <Button type="button" variant="confirm" className="w-full py-3 text-base font-semibold shadow-lg" onClick={handleApply}>
               Apply Filters
-            </button>
-            <button
-              onClick={handleReset}
-              className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-lg transition-all"
-            >
+            </Button>
+            <Button type="button" variant="cancel" className="w-full py-3 text-base font-semibold" onClick={handleReset}>
               Reset All
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -529,6 +574,10 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
   const totalImages = property.images?.length || 0;
   const router = useRouter();
   const [showShareCard, setShowShareCard] = useState(false);
+
+  useEffect(() => {
+    setIsSaved(property.isSaved || false);
+  }, [property.isSaved]);
 
   useEffect(() => {
     if (isHovered && hasImages && totalImages > 1) {
@@ -570,6 +619,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
       setScrollProgress(0);
     }
   }, [isHovered, hasImages, totalImages]);
+
 
   const nextImage = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -616,11 +666,9 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
       if (res.ok) {
         setIsSaved(!isSaved);
       }
-  
     } catch (error) {
       console.error("Favorite error:", error);
     }
-  
   }, [router, isSaved, property.id, property.price_per_sqft]);
 
   const handleShare = async (e: React.MouseEvent) => {
@@ -651,11 +699,13 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
     onHover?.(null);
   }, [onHover]);
 
+  const listingDateLine = propertyListingDateLine(property);
+
   return (
     <>
     <Link href={`/property/${property.id}`}>
       <div 
-        className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-orange-400 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col"
+        className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-[#d07648]/45 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -675,6 +725,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
                 sizes="300px"
                 onError={() => setImageError(true)}
                 quality={90}
+                priority={currentImageIndex === 0}
                 unoptimized
               />
               
@@ -707,7 +758,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
                   {isHovered && (
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
                       <div 
-                        className="h-full bg-orange-500 transition-all duration-100"
+                        className="h-full bg-[#d07648] transition-all duration-100"
                         style={{ width: `${scrollProgress * 100}%` }}
                       />
                     </div>
@@ -725,8 +776,8 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
             <div className="flex gap-1.5">
               <span className={`text-xs font-bold px-2 py-1 rounded shadow-md ${
                 property.price_type === 'Sale' 
-                  ? 'bg-orange-600 text-white' 
-                  : 'bg-blue-600 text-white'
+                  ? 'bg-[#d07648] text-white'
+                  : 'bg-[#13a8b4] text-white'
               }`}>
                 {property.price_type}
               </span>
@@ -737,42 +788,42 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
               )}
             </div>
             <div className="flex items-center gap-2">
-            <button
-              onClick={handleSave}
-              className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-white transition-all"
-            >
-              <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
+              <button
+                onClick={handleSave}
+                className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-white transition-all"
+              >
+                <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
               </button>
-                <button
-                  onClick={handleShare}
-                  className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
-                >
-                  <Share2 size={18} />
-                </button>
-              </div>
+              <button
+                onClick={handleShare}
+                className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
+              >
+                <Share2 size={18} />
+              </button>
             </div>
+          </div>
 
-          {property.distance !== undefined && property.distance > 0 && (
+          {/* {property.distance !== undefined && property.distance > 0 && (
             <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded font-medium">
               {property.distance.toFixed(1)} km
             </div>
-          )}
+          )} */}
         </div>
 
         <div className="p-3 flex flex-col flex-1">
-          <h3 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-orange-600 transition-colors leading-snug">
+          <h3 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-[#d07648] transition-colors leading-snug">
             {property.title}
           </h3>
 
           <div className="flex items-center gap-1 mb-2">
-            <MapPin className="h-3.5 w-3.5 text-orange-500 flex-shrink-0" />
+            <MapPin className="h-3.5 w-3.5 text-[#d07648] flex-shrink-0" />
             <p className="text-xs text-gray-600 line-clamp-1">
               {property.city}, {property.state}
             </p>
           </div>
 
           <div className="flex items-center gap-1.5 mb-2 text-xs">
-            <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">
+            <span className="bg-[#13a8b4]/10 text-[#0f8a94] px-2 py-0.5 rounded font-medium">
               {property.property_type}
             </span>
             {property.is_verified && (
@@ -786,41 +837,56 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
           <div className="grid grid-cols-2 gap-1.5 mb-2 pb-2 border-b border-gray-100">
             <div>
               <p className="text-xs text-gray-500 mb-0.5">Available</p>
-              <p className="text-sm font-bold text-gray-900">
-                {property.space_available?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
+              <p className="text-sm font-normal text-gray-900">
+                {property.space_available?.toLocaleString('en-IN')} <span className="text-xs">sqft</span>
               </p>
             </div>
-            <div>
+            {/* <div>
               <p className="text-xs text-gray-500 mb-0.5">Total</p>
               <p className="text-sm font-bold text-gray-900">
                 {property.warehouse_size?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
               </p>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex-1" />
 
-          <div className="mb-2">
-            <p className="text-xs text-gray-500 mb-0.5">Price per sqft</p>
-            <div className="flex items-baseline gap-0.5">
-              <IndianRupee className="h-4 w-4 text-orange-600" />
-              <span className="text-lg font-bold text-orange-600">
-                {property.price_per_sqft?.toLocaleString('en-IN')}
-              </span>
-              <span className="text-xs text-gray-600 font-medium">/sqft</span>
-            </div>
-          </div>
+        <div className="mb-2">
+        <p className="text-[10px] text-gray-500 mb-1">Price / sqft</p>
+        <div className="inline-flex w-full max-w-full items-baseline gap-0.5 rounded-md bg-[#d07648]/12 px-2 py-1.5">
+          <IndianRupee className="h-3.5 w-3.5 shrink-0 text-gray-600" />
+          <span className="text-sm font-medium text-gray-800 tabular-nums">
+            {property.price_per_sqft?.toLocaleString('en-IN')}
+          </span>
+          <span className="text-xs text-gray-600">/sqft</span>
+        </div>
+        {property.total_price != null && (
+          <p className="text-xs text-gray-600 mt-1.5">
+            Total:{' '}
+            <span className="font-bold text-[#d07648] tabular-nums">
+              ₹{property.total_price.toLocaleString('en-IN')}
+            </span>
+          </p>
+        )}
+      </div>
 
-          <button
+          {listingDateLine && (
+            <p className="text-[10px] text-gray-500 mb-2 leading-snug">{listingDateLine}</p>
+          )}
+
+          <Button
+            type="button"
+            variant="confirm"
+            className="w-full py-2 px-3 text-xs font-semibold shadow-md"
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               window.location.href = `tel:${property.contact_person_phone}`;
             }}
-            className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
           >
             <Phone className="h-3.5 w-3.5" />
             Contact Now
-          </button>
+          </Button>
         </div>
       </div>
     </Link>
@@ -851,7 +917,6 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
   const hasImages = property.images && property.images.length > 0;
   const currentImage = hasImages ? property.images![currentImageIndex] : null;
   const totalImages = property.images?.length || 0;
-
   useEffect(() => {
     if (isHovered && hasImages && totalImages > 1) {
       const duration = 3000;
@@ -921,10 +986,12 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
     setIsSaved(!isSaved);
   }, [isSaved]);
 
+  const listingDateLine = propertyListingDateLine(property);
+
   return (
     <Link href={`/property/${property.id}`}>
       <div 
-        className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-orange-300 hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col"
+        className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-[#d07648]/35 hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -946,6 +1013,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 onError={() => setImageError(true)}
                 quality={90}
+                priority={currentImageIndex === 0}
                 unoptimized
               />
               
@@ -977,7 +1045,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                   {isHovered && (
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
                       <div 
-                        className="h-full bg-orange-500 transition-all duration-100"
+                        className="h-full bg-[#d07648] transition-all duration-100"
                         style={{ width: `${scrollProgress * 100}%` }}
                       />
                     </div>
@@ -995,8 +1063,8 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
             <div className="flex gap-2">
               <span className={`text-xs font-bold px-2.5 py-1 rounded shadow-md ${
                 property.price_type === 'Sale' 
-                  ? 'bg-orange-600 text-white' 
-                  : 'bg-blue-600 text-white'
+                  ? 'bg-[#d07648] text-white'
+                  : 'bg-[#13a8b4] text-white'
               }`}>
                 {property.price_type}
               </span>
@@ -1007,7 +1075,6 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                 </span>
               )}
             </div>
-            {/* Share Icon */}
 
             <button
               onClick={handleSave}
@@ -1020,20 +1087,30 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
             >
               <Share size={18} />
             </button>
-
           </div>
         </div>
 
         <div className="p-4 flex flex-col flex-1">
-          <div className="flex items-baseline gap-1 mb-2">
-            <IndianRupee className="h-5 w-5 text-orange-600" />
-            <span className="text-2xl font-bold text-orange-600">
-              {property.price_per_sqft?.toLocaleString('en-IN')}
+        <div className="mb-2">
+        <p className="text-xs text-gray-500 mb-1">Price / sqft</p>
+        <div className="inline-flex w-full max-w-full items-baseline gap-1 rounded-md bg-[#d07648]/12 px-2.5 py-2">
+          <IndianRupee className="h-4 w-4 shrink-0 text-gray-600" />
+          <span className="text-xl font-medium text-gray-800 tabular-nums">
+            {property.price_per_sqft?.toLocaleString('en-IN')}
+          </span>
+          <span className="text-sm text-gray-600">/sqft</span>
+        </div>
+        {property.total_price != null && (
+          <p className="text-sm text-gray-600 mt-1">
+            Total:{' '}
+            <span className="font-bold text-[#d07648] tabular-nums">
+              ₹{property.total_price.toLocaleString('en-IN')}
             </span>
-            <span className="text-sm text-gray-600 font-medium">/sqft</span>
-          </div>
+          </p>
+        )}
+      </div>
 
-          <h3 className="font-bold text-gray-900 text-base mb-2 line-clamp-2 group-hover:text-orange-600 transition-colors">
+          <h3 className="font-bold text-gray-900 text-base mb-2 line-clamp-2 group-hover:text-[#d07648] transition-colors">
             {property.title}
           </h3>
 
@@ -1045,7 +1122,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
           </div>
 
           <div className="flex items-center gap-2 mb-3 text-sm">
-            <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded font-medium">
+            <span className="bg-[#13a8b4]/10 text-[#0f8a94] px-2 py-1 rounded font-medium">
               {property.property_type}
             </span>
             {property.is_verified && (
@@ -1059,30 +1136,37 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
           <div className="grid grid-cols-2 gap-2 mb-3 pb-3 border-b border-gray-100">
             <div>
               <p className="text-xs text-gray-500 mb-1">Available</p>
-              <p className="text-base font-bold text-gray-900">
-                {property.space_available?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
+              <p className="text-base font-normal text-gray-900 tabular-nums">
+                {property.space_available?.toLocaleString('en-IN')} <span className="text-xs">sqft</span>
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">Total Size</p>
-              <p className="text-base font-bold text-gray-900">
-                {property.warehouse_size?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
+              <p className="text-base font-normal text-gray-900 tabular-nums">
+                {property.warehouse_size?.toLocaleString('en-IN')} <span className="text-xs">sqft</span>
               </p>
             </div>
           </div>
 
           <div className="flex-1" />
 
-          <button
+          {listingDateLine && (
+            <p className="text-xs text-gray-500 mb-3 leading-snug">{listingDateLine}</p>
+          )}
+
+          <Button
+            type="button"
+            variant="confirm"
+            className="w-full py-2.5 font-semibold gap-2"
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               window.location.href = `tel:${property.contact_person_phone}`;
             }}
-            className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <Phone className="h-4 w-4" />
             Contact Now
-          </button>
+          </Button>
         </div>
       </div>
     </Link>
@@ -1092,17 +1176,27 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
 PropertyCard.displayName = 'PropertyCard';
 
 const LoadingSkeleton = () => (
-  <div className="h-screen bg-white">
-    <div className="animate-pulse">
-      <div className="h-16 bg-gray-200"></div>
-      <div className="flex">
-        <div className="w-1/2 p-4 space-y-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded"></div>
-          ))}
-        </div>
-        <div className="w-1/2 bg-gray-200"></div>
+  <div className="h-screen flex flex-col bg-white overflow-hidden">
+    <div className="flex-shrink-0 h-16 bg-white border-b border-gray-200 animate-pulse">
+      <div className="px-4 py-3 flex gap-4 items-center">
+        <div className="h-6 w-32 bg-gray-200 rounded" />
+        <div className="h-10 w-64 bg-gray-200 rounded-lg" />
       </div>
+    </div>
+    <div className="flex flex-1 overflow-hidden">
+      <div className="w-full lg:w-1/2 p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[1,2,3,4,5,6].map(i => (
+          <div key={i} className="rounded-lg overflow-hidden border border-gray-200 animate-pulse">
+            <div className="h-40 bg-gray-200" />
+            <div className="p-3 space-y-2">
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
+              <div className="h-3 bg-gray-200 rounded w-1/2" />
+              <div className="h-8 bg-gray-200 rounded mt-4" />
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="hidden lg:block lg:w-1/2 bg-gray-100" />
     </div>
   </div>
 );
@@ -1117,7 +1211,7 @@ const ViewToggle = memo(({ layout, onLayoutChange }: {
         onClick={() => onLayoutChange('split')}
         className={`px-3 py-2 text-sm font-medium transition-colors ${
           layout === 'split'
-            ? 'bg-orange-600 text-white'
+            ? 'bg-[#d07648] text-white'
             : 'text-gray-600 hover:bg-gray-50'
         }`}
         title="Split view"
@@ -1128,7 +1222,7 @@ const ViewToggle = memo(({ layout, onLayoutChange }: {
         onClick={() => onLayoutChange('grid')}
         className={`px-3 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
           layout === 'grid'
-            ? 'bg-orange-600 text-white'
+            ? 'bg-[#d07648] text-white'
             : 'text-gray-600 hover:bg-gray-50'
         }`}
         title="Grid view"
@@ -1139,7 +1233,7 @@ const ViewToggle = memo(({ layout, onLayoutChange }: {
         onClick={() => onLayoutChange('map')}
         className={`px-3 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
           layout === 'map'
-            ? 'bg-orange-600 text-white'
+            ? 'bg-[#d07648] text-white'
             : 'text-gray-600 hover:bg-gray-50'
         }`}
         title="Map view"
@@ -1164,9 +1258,7 @@ function SearchResults() {
   const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   
-  // Dynamic map state - ALWAYS ENABLED
   const [visiblePropertyIds, setVisiblePropertyIds] = useState<Set<number>>(new Set());
-  const [isMapLoading, setIsMapLoading] = useState(false);
 
   const city = searchParams.get('city');
   const state = searchParams.get('state');
@@ -1174,6 +1266,8 @@ function SearchResults() {
   const lat = searchParams.get('lat');
   const lng = searchParams.get('lng');
   const distance = searchParams.get('distance');
+  // Alternate city names from URL (e.g. "Bengaluru,Bangalore Urban")
+  const alternateCityNames = searchParams.get('alternate_names');
 
   const initialCityDisplay = useMemo(() => {
     if (city && state) {
@@ -1184,26 +1278,23 @@ function SearchResults() {
     return '';
   }, [city, state]);
 
-  // Handle map bounds change - filter visible properties
   const handleMapBoundsChange = useCallback((bounds: MapBounds) => {
-    // Filter properties that are within the visible bounds
     const visibleIds = new Set<number>();
     
     properties.forEach(property => {
       if (property.latitude && property.longitude) {
-        const lat = property.latitude;
-        const lng = property.longitude;
+        const pLat = property.latitude;
+        const pLng = property.longitude;
         
-        // Check if property is within bounds
-        if (lat >= bounds.sw.lat && lat <= bounds.ne.lat &&
-            lng >= bounds.sw.lng && lng <= bounds.ne.lng) {
+        if (pLat >= bounds.sw.lat && pLat <= bounds.ne.lat &&
+            pLng >= bounds.sw.lng && pLng <= bounds.ne.lng) {
           visibleIds.add(property.id);
         }
       }
     });
     
     setVisiblePropertyIds(visibleIds);
-    setCurrentPage(1); // Reset to first page when bounds change
+    setCurrentPage(1);
   }, [properties]);
 
   useEffect(() => {
@@ -1217,86 +1308,83 @@ function SearchResults() {
         if (distance) params.append('distance', distance);
         if (lat) params.append('lat', lat);
         if (lng) params.append('lng', lng);
+        if (alternateCityNames) params.append('alternate_names', alternateCityNames);
 
-        const response = await fetch(`/api/warehouse/search?${params.toString()}`);
+        // Fire properties and favorites in parallel
+        const propertiesPromise = fetch(`/api/warehouse/search?${params.toString()}`);
+
+        const response = await propertiesPromise;
         if (!response.ok) {
           setProperties([]);
           setFilteredProperties([]);
+          setLoading(false);
           return;
         }
 
         const data = await response.json();
         if (data.success && data.properties) {
           let processedProperties = data.properties;
-          
+
           if (lat && lng) {
             const searchLat = parseFloat(lat);
             const searchLng = parseFloat(lng);
-            
             processedProperties = processedProperties.map((prop: Property) => ({
               ...prop,
-              distance: prop.latitude && prop.longitude 
+              distance: prop.latitude && prop.longitude
                 ? calculateDistance(searchLat, searchLng, prop.latitude, prop.longitude)
                 : undefined
             }));
-
             if (distance) {
               const maxDistance = parseFloat(distance);
-              processedProperties = processedProperties.filter((p: Property) => 
+              processedProperties = processedProperties.filter((p: Property) =>
                 p.distance === undefined || p.distance <= maxDistance
               );
             }
           }
-          
-          if (city) {
-            processedProperties = processedProperties.filter((p: Property) => 
-              p.city.toLowerCase() === city.toLowerCase()
-            );
-          }
 
-          try {
-            const propertyIds = processedProperties.map((p: Property) => p.id);
-        
-            if (propertyIds.length > 0) {
-              const favRes = await fetch("/api/leads/favorite/status", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ propertyIds }),
-              });
-              if (favRes.ok) {
-                const { favoriteIds } = await favRes.json();
-
-                processedProperties = processedProperties.map((p: Property) => ({
-                  ...p,
-                  isSaved: favoriteIds.includes(p.id),
-                }));
-              }
-            }
-          } catch (error) {
-            console.error("Favorite bulk fetch error:", error);
-          }
-
+          // Show properties immediately — don't wait for favorites
           setProperties(processedProperties);
           setFilteredProperties(processedProperties);
-          
-          // Initialize with all properties visible
           const allIds = new Set<number>(processedProperties.map((p: Property) => p.id));
           setVisiblePropertyIds(allIds);
+          setLoading(false); // ← unblock UI immediately
+
+          // Fetch favorites in background, update silently
+          const propertyIds = processedProperties.map((p: Property) => p.id);
+          if (propertyIds.length > 0) {
+            fetch("/api/leads/favorite/status", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ propertyIds }),
+            })
+              .then(res => res.ok ? res.json() : null)
+              .then(json => {
+                if (!json) return;
+                const { favoriteIds } = json;
+                setProperties(prev =>
+                  prev.map(p => ({ ...p, isSaved: favoriteIds.includes(p.id) }))
+                );
+                setFilteredProperties(prev =>
+                  prev.map(p => ({ ...p, isSaved: favoriteIds.includes(p.id) }))
+                );
+              })
+              .catch(err => console.error("Favorite bulk fetch error:", err));
+          }
         } else {
           setProperties([]);
           setFilteredProperties([]);
+          setLoading(false);
         }
       } catch (err) {
         console.error('Error fetching properties:', err);
         setProperties([]);
         setFilteredProperties([]);
-      } finally {
         setLoading(false);
       }
     };
 
     fetchProperties();
-  }, [city, state, propertyType, distance, lat, lng]);
+  }, [city, state, propertyType, distance, lat, lng, alternateCityNames]);
 
   const handleCitySelect = useCallback((selectedCity: City) => {
     const params = new URLSearchParams();
@@ -1309,6 +1397,25 @@ function SearchResults() {
     if (selectedCity.latitude !== undefined && selectedCity.longitude !== undefined) {
       params.set('lat', selectedCity.latitude.toString());
       params.set('lng', selectedCity.longitude.toString());
+    }
+
+    // Pass all alternate name variants so the warehouse search can match
+    // any spelling that exists in the DB for this same location
+    const allNames = selectedCity.all_names || [];
+    const alternates = allNames.filter(
+      (n) => n.toLowerCase() !== selectedCity.city.toLowerCase()
+    );
+    // Also include the top-level alternate_name field as a fallback
+    if (selectedCity.alternate_name) {
+      selectedCity.alternate_name.split(',').forEach((n) => {
+        const trimmed = n.trim();
+        if (trimmed && !alternates.includes(trimmed)) {
+          alternates.push(trimmed);
+        }
+      });
+    }
+    if (alternates.length > 0) {
+      params.set('alternate_names', alternates.join(','));
     }
     
     if (propertyType) {
@@ -1373,10 +1480,9 @@ function SearchResults() {
     }
   }, [filteredProperties, sortBy]);
 
-  // Filter by visible properties when map bounds change
   const visibleProperties = useMemo(() => {
     if (visiblePropertyIds.size === 0) {
-      return sortedProperties; // Show all if none visible (initial state)
+      return sortedProperties;
     }
     return sortedProperties.filter(p => visiblePropertyIds.has(p.id));
   }, [sortedProperties, visiblePropertyIds]);
@@ -1466,7 +1572,7 @@ function SearchResults() {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white hover:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent cursor-pointer transition-all"
+                  className="text-sm border border-gray-300 rounded-lg px-3 py-2 bg-white hover:border-[#d07648] focus:outline-none focus:ring-2 focus:ring-[#13a8b4] focus:border-transparent cursor-pointer transition-all"
                 >
                   <option value="newest">Newest First</option>
                   <option value="price-low">Price: Low to High</option>
@@ -1479,7 +1585,7 @@ function SearchResults() {
 
               <button
                 onClick={() => setShowFilters(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:border-[#d07648] hover:bg-[#d07648]/10 transition-all shadow-sm"
               >
                 <SlidersHorizontal className="h-4 w-4" />
                 <span className="text-sm font-medium">Filters</span>
@@ -1539,7 +1645,7 @@ function SearchResults() {
                       className={`p-2.5 rounded-lg transition-all border ${
                         currentPage === 1
                           ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
-                          : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                          : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                       }`}
                     >
                       <ChevronLeft className="h-5 w-5" />
@@ -1564,8 +1670,8 @@ function SearchResults() {
                             onClick={() => handlePageChange(pageNum)}
                             className={`min-w-[42px] h-11 rounded-lg font-semibold transition-all border ${
                               currentPage === pageNum
-                                ? 'bg-gradient-to-r from-orange-600 to-orange-700 text-white shadow-lg border-orange-700'
-                                : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                                ? 'border-0 bg-gradient-to-r from-[#13a8b4] to-[#0f8a94] text-white shadow-lg'
+                                : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                             }`}
                           >
                             {pageNum}
@@ -1580,7 +1686,7 @@ function SearchResults() {
                       className={`p-2.5 rounded-lg transition-all border ${
                         currentPage === totalPages
                           ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
-                          : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                          : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                       }`}
                     >
                       <ChevronRight className="h-5 w-5" />
@@ -1592,7 +1698,7 @@ function SearchResults() {
 
             <div 
               className="hidden lg:block lg:w-1/2 relative bg-gray-100"
-              style={{ height: 'calc(100vh - 73px)' }}
+              style={{ height: 'calc(100vh - 136px)' }}
             >
               <Map 
                 properties={mapProperties}
@@ -1603,7 +1709,7 @@ function SearchResults() {
             </div>
           </>
         ) : layout === 'map' ? (
-          <div className="flex-1 relative" style={{ height: 'calc(100vh - 73px)' }}>
+          <div className="flex-1 relative" style={{ height: 'calc(100vh - 136px)' }}>
             <Map 
               properties={mapProperties}
               center={mapCenter}
@@ -1628,7 +1734,7 @@ function SearchResults() {
                     className={`p-2.5 rounded-lg transition-all border ${
                       currentPage === 1
                         ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
-                        : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                        : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                     }`}
                   >
                     <ChevronLeft className="h-5 w-5" />
@@ -1653,8 +1759,8 @@ function SearchResults() {
                           onClick={() => handlePageChange(pageNum)}
                           className={`min-w-[42px] h-11 rounded-lg font-semibold transition-all border ${
                             currentPage === pageNum
-                              ? 'bg-gradient-to-r from-orange-600 to-orange-700 text-white shadow-lg border-orange-700'
-                              : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
+                              ? 'border-0 bg-gradient-to-r from-[#13a8b4] to-[#0f8a94] text-white shadow-lg'
+                              : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                           }`}
                         >
                           {pageNum}
@@ -1669,8 +1775,8 @@ function SearchResults() {
                     className={`p-2.5 rounded-lg transition-all border ${
                       currentPage === totalPages
                         ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
-                        : 'text-gray-700 hover:bg-orange-50 border-gray-300 hover:border-orange-500 bg-white'
-                    }`}
+                        : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
+                      }`}
                   >
                     <ChevronRight className="h-5 w-5" />
                   </button>

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { MoreVertical } from "lucide-react";
+import Link from "next/link";
+
 interface Favorite {
   id: string;
   user_id: string;
@@ -12,23 +14,53 @@ interface Favorite {
   price_per_sqft: number;
   price_at_favorite: number;
   created_at: string;
+  property_code: string;
 }
+
+const TableSkeleton = () => (
+  <div className="overflow-x-auto bg-white shadow rounded-lg">
+    <table className="min-w-full border border-gray-200">
+      <thead className="bg-gray-100 text-left">
+        <tr>
+          {["Title","City","Property Id","Property Details","Type","Price","Favorited Price","Added On","Actions"].map((h) => (
+            <th key={h} className="p-3 border">{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {[1,2,3,4,5].map((i) => (
+          <tr key={i} className="animate-pulse">
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-40" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-24" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-16" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-12" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-20" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-16" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-16" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-20" /></td>
+            <td className="p-3 border"><div className="h-4 bg-gray-200 rounded w-8" /></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 
 export default function MyFavorites() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
   useEffect(() => {
     fetch("/api/leads/favorite/list")
       .then(res => res.json())
       .then(data => {
-        console.log(data, "dataa");
+        console.log(data, 'dataaa')
         setFavorites(data);
       })
-      .catch(err => console.error(err))
+      .catch(() => undefined)
       .finally(() => setLoading(false));
   }, []);
-
 
   const handleRemoveFavorite = async (userId: string, propertyId: string) => {
     try {
@@ -57,12 +89,14 @@ export default function MyFavorites() {
     }
   };
 
+  const baseUrl = process.env.NEXT_PUBLIC_URL || "http://localhost:3000";
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">My Favorites</h1>
 
       {loading ? (
-        <p>Loading favorites...</p>
+        <TableSkeleton />
       ) : favorites.length === 0 ? (
         <p>No favorite properties found.</p>
       ) : (
@@ -73,6 +107,7 @@ export default function MyFavorites() {
                 <th className="p-3 border">Title</th>
                 <th className="p-3 border">City</th>
                 <th className="p-3 border">Property Id</th>
+                <th className="p-3 border">Property Details</th>
                 <th className="p-3 border">Type</th>
                 <th className="p-3 border">Price</th>
                 <th className="p-3 border">Favorited Price</th>
@@ -85,11 +120,19 @@ export default function MyFavorites() {
                 <tr key={item.id} className="hover:bg-gray-50">
                   <td className="p-3 border">{item.title}</td>
                   <td className="p-3 border">{item.city}</td>
-                  <td className="p-3 border">{item.id}</td>
-                  <td className="p-3 border">{item.property_type}</td>
-                  <td className="p-3 border">₹ {item.price_per_sqft}</td>
+                  <td className="p-3 border">{item.property_code}</td>
                   <td className="p-3 border">
-                    ₹ {item.price_at_favorite}
+                    <Link
+                      href={`${baseUrl}/property/${item.id}`}
+                      className="text-[#0f8a94] hover:underline"
+                    >
+                      View
+                    </Link>
+                  </td>
+                  <td className="p-3 border">{item.property_type}</td>
+                  <td className="p-3 border">₹ {item.total_price}</td>
+                  <td className="p-3 border">
+                    ₹ {item.total_price}
                   </td>
                   <td className="p-3 border">
                     {new Date(item.created_at).toLocaleDateString()}

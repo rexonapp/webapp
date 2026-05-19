@@ -75,8 +75,11 @@ interface FieldErrors {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const PROPERTY_TYPES = [
-  'Warehouse', 'Cold Storage', 'Industrial Shed', 'Manufacturing Unit',
-  'Godown', 'Factory Space', 'Logistics Hub', 'Distribution Center'
+  'Warehouse', 'Cold Storage',
+  //  'Industrial Shed',
+  //  'Manufacturing Unit',
+  // 'Godown',
+   'Factory Space', 'Logistics Hub', 'Distribution Center'
 ];
 
 const AMENITIES = ['Parking', 'Security', 'CCTV'];
@@ -102,7 +105,9 @@ const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
 
 // Reverse map DB values → frontend display values
 const PROPERTY_TYPE_REVERSE: Record<string, string> = {
-  'Warehouse': 'Warehouse', 'Industrial': 'Industrial Shed', 'Commercial': 'Logistics Hub',
+  'Warehouse': 'Warehouse',
+  //  'Industrial': 'Industrial Shed', 
+   'Commercial': 'Logistics Hub',
 };
 const PRICE_TYPE_REVERSE: Record<string, 'sale' | 'rent' | 'lease'> = {
   'Rent': 'rent', 'Sale': 'sale', 'Lease': 'lease',
@@ -839,8 +844,9 @@ export default function WarehouseEditForm({ warehouseId, initialData }: Props) {
                 <div className="pt-2">
                   <Button
                     type="button"
+                    variant="confirm"
                     onClick={() => setShowMap(!showMap)}
-                    className="bg-orange-600 hover:bg-orange-700 h-11"
+                    className="h-11"
                   >
                     <MapPin className="h-4 w-4 mr-2" />
                     {showMap ? 'Hide Map' : 'Update Location on Map'}
@@ -1011,7 +1017,7 @@ export default function WarehouseEditForm({ warehouseId, initialData }: Props) {
                                   e.stopPropagation();
                                   setImageToDelete({ type: isExisting ? 'existing' : 'new', index: isExisting ? idx : idx - existingImages.length });
                                 }}
-                                className="absolute -top-2 -right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity bg-orange-500 hover:bg-orange-600 shadow-lg"
+                                className="absolute -top-2 -right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
                               >
                                 <Trash2 className="h-3 w-3" />
                               </Button>
@@ -1176,7 +1182,8 @@ export default function WarehouseEditForm({ warehouseId, initialData }: Props) {
                 <Button
                   onClick={handleSubmit}
                   disabled={uploading}
-                  className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white py-6 text-base font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                  variant="confirm"
+                  className="w-full py-6 text-base font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
                 >
                   {uploading ? (
                     <>
@@ -1192,9 +1199,11 @@ export default function WarehouseEditForm({ warehouseId, initialData }: Props) {
                 </Button>
 
                 <Button
-                  type="button" variant="outline" disabled={uploading}
+                  type="button"
+                  variant="cancel"
+                  disabled={uploading}
                   onClick={() => router.push('/mylistings')}
-                  className="w-full py-6 text-base font-medium border-2 hover:bg-gray-50"
+                  className="w-full py-6 text-base font-medium"
                 >
                   Cancel
                 </Button>
@@ -1290,6 +1299,7 @@ export default function WarehouseEditForm({ warehouseId, initialData }: Props) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
               onClick={() => {
                 if (!imageToDelete) return;
                 if (imageToDelete.type === 'existing') {
@@ -1298,7 +1308,6 @@ export default function WarehouseEditForm({ warehouseId, initialData }: Props) {
                   removeNewImage(imageToDelete.index);
                 }
               }}
-              className="bg-orange-600 hover:bg-orange-700"
             >
               Delete
             </AlertDialogAction>
