@@ -880,13 +880,12 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
           <Button
             type="button"
             variant="confirm"
-            className="w-full py-2 px-3 text-xs font-semibold shadow-md"
+            className="w-full bg-[#0f8a94] hover:bg-[#0f8a94] text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               window.location.href = `tel:${property.contact_person_phone}`;
             }}
-            className="w-full bg-[#0f8a94] hover:bg-[#0f8a94] text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
           >
             <Phone className="h-3.5 w-3.5" />
             Notify Me
@@ -1159,13 +1158,12 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
           <Button
             type="button"
             variant="confirm"
-            className="w-full py-2.5 font-semibold gap-2"
+            className="w-full bg-[#d07648] hover:bg-[#a85832] text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               window.location.href = `tel:${property.contact_person_phone}`;
             }}
-            className="w-full bg-[#d07648] hover:bg-[#a85832] text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <Phone className="h-4 w-4" />
             Contact Now
