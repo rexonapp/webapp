@@ -968,7 +968,7 @@ export default function AgentRegistrationForm() {
                             <Button type="button" size="icon" variant="secondary" onClick={() => setIsImageModalOpen(true)} className="h-9 w-9 rounded-full bg-white/90 hover:bg-white text-gray-900">
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button type="button" size="icon" onClick={removeProfileImage} className="h-9 w-9 rounded-full bg-red-500 hover:bg-red-600 text-white">
+                            <Button type="button" size="icon" variant="destructive" onClick={removeProfileImage} className="h-9 w-9 rounded-full">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1044,14 +1044,15 @@ export default function AgentRegistrationForm() {
                 <Button
                   onClick={handleSubmit}
                   disabled={uploading}
-                  className="w-full bg-[#0f8a94] hover:bg-[#0f8a94] text-white h-12 text-base font-bold shadow-sm hover:shadow-md transition-all"
+                  variant="confirm"
+                  className="w-full h-12 text-base font-bold shadow-sm hover:shadow-md transition-all"
                 >
                   {uploading
                     ? <><Loader2 className="h-5 w-5 animate-spin mr-2" />Registering…</>
                     : 'Register as Agent'
                   }
                 </Button>
-                <Button type="button" variant="outline" onClick={() => router.back()} className="w-full bg-[#da7948] hover:bg-[#da7948] h-11 text-sm font-medium text-white">
+                <Button type="button" variant="cancel" onClick={() => router.back()} className="w-full h-11 text-sm font-medium">
                   Cancel
                 </Button>
               </div>
@@ -1071,8 +1072,8 @@ export default function AgentRegistrationForm() {
           <DialogHeader><DialogTitle>Profile Photo Preview</DialogTitle></DialogHeader>
           {profilePreview && <img src={profilePreview} alt="Full size" className="w-full h-auto rounded-lg object-contain" />}
           <div className="flex justify-end gap-2 mt-3">
-            <Button variant="outline" onClick={() => setIsImageModalOpen(false)}>Close</Button>
-            <Button variant="destructive" onClick={() => { removeProfileImage(); setIsImageModalOpen(false); }} className="bg-red-500 hover:bg-red-600">
+            <Button variant="cancel" onClick={() => setIsImageModalOpen(false)}>Close</Button>
+            <Button variant="destructive" onClick={() => { removeProfileImage(); setIsImageModalOpen(false); }}>
               <Trash2 className="h-4 w-4 mr-1.5" />Delete Photo
             </Button>
           </div>
@@ -1110,7 +1111,7 @@ export default function AgentRegistrationForm() {
               <div className="flex flex-col items-center justify-center py-16 gap-3">
                 <AlertCircle className="h-7 w-7 text-red-400" />
                 <p className="text-sm text-gray-500">{tncError}</p>
-                <Button variant="outline" size="sm" onClick={() => { setTncSections([]); openTncDialog(); }}>Try Again</Button>
+                <Button variant="confirm" size="sm" onClick={() => { setTncSections([]); openTncDialog(); }}>Try Again</Button>
               </div>
             )}
             {!tncLoading && !tncError && tncSections.length > 0 && (
@@ -1134,9 +1135,10 @@ export default function AgentRegistrationForm() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <p className="text-xs text-gray-400">By clicking "Accept", you confirm you have read all the terms above.</p>
               <div className="flex gap-2 w-full sm:w-auto">
-                <Button variant="outline" className="flex-1 sm:flex-none" onClick={() => setIsTncDialogOpen(false)}>Close</Button>
+                <Button variant="cancel" className="flex-1 sm:flex-none" onClick={() => setIsTncDialogOpen(false)}>Close</Button>
                 <Button
-                  className="flex-1 sm:flex-none bg-[#d07648] hover:bg-[#a85832] text-white"
+                  variant="confirm"
+                  className="flex-1 sm:flex-none"
                   onClick={() => {
                     setTermsAccepted(true);
                     setTouchedFields(prev => new Set(prev).add('termsAccepted'));

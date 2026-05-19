@@ -37,6 +37,7 @@ import dynamic from 'next/dynamic';
 import { cn } from "@/lib/utils"
 import ShareModal from '@/components/ui/shareModel';
 import LoginForm from '@/components/layout/LoginForm';
+import { Button } from '@/components/ui/button';
 
 const Map = dynamic(() => import('./map'), {
   ssr: false,
@@ -88,6 +89,27 @@ interface Property {
   distance?: number;
   isSaved?: boolean;
   total_price: number; 
+}
+
+function formatShortDate(iso: string) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+/** Listed / updated line for property cards */
+function propertyListingDateLine(p: Property) {
+  const listed = formatShortDate(p.created_at);
+  const updated = formatShortDate(p.updated_at);
+  const sameDay =
+    p.created_at &&
+    p.updated_at &&
+    p.created_at.slice(0, 10) === p.updated_at.slice(0, 10);
+  if (p.updated_at && !sameDay && listed && updated) {
+    return `Listed ${listed} · Updated ${updated}`;
+  }
+  return listed ? `Listed ${listed}` : '';
 }
 
 interface City {
@@ -529,13 +551,10 @@ const FilterPanel = memo(({
               className="w-full bg-gradient-to-r from-[#13a8b4] to-[#d07648] hover:from-[#0f8a94] hover:to-[#a85832] text-white font-semibold py-3 rounded-lg shadow-lg transition-all"
             >
               Apply Filters
-            </button>
-            <button
-              onClick={handleReset}
-              className="w-full bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-3 rounded-lg transition-all"
-            >
+            </Button>
+            <Button type="button" variant="cancel" className="w-full py-3 text-base font-semibold" onClick={handleReset}>
               Reset All
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -685,6 +704,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
     onHover?.(null);
   }, [onHover]);
 
+  const listingDateLine = propertyListingDateLine(property);
 
   return (
     <>
@@ -853,16 +873,24 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
 )}
       </div>
 
-          <button
+          {listingDateLine && (
+            <p className="text-[10px] text-gray-500 mb-2 leading-snug">{listingDateLine}</p>
+          )}
+
+          <Button
+            type="button"
+            variant="confirm"
+            className="w-full py-2 px-3 text-xs font-semibold shadow-md"
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               window.location.href = `tel:${property.contact_person_phone}`;
             }}
             className="w-full bg-gradient-to-r from-[#13a8b4] to-[#d07648] hover:from-[#0f8a94] hover:to-[#a85832] text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
           >
             <Phone className="h-3.5 w-3.5" />
             Contact Now
-          </button>
+          </Button>
         </div>
       </div>
     </Link>
@@ -961,6 +989,8 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
     e.stopPropagation();
     setIsSaved(!isSaved);
   }, [isSaved]);
+
+  const listingDateLine = propertyListingDateLine(property);
 
   return (
     <Link href={`/property/${property.id}`}>
@@ -1108,30 +1138,38 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
           <div className="grid grid-cols-2 gap-2 mb-3 pb-3 border-b border-gray-100">
             <div>
               <p className="text-xs text-gray-500 mb-1">Available</p>
-              <p className="text-base font-bold text-gray-900">
-                {property.space_available?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
+              <p className="text-base font-normal text-gray-900 tabular-nums">
+                {property.space_available?.toLocaleString('en-IN')} <span className="text-xs">sqft</span>
               </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">Total Size</p>
-              <p className="text-base font-bold text-gray-900">
-                {property.warehouse_size?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
+              <p className="text-base font-normal text-gray-900 tabular-nums">
+                {property.warehouse_size?.toLocaleString('en-IN')} <span className="text-xs">sqft</span>
               </p>
             </div>
           </div>
 
           <div className="flex-1" />
 
-          <button
+          {listingDateLine && (
+            <p className="text-xs text-gray-500 mb-3 leading-snug">{listingDateLine}</p>
+          )}
+
+          <Button
+            type="button"
+            variant="confirm"
+            className="w-full py-2.5 font-semibold gap-2"
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               window.location.href = `tel:${property.contact_person_phone}`;
             }}
             className="w-full bg-[#d07648] hover:bg-[#a85832] text-white font-semibold py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <Phone className="h-4 w-4" />
             Contact Now
-          </button>
+          </Button>
         </div>
       </div>
     </Link>

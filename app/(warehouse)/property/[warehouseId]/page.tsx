@@ -34,6 +34,7 @@ export default async function PropertyPage({
   }
 
   const { property, media } = data;
+
   const images = media?.filter((m: any) =>
     m.file_type?.startsWith("image/")
   );
@@ -77,15 +78,11 @@ export default async function PropertyPage({
       )}
 
       {/* 🔹 Title & Badges */}
-      <div className="flex flex-wrap bg-[#13a8b4]/10 border border-[#13a8b4]/20 bg-gray-50 items-start rounded-xl justify-between w-full p-4 mb-7">
-        <div >
+      <div className="flex flex-wrap items-center justify-between mb-4">
         <h1 className="text-3xl font-bold">
           {property.title}
         </h1>
-        <p className="text-gray-500 mt-1">
-        {property.address}, {property.city}, {property.state}
-      </p>
-      </div>
+
         <div className="flex gap-2">
           {property.is_verified && (
             <span className="bg-green-600 text-white px-3 py-1 text-sm rounded-full">
@@ -102,12 +99,12 @@ export default async function PropertyPage({
       </div>
 
       {/* 🔹 Location */}
-      {/* <p className="text-gray-500 mb-6">
+      <p className="text-gray-500 mb-6">
         {property.address}, {property.city}, {property.state}
-      </p> */}
+      </p>
 
       {/* 🔹 Price Section */}
-      <div className="bg-[#13a8b4]/10 border border-[#13a8b4]/20 bg-gray-50 rounded-xl p-4 mb-7">
+      <div className="bg-[#13a8b4]/10 border border-[#13a8b4]/20 rounded-xl p-6 mb-8">
         <p className="text-sm text-gray-500 mb-1">
           {property.price_type}
         </p>
@@ -117,36 +114,29 @@ export default async function PropertyPage({
       </div>
 
       {/* 🔹 Highlights Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-6  bg-[#13a8b4]/10 border border-[#13a8b4]/20 bg-gray-50 p-6 rounded-xl mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 bg-gray-50 p-6 rounded-xl mb-6">
         <div>
-          <p className="text-sm font-bold text-gray-700 ">Property Type</p>
-          <p className="font-black">{property.property_type}</p>
+          <p className="text-sm text-gray-500">Property Type</p>
+          <p className="font-semibold">{property.property_type}</p>
         </div>
 
         <div>
-          <p className="text-sm font-bold text-gray-700">Available Space</p>
-          <p className="font-black">
+          <p className="text-sm text-gray-500">Available Space</p>
+          <p className="font-semibold">
             {property.space_available} sqft
           </p>
         </div>
 
         <div>
-          <p className="text-sm font-bold text-gray-700">Total Price</p>
-          <p className="font-black">
-            {property.total_price}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-sm font-bold text-gray-700">Warehouse Size</p>
-          <p className="font-black">
+          <p className="text-sm text-gray-500">Warehouse Size</p>
+          <p className="font-semibold">
             {property.warehouse_size} sqft
           </p>
         </div>
 
         <div>
-          <p className="text-sm font-bold text-gray-700">Listed On</p>
-          <p className="font-black">
+          <p className="text-sm text-gray-500">Listed On</p>
+          <p className="font-semibold">
             {new Date(property.created_at).toLocaleDateString()}
           </p>
         </div>

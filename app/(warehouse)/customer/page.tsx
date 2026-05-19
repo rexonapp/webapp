@@ -312,7 +312,8 @@ export default function CustomerOnboardingForm() {
               <Button
                 onClick={handleSubmit}
                 disabled={uploading}
-                className="sm:flex-1 bg-[#d07648] hover:bg-[#a85832] text-white h-11 text-sm font-semibold"
+                variant="confirm"
+                className="sm:flex-1 h-11 text-sm font-semibold"
               >
                 {uploading ? (
                   <>
@@ -326,7 +327,7 @@ export default function CustomerOnboardingForm() {
 
               <Button
                 type="button"
-                variant="outline"
+                variant="cancel"
                 onClick={() => router.back()}
                 disabled={uploading}
                 className="sm:w-32 h-11 text-sm font-medium"

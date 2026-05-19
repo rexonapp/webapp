@@ -851,6 +851,7 @@ export default function WarehouseUploadForm() {
                 <div className="pt-2">
                   <Button
                     type="button"
+                    variant="confirm"
                     onClick={() => setShowMap(!showMap)}
                     className="bg-[#d07648] hover:bg-[#a85832] h-11"
                   >
@@ -1246,7 +1247,8 @@ export default function WarehouseUploadForm() {
                 <Button
                   onClick={handleSubmit}
                   disabled={uploading}
-                  className="w-full bg-gradient-to-r from-[#13a8b4] to-[#d07648] hover:from-[#0f8a94] hover:to-[#a85832] text-white py-6 text-base font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                  variant="confirm"
+                  className="w-full py-6 text-base font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
                 >
                   {uploading ? (
                     <>
@@ -1263,9 +1265,9 @@ export default function WarehouseUploadForm() {
 
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="cancel"
                   disabled={uploading}
-                  className="w-full py-6 text-base font-medium border-2 hover:bg-gray-50"
+                  className="w-full py-6 text-base font-medium"
                 >
                   Cancel
                 </Button>
@@ -1375,6 +1377,7 @@ export default function WarehouseUploadForm() {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
               onClick={() => {
                 if (imageToDelete !== null) removeImage(imageToDelete);
               }}

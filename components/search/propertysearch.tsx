@@ -457,6 +457,7 @@ export default function PropertySearch() {
           </div>
 
           <Button
+            variant="confirm"
             onClick={handleSearch}
             className="bg-[#d07648] hover:bg-[#c46b3f] text-white px-5 !h-full rounded-none rounded-r-xl font-semibold text-sm shadow-none flex items-center gap-2 transition-colors"
           >
@@ -481,6 +482,7 @@ export default function PropertySearch() {
               {propertyTypeSelectSM}
             </div>
             <Button
+              variant="confirm"
               onClick={handleSearch}
               className="bg-[#d07648] hover:bg-[#c46b3f] text-white px-6 py-3 rounded-none rounded-br-xl font-semibold text-sm shadow-none flex items-center gap-2"
             >
@@ -508,6 +510,7 @@ export default function PropertySearch() {
           </div>
 
           <Button
+            variant="confirm"
             onClick={handleSearch}
             className="w-full bg-[#d07648] hover:bg-[#c46b3f] text-white py-3 rounded-none rounded-b-xl font-semibold text-sm shadow-none flex items-center justify-center gap-2"
           >
