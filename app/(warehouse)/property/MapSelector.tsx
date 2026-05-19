@@ -18,7 +18,7 @@ declare global {
   }
 }
 
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '';
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || 'AIzaSyDyQ-12h7R0_GMEH0PFV77TEOcBO9nwb0Q';
 
 export default function MapSelector({
   latitude,
@@ -143,7 +143,7 @@ export default function MapSelector({
     if (markerRef.current) {
       markerRef.current.setPosition({ lat, lng });
     } else {
-      const marker = new window.google.maps.Marker({
+      const marker = new window.google.maps.Marker.AdvancedMarkerElement({
         position: { lat, lng },
         map,
         draggable: true,

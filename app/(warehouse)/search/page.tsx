@@ -486,7 +486,9 @@ const FilterPanel = memo(({
                 Property Type
               </h3>
               <div className="space-y-2">
-                {['Warehouse', 'Cold Storage', 'Industrial', 'Logistics', 'Distribution Center'].map((type) => (
+                {['Warehouse', 
+                // 'Cold Storage', 'Industrial', 
+                'Logistics', 'Distribution Center'].map((type) => (
                   <label key={type} className="flex items-center gap-3 cursor-pointer group">
                     <input
                       type="checkbox"
