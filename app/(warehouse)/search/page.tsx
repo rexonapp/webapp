@@ -546,7 +546,7 @@ const FilterPanel = memo(({
           </div>
 
           <div className="border-t border-gray-200 p-6 bg-gray-50 space-y-3">
-            <button
+            <Button
               onClick={handleApply}
               className="w-full bg-gradient-to-r from-[#13a8b4] to-[#d07648] hover:from-[#0f8a94] hover:to-[#a85832] text-white font-semibold py-3 rounded-lg shadow-lg transition-all"
             >
@@ -886,10 +886,10 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
               e.stopPropagation();
               window.location.href = `tel:${property.contact_person_phone}`;
             }}
-            className="w-full bg-gradient-to-r from-[#13a8b4] to-[#d07648] hover:from-[#0f8a94] hover:to-[#a85832] text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
+            className="w-full bg-[#0f8a94] hover:bg-[#0f8a94] text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
           >
             <Phone className="h-3.5 w-3.5" />
-            Contact Now
+            Notify Me
           </Button>
         </div>
       </div>
