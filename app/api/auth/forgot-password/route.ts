@@ -2,27 +2,47 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
 import { query } from '@/lib/db';
-import sgMail from '@sendgrid/mail';
+// import sgMail from '@sendgrid/mail';
+import { BrevoClient } from '@getbrevo/brevo';
 
 export async function POST(request: NextRequest) {
-  const SENDGRID_API_KEY   = process.env.SENDGRID_API_KEY;
+  // const SENDGRID_API_KEY   = process.env.SENDGRID_API_KEY;
   const RESET_TOKEN_SECRET = process.env.RESET_TOKEN_SECRET;
-  const NEXT_PUBLIC_URL    = process.env.NEXT_PUBLIC_URL;
+  const NEXT_PUBLIC_URL = process.env.NEXT_PUBLIC_URL;
+  const BREVO_KEY = process.env.BREVO_KEY;
 
-  if (!SENDGRID_API_KEY || !RESET_TOKEN_SECRET || !NEXT_PUBLIC_URL) {
+  // if (!SENDGRID_API_KEY || !RESET_TOKEN_SECRET || !NEXT_PUBLIC_URL) {
+  //   const missing = [
+  //     !SENDGRID_API_KEY   && 'SENDGRID_API_KEY',
+  //     !RESET_TOKEN_SECRET && 'RESET_TOKEN_SECRET',
+  //     !NEXT_PUBLIC_URL    && 'NEXT_PUBLIC_URL',
+  //   ].filter(Boolean);
+  //   console.error('[Forgot-password] Missing env vars:', missing.join(', '));
+  //   return NextResponse.json(
+  //     { error: 'Server configuration error. Please try again later.' },
+  //     { status: 500 }
+  //   );
+  // }
+
+  // sgMail.setApiKey(SENDGRID_API_KEY);
+  if (!BREVO_KEY || !RESET_TOKEN_SECRET || !NEXT_PUBLIC_URL) {
     const missing = [
-      !SENDGRID_API_KEY   && 'SENDGRID_API_KEY',
+      !BREVO_KEY && 'BREVO_KEY',
       !RESET_TOKEN_SECRET && 'RESET_TOKEN_SECRET',
-      !NEXT_PUBLIC_URL    && 'NEXT_PUBLIC_URL',
+      !NEXT_PUBLIC_URL && 'NEXT_PUBLIC_URL',
     ].filter(Boolean);
+
     console.error('[Forgot-password] Missing env vars:', missing.join(', '));
+
     return NextResponse.json(
       { error: 'Server configuration error. Please try again later.' },
       { status: 500 }
     );
   }
+  const brevo = new BrevoClient({
+    apiKey: BREVO_KEY,
+  });
 
-  sgMail.setApiKey(SENDGRID_API_KEY);
   const secret = new TextEncoder().encode(RESET_TOKEN_SECRET);
 
   try {
@@ -55,9 +75,8 @@ export async function POST(request: NextRequest) {
     if (user.auth_provider !== 'email') {
       return NextResponse.json(
         {
-          error: `This account uses ${user.auth_provider} sign-in. Please use the "${
-            user.auth_provider.charAt(0).toUpperCase() + user.auth_provider.slice(1)
-          }" button to sign in.`,
+          error: `This account uses ${user.auth_provider} sign-in. Please use the "${user.auth_provider.charAt(0).toUpperCase() + user.auth_provider.slice(1)
+            }" button to sign in.`,
         },
         { status: 400 }
       );
@@ -74,50 +93,89 @@ export async function POST(request: NextRequest) {
       .sign(secret);
 
     const resetUrl = `${NEXT_PUBLIC_URL}/reset-password?token=${token}`;
-    const appUrl   = NEXT_PUBLIC_URL.replace(/^https?:\/\//, '');
+    const appUrl = NEXT_PUBLIC_URL.replace(/^https?:\/\//, '');
 
-    await sgMail.send({
-      to: user.email,
+    // await sgMail.send({
+    //   to: user.email,
 
-      // ── FIX 1: from must exactly match a Sender Identity verified in SendGrid ──
-      // Go to SendGrid → Settings → Sender Authentication → verify admin@rexonproperties.in
-      from: {
-        email: 'admin@rexonproperties.in',
-        name: 'Rexon',
-      },
+    //   // ── FIX 1: from must exactly match a Sender Identity verified in SendGrid ──
+    //   // Go to SendGrid → Settings → Sender Authentication → verify admin@rexonproperties.in
+    //   from: {
+    //     email: 'admin@rexonproperties.in',
+    //     name: 'Rexon',
+    //   },
 
-      // ── FIX 2: reply-to keeps replies off the no-reply address ──
-      replyTo: {
-        email: 'support@rexonproperties.in',
-        name: 'Rexon Support',
-      },
+    //   // ── FIX 2: reply-to keeps replies off the no-reply address ──
+    //   replyTo: {
+    //     email: 'support@rexonproperties.in',
+    //     name: 'Rexon Support',
+    //   },
 
-      subject: 'Reset your Rexon password',
+    //   subject: 'Reset your Rexon password',
 
-      // ── FIX 3: List-Unsubscribe header — required by Gmail/Yahoo bulk rules ──
-      headers: {
-        'List-Unsubscribe': `<mailto:support@rexonproperties.in?subject=unsubscribe>, <${NEXT_PUBLIC_URL}/unsubscribe>`,
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-        // Categorise as transactional so filters treat it correctly
-        'X-Entity-Ref-ID': `rexon-password-reset-${user.id}-${Date.now()}`,
-      },
+    //   // ── FIX 3: List-Unsubscribe header — required by Gmail/Yahoo bulk rules ──
+    //   headers: {
+    //     'List-Unsubscribe': `<mailto:support@rexonproperties.in?subject=unsubscribe>, <${NEXT_PUBLIC_URL}/unsubscribe>`,
+    //     'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+    //     // Categorise as transactional so filters treat it correctly
+    //     'X-Entity-Ref-ID': `rexon-password-reset-${user.id}-${Date.now()}`,
+    //   },
 
-      // ── FIX 4: SendGrid mail settings ──
-      mailSettings: {
-        clickTracking: { enable: false, enableText: false },
-        openTracking: { enable: false },
-      } as any,
+    //   // ── FIX 4: SendGrid mail settings ──
+    //   mailSettings: {
+    //     clickTracking: { enable: false, enableText: false },
+    //     openTracking: { enable: false },
+    //   } as any,
 
-      // ── FIX 5: SendGrid category helps deliverability analytics ──
-      categories: ['password-reset', 'transactional'],
+    //   // ── FIX 5: SendGrid category helps deliverability analytics ──
+    //   categories: ['password-reset', 'transactional'],
 
-      html: buildEmailHtml({ firstName: user.first_name, resetUrl, appUrl }),
-      text: buildEmailText({ firstName: user.first_name, resetUrl }),
-    });
+    //   html: buildEmailHtml({ firstName: user.first_name, resetUrl, appUrl }),
+    //   text: buildEmailText({ firstName: user.first_name, resetUrl }),
+    // });
 
+    const emailResult =
+      await brevo.transactionalEmails.sendTransacEmail({
+        subject: 'Reset your Rexon password',
+
+        sender: {
+          email: 'admin@rexonproperties.in',
+          name: 'Rexon',
+        },
+
+        replyTo: {
+          email: 'support@rexonproperties.in',
+          name: 'Rexon Support',
+        },
+
+        to: [
+          {
+            email: user.email,
+            name: user.first_name,
+          },
+        ],
+
+        htmlContent: buildEmailHtml({
+          firstName: user.first_name,
+          resetUrl,
+          appUrl,
+        }),
+
+        textContent: buildEmailText({
+          firstName: user.first_name,
+          resetUrl,
+        }),
+
+        headers: {
+          'X-Entity-Ref-ID': `rexon-password-reset-${user.id}-${Date.now()}`,
+        },
+      });
+
+    console.log('Brevo Message ID:', emailResult.messageId);
     console.log('[Password Reset Email Sent]', {
       userId: user.id,
       email: user.email,
+      messageId: emailResult.messageId,
       timestamp: new Date().toISOString(),
     });
 
