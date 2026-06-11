@@ -162,8 +162,10 @@ export async function PATCH(
       //  'Godown': 'Warehouse',
       // 'Industrial Shed': 'Industrial', 
       // 'Manufacturing Unit': 'Industrial', 
-      'Factory Space': 'Industrial',
-      'Logistics Hub': 'Commercial', 'Distribution Center': 'Commercial',
+      // 'Factory Space': 'Industrial',
+      // 'Logistics Hub': 'Commercial', 'Distribution Center': 'Commercial', 
+      'Farm Land' : 'Farm Land',
+      'Commercial Space' : 'Commercial Space',
     };
     const normalizedPropertyType = propertyTypeMap[propertyType] || 'Warehouse';
 

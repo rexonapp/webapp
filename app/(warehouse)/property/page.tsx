@@ -64,9 +64,11 @@ const PROPERTY_TYPES = [
   // 'Industrial Shed',
   // 'Manufacturing Unit',
   // 'Godown',
-  'Factory Space',
-  'Logistics Hub',
-  'Distribution Center'
+  // 'Factory Space',
+  // 'Logistics Hub',
+  // 'Distribution Center'
+  'Farm Land',
+  'Commercial Space'
 ];
 
 const AMENITIES = [
