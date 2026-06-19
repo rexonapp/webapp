@@ -392,7 +392,7 @@ export default function HeroWithBanner() {
           {/* Cards Section with tighter top spacing on large screens */}
           <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-4 animate-slide-up-delayed-2 px-0 sm:px-0">
             <Card
-              onClick={() => router.push('/property')}
+              // onClick={() => router.push('/property')}
               className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/65 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 rounded-t-[inherit] bg-gradient-to-b from-white/30 to-transparent" aria-hidden />
