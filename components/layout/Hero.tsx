@@ -391,14 +391,14 @@ export default function HeroWithBanner() {
 
           {/* Cards Section with tighter top spacing on large screens */}
           <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4 lg:gap-4 animate-slide-up-delayed-2 px-0 sm:px-0">
-            <Card
+            {/* <Card
               // onClick={() => router.push('/property')}
               className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/65 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 rounded-t-[inherit] bg-gradient-to-b from-white/30 to-transparent" aria-hidden />
-              <div className="absolute -inset-1 -z-10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:bg-white/25 group-hover:opacity-100" />
+              <div className="absolute -inset-1 -z-10 opacity-0 blur-2xl transition-opacity duration-500 group-hover:bg-white/25 group-hover:opacity-100" /> */}
 
-              <CardHeader className="relative space-y-0 pb-2 pt-4 px-4 sm:px-4">
+              {/* <CardHeader className="relative space-y-0 pb-2 pt-4 px-4 sm:px-4">
                 <div className="flex items-start gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#13a8b4]/30 bg-[#13a8b4] shadow-md transition-all duration-300 group-hover:scale-105 group-hover:bg-[#13a8b4] group-hover:border-[#13a8b4]/55 sm:h-11 sm:w-11">
                     <Home className="h-5 w-5 text-white sm:h-5 sm:w-5" />
@@ -407,18 +407,18 @@ export default function HeroWithBanner() {
                     Property Owner
                   </CardTitle>
                 </div>
-              </CardHeader>
+              </CardHeader> */}
 
-              <CardContent className="relative space-y-3 px-4 pb-4 pt-0 sm:px-4">
+              {/* <CardContent className="relative space-y-3 px-4 pb-4 pt-0 sm:px-4">
                 <CardDescription className="home-hero-card-body text-slate-800/95 font-medium">
                   List your warehouse or commercial property and connect with verified buyers
-                </CardDescription>
+                </CardDescription> */}
                 {/* <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#a85832] font-semibold transition-all duration-300 group-hover:gap-2 group-hover:text-[#8e4c2d]">
                   <span>Get Started</span>
                   <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
                 </div> */}
-              </CardContent>
-            </Card>
+              {/* </CardContent> */}
+            {/* </Card> */}
 
             <Card
               onClick={() => router.push('/agent/join')}
