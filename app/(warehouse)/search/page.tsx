@@ -4,15 +4,15 @@ import { Suspense } from 'react';
 import { useEffect, useState, useCallback, useMemo, memo, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { 
-  Building2, 
-  MapPin, 
-  IndianRupee, 
-  Loader2, 
-  Ruler, 
-  Phone, 
-  ChevronLeft, 
-  ChevronRight, 
+import {
+  Building2,
+  MapPin,
+  IndianRupee,
+  Loader2,
+  Ruler,
+  Phone,
+  ChevronLeft,
+  ChevronRight,
   ImageIcon,
   Map as MapIcon,
   Layers,
@@ -88,7 +88,7 @@ interface Property {
   images?: PropertyImage[];
   distance?: number;
   isSaved?: boolean;
-  total_price: number; 
+  total_price: number;
 }
 
 function formatShortDate(iso: string) {
@@ -138,19 +138,19 @@ const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: numbe
   const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 };
 
 // Enhanced City Search Component
-const CitySearch = memo(({ 
-  initialCity, 
-  onCitySelect 
-}: { 
+const CitySearch = memo(({
+  initialCity,
+  onCitySelect
+}: {
   initialCity?: string;
   onCitySelect: (city: City) => void;
 }) => {
@@ -233,7 +233,7 @@ const CitySearch = memo(({
       const currentDisplay = selectedCity.stateCode
         ? `${selectedCity.city}, ${selectedCity.stateCode}`
         : selectedCity.city;
-      
+
       if (searchQuery !== currentDisplay) {
         setSelectedCity(null);
       }
@@ -329,8 +329,8 @@ const CitySearch = memo(({
                 // this entry covers e.g. "Bangalore" too
                 const altHint = city.all_names && city.all_names.length > 1
                   ? city.all_names.filter(
-                      (n) => n.toLowerCase() !== city.city.toLowerCase()
-                    ).join(', ')
+                    (n) => n.toLowerCase() !== city.city.toLowerCase()
+                  ).join(', ')
                   : city.alternate_name || '';
 
                 return (
@@ -343,7 +343,7 @@ const CitySearch = memo(({
                       className={cn(
                         "h-4 w-4 text-[#d07648] flex-shrink-0",
                         selectedCity?.city === city.city &&
-                        (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
+                          (selectedCity?.stateCode === city.stateCode || (!selectedCity?.stateCode && !city.stateCode))
                           ? "opacity-100"
                           : "opacity-0"
                       )}
@@ -379,12 +379,12 @@ const CitySearch = memo(({
 CitySearch.displayName = 'CitySearch';
 
 // Filter Panel Component
-const FilterPanel = memo(({ 
-  isOpen, 
+const FilterPanel = memo(({
+  isOpen,
   onClose,
-  onApplyFilters 
-}: { 
-  isOpen: boolean; 
+  onApplyFilters
+}: {
+  isOpen: boolean;
   onClose: () => void;
   onApplyFilters: (filters: any) => void;
 }) => {
@@ -411,13 +411,13 @@ const FilterPanel = memo(({
   };
 
   const togglePropertyType = (type: string) => {
-    setPropertyTypes(prev => 
+    setPropertyTypes(prev =>
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
     );
   };
 
   const togglePriceType = (type: string) => {
-    setPriceTypes(prev => 
+    setPriceTypes(prev =>
       prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
     );
   };
@@ -427,7 +427,7 @@ const FilterPanel = memo(({
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      
+
       <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl transform transition-transform duration-300">
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#13a8b4] to-[#0f8a94]">
@@ -508,12 +508,12 @@ const FilterPanel = memo(({
                 Property Type
               </h3>
               <div className="space-y-2">
-                {['Warehouse', 
-                // 'Cold Storage', 'Industrial', 
-                // 'Logistics', 'Distribution Center',
-                 'Farm Land'
-                // 'Commercial Space'
-              ].map((type) => (
+                {['Warehouse',
+                  // 'Cold Storage', 'Industrial', 
+                  // 'Logistics', 'Distribution Center',
+                  'Farm Land'
+                  // 'Commercial Space'
+                ].map((type) => (
                   <label key={type} className="flex items-center gap-3 cursor-pointer group">
                     <input
                       type="checkbox"
@@ -571,7 +571,7 @@ FilterPanel.displayName = 'FilterPanel';
 const CompactPropertyCard = memo(({ property, onHover }: { property: Property; onHover?: (property: Property | null) => void }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
-  const [isSaved, setIsSaved] = useState(property.isSaved || false);  
+  const [isSaved, setIsSaved] = useState(property.isSaved || false);
   const [isHovered, setIsHovered] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const animationFrameRef = useRef<number | null>(null);
@@ -590,7 +590,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
   useEffect(() => {
     if (isHovered && hasImages && totalImages > 1) {
       const duration = 3000;
-      
+
       const animate = (timestamp: number) => {
         if (!startTimeRef.current) {
           startTimeRef.current = timestamp;
@@ -598,7 +598,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
 
         const elapsed = timestamp - startTimeRef.current;
         const progress = (elapsed % duration) / duration;
-        
+
         setScrollProgress(progress);
 
         if (elapsed >= duration) {
@@ -665,12 +665,12 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
           priceAtFavorite: property.price_per_sqft || null,
         }),
       });
-  
+
       if (res.status === 401) {
         router.push("/login");
         return;
       }
-  
+
       if (res.ok) {
         setIsSaved(!isSaved);
       }
@@ -682,7 +682,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-  
+
     try {
       const res = await fetch("/api/auth/me");
       const data = await res.json();
@@ -696,7 +696,7 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
       console.error("Share auth error:", error);
     }
   };
-  
+
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
     onHover?.(property);
@@ -707,202 +707,232 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
     onHover?.(null);
   }, [onHover]);
 
+  const handleNotifyMe = async (
+    e: React.MouseEvent,
+    propertyId: number
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+  
+    try {
+      const res = await fetch(`/api/properties/${property.id}/notify`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          propertyId,
+        }),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to notify agent");
+      }
+  
+      // Replace with your toast component if you're using one
+      alert("Thanks for your interest! The agent has been notified and will reach out to you soon.");    } catch (error: any) {
+      alert(error.message || "Something went wrong.");
+    }
+  };
+
   const listingDateLine = propertyListingDateLine(property);
 
   return (
     <>
-    <Link href={`/property/${property.id}`}>
-      <div 
-        className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-[#d07648]/45 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <div className="relative h-40 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-          {hasImages && currentImage && !imageError ? (
-            <>
-              <Image
-                src={currentImage.s3_url}
-                alt={property.title}
-                fill
-                className="object-cover transition-all duration-700 group-hover:scale-110"
-                style={{
-                  transform: isHovered && totalImages > 1 
-                    ? `scale(1.1) translateX(-${scrollProgress * 15}%)` 
-                    : undefined
-                }}
-                sizes="300px"
-                onError={() => setImageError(true)}
-                quality={90}
-                priority={currentImageIndex === 0}
-                unoptimized
-              />
-              
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-              
-              {property.images && property.images.length > 1 && (
-                <div className="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <button
-                    onClick={prevImage}
-                    className="bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-transform hover:scale-110"
-                  >
-                    <ChevronLeft className="h-4 w-4 text-gray-800" />
-                  </button>
-                  <button
-                    onClick={nextImage}
-                    className="bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-transform hover:scale-110"
-                  >
-                    <ChevronRight className="h-4 w-4 text-gray-800" />
-                  </button>
-                </div>
-              )}
+      <Link href={`/property/${property.id}`}>
+        <div
+          className="group bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-[#d07648]/45 hover:shadow-lg transition-all duration-300 cursor-pointer h-full flex flex-col"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div className="relative h-40 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+            {hasImages && currentImage && !imageError ? (
+              <>
+                <Image
+                  src={currentImage.s3_url}
+                  alt={property.title}
+                  fill
+                  className="object-cover transition-all duration-700 group-hover:scale-110"
+                  style={{
+                    transform: isHovered && totalImages > 1
+                      ? `scale(1.1) translateX(-${scrollProgress * 15}%)`
+                      : undefined
+                  }}
+                  sizes="300px"
+                  onError={() => setImageError(true)}
+                  quality={90}
+                  priority={currentImageIndex === 0}
+                  unoptimized
+                />
 
-              {property.images && property.images.length > 1 && (
-                <>
-                  <div className="absolute bottom-2 left-2 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded font-medium flex items-center gap-1 transition-all duration-300">
-                    <ImageIcon className="h-3 w-3" />
-                    {currentImageIndex + 1}/{property.images.length}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+                {property.images && property.images.length > 1 && (
+                  <div className="absolute inset-0 flex items-center justify-between px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <button
+                      onClick={prevImage}
+                      className="bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-transform hover:scale-110"
+                    >
+                      <ChevronLeft className="h-4 w-4 text-gray-800" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-transform hover:scale-110"
+                    >
+                      <ChevronRight className="h-4 w-4 text-gray-800" />
+                    </button>
                   </div>
-                  
-                  {isHovered && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
-                      <div 
-                        className="h-full bg-[#d07648] transition-all duration-100"
-                        style={{ width: `${scrollProgress * 100}%` }}
-                      />
+                )}
+
+                {property.images && property.images.length > 1 && (
+                  <>
+                    <div className="absolute bottom-2 left-2 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded font-medium flex items-center gap-1 transition-all duration-300">
+                      <ImageIcon className="h-3 w-3" />
+                      {currentImageIndex + 1}/{property.images.length}
                     </div>
-                  )}
-                </>
-              )}
-            </>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <ImageIcon className="h-12 w-12 text-gray-300" />
-            </div>
-          )}
 
-          <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
-            <div className="flex gap-1.5">
-              <span className={`text-xs font-bold px-2 py-1 rounded shadow-md ${
-                property.price_type === 'Sale' 
-                  ? 'bg-[#d07648] text-white'
-                  : 'bg-[#13a8b4] text-white'
-              }`}>
-                {property.price_type}
-              </span>
-              {property.is_featured && (
-                <span className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md flex items-center gap-0.5">
-                  <Star className="h-3 w-3 inline fill-current" />
+                    {isHovered && (
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
+                        <div
+                          className="h-full bg-[#d07648] transition-all duration-100"
+                          style={{ width: `${scrollProgress * 100}%` }}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <ImageIcon className="h-12 w-12 text-gray-300" />
+              </div>
+            )}
+
+            <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
+              <div className="flex gap-1.5">
+                <span className={`text-xs font-bold px-2 py-1 rounded shadow-md ${property.price_type === 'Sale'
+                    ? 'bg-[#d07648] text-white'
+                    : 'bg-[#13a8b4] text-white'
+                  }`}>
+                  {property.price_type}
                 </span>
-              )}
+                {property.is_featured && (
+                  <span className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded shadow-md flex items-center gap-0.5">
+                    <Star className="h-3 w-3 inline fill-current" />
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSave}
+                  className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-white transition-all"
+                >
+                  <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
+                >
+                  <Share2 size={18} />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleSave}
-                className="bg-white/90 backdrop-blur-sm p-1.5 rounded-full shadow-md hover:bg-white transition-all"
-              >
-                <Heart className={`h-4 w-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
-              </button>
-              <button
-                onClick={handleShare}
-                className="bg-white p-2 rounded-full shadow-md hover:scale-105 transition"
-              >
-                <Share2 size={18} />
-              </button>
-            </div>
-          </div>
 
-          {/* {property.distance !== undefined && property.distance > 0 && (
+            {/* {property.distance !== undefined && property.distance > 0 && (
             <div className="absolute bottom-2 right-2 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded font-medium">
               {property.distance.toFixed(1)} km
             </div>
           )} */}
-        </div>
-
-        <div className="p-3 flex flex-col flex-1">
-          <h3 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-[#d07648] transition-colors leading-snug">
-            {property.title}
-          </h3>
-
-          <div className="flex items-center gap-1 mb-2">
-            <MapPin className="h-3.5 w-3.5 text-[#d07648] flex-shrink-0" />
-            <p className="text-xs text-gray-600 line-clamp-1">
-              {property.city}, {property.state}
-            </p>
           </div>
 
-          <div className="flex items-center gap-1.5 mb-2 text-xs">
-            <span className="bg-[#13a8b4]/10 text-[#0f8a94] px-2 py-0.5 rounded font-medium">
-              {property.property_type}
-            </span>
-            {property.is_verified && (
-              <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded flex items-center gap-0.5 font-medium">
-                <CheckCircle2 className="h-3 w-3" />
-                Verified
-              </span>
-            )}
-          </div>
+          <div className="p-3 flex flex-col flex-1">
+            <h3 className="font-bold text-gray-900 text-sm mb-1.5 line-clamp-2 group-hover:text-[#d07648] transition-colors leading-snug">
+              {property.title}
+            </h3>
 
-          <div className="grid grid-cols-2 gap-1.5 mb-2 pb-2 border-b border-gray-100">
-            <div>
-              <p className="text-xs text-gray-500 mb-0.5">Total Space</p>
-              <p className="text-sm text-gray-700">
-                {property.space_available?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
+            <div className="flex items-center gap-1 mb-2">
+              <MapPin className="h-3.5 w-3.5 text-[#d07648] flex-shrink-0" />
+              <p className="text-xs text-gray-600 line-clamp-1">
+                {property.city}, {property.state}
               </p>
             </div>
-            {/* <div>
+
+            <div className="flex items-center gap-1.5 mb-2 text-xs">
+              <span className="bg-[#13a8b4]/10 text-[#0f8a94] px-2 py-0.5 rounded font-medium">
+                {property.property_type}
+              </span>
+              {property.is_verified && (
+                <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded flex items-center gap-0.5 font-medium">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Verified
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5 mb-2 pb-2 border-b border-gray-100">
+              <div>
+                <p className="text-xs text-gray-500 mb-0.5">Total Space</p>
+                <p className="text-sm text-gray-700">
+                  {property.space_available?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
+                </p>
+              </div>
+              {/* <div>
               <p className="text-xs text-gray-500 mb-0.5">Total</p>
               <p className="text-sm font-bold text-gray-900">
                 {property.warehouse_size?.toLocaleString('en-IN')} <span className="text-xs font-normal">sqft</span>
               </p>
             </div> */}
+            </div>
+
+            <div className="flex-1" />
+
+            <div className="mb-2">
+              <div className="flex items-baseline gap-0.5">
+                <IndianRupee className="h-4 w-4 text-[#d07648]" />
+                <span className="text-lg font-bold text-gray-800">
+                  {property.price_per_sqft?.toLocaleString('en-IN')}
+                </span>
+                <span className="text-xs text-gray-600 font-medium">/sqft</span>
+              </div>
+              {property.total_price != null && (
+                <p className="text-md font-bold text-gray-900 mt-0.5">
+                  Total Price: <span className=" text-md font-bold text-[#d07648]">
+                    ₹{property.total_price.toLocaleString('en-IN')}
+                  </span>
+                </p>
+              )}
+            </div>
+
+            {listingDateLine && (
+              <p className="text-[10px] text-gray-500 mb-2 leading-snug">{listingDateLine}</p>
+            )}
+
+            <Button
+              type="button"
+              variant="confirm"
+              className="w-full bg-[#0f8a94] hover:bg-[#0f8a94] text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
+              // onClick={(e) => {
+              //   e.preventDefault();
+              //   e.stopPropagation();
+              //   window.location.href = `tel:${property.contact_person_phone}`;
+              // }}
+              onClick={(e) => handleNotifyMe(e, property.id)}
+            >
+              <Phone className="h-3.5 w-3.5" />
+              Notify Me
+            </Button>
           </div>
-
-          <div className="flex-1" />
-
-        <div className="mb-2">
-        <div className="flex items-baseline gap-0.5">
-          <IndianRupee className="h-4 w-4 text-[#d07648]" />
-          <span className="text-lg font-bold text-gray-800">
-            {property.price_per_sqft?.toLocaleString('en-IN')}
-          </span>
-          <span className="text-xs text-gray-600 font-medium">/sqft</span>
         </div>
-        {property.total_price != null && (
-  <p className="text-md font-bold text-gray-900 mt-0.5">
-    Total Price: <span className=" text-md font-bold text-[#d07648]">
-      ₹{property.total_price.toLocaleString('en-IN')}
-    </span>
-  </p>
-)}
-      </div>
-
-          {listingDateLine && (
-            <p className="text-[10px] text-gray-500 mb-2 leading-snug">{listingDateLine}</p>
-          )}
-
-          <Button
-            type="button"
-            variant="confirm"
-            className="w-full bg-[#0f8a94] hover:bg-[#0f8a94] text-white font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-1.5 text-xs shadow-md hover:shadow-lg"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              window.location.href = `tel:${property.contact_person_phone}`;
-            }}
-          >
-            <Phone className="h-3.5 w-3.5" />
-            Notify Me
-          </Button>
-        </div>
-      </div>
-    </Link>
-    {showShareCard && (
-      <ShareModal
-        propertyId={property.id}
-        title={property.title}
-        onClose={() => setShowShareCard(false)}
-      />
-    )}
+      </Link>
+      {showShareCard && (
+        <ShareModal
+          propertyId={property.id}
+          title={property.title}
+          onClose={() => setShowShareCard(false)}
+        />
+      )}
     </>
   );
 });
@@ -914,7 +944,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [isSaved, setIsSaved] = useState(property.isSaved || false);  
+  const [isSaved, setIsSaved] = useState(property.isSaved || false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const animationFrameRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
@@ -926,7 +956,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
   useEffect(() => {
     if (isHovered && hasImages && totalImages > 1) {
       const duration = 3000;
-      
+
       const animate = (timestamp: number) => {
         if (!startTimeRef.current) {
           startTimeRef.current = timestamp;
@@ -934,7 +964,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
 
         const elapsed = timestamp - startTimeRef.current;
         const progress = (elapsed % duration) / duration;
-        
+
         setScrollProgress(progress);
 
         if (elapsed >= duration) {
@@ -996,7 +1026,7 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
 
   return (
     <Link href={`/property/${property.id}`}>
-      <div 
+      <div
         className="group bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-[#d07648]/35 hover:shadow-xl transition-all duration-300 cursor-pointer h-full flex flex-col"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -1010,11 +1040,11 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                 fill
                 className="object-cover transition-all duration-700"
                 style={{
-                  transform: isHovered && totalImages > 1 
-                    ? `scale(1.1) translateX(-${scrollProgress * 15}%)` 
-                    : isHovered 
-                    ? 'scale(1.1)' 
-                    : 'scale(1)'
+                  transform: isHovered && totalImages > 1
+                    ? `scale(1.1) translateX(-${scrollProgress * 15}%)`
+                    : isHovered
+                      ? 'scale(1.1)'
+                      : 'scale(1)'
                 }}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 onError={() => setImageError(true)}
@@ -1022,9 +1052,9 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                 priority={currentImageIndex === 0}
                 unoptimized
               />
-              
+
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-              
+
               {property.images && property.images.length > 1 && (
                 <div className="absolute inset-0 flex items-center justify-between px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button
@@ -1041,16 +1071,16 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
                   </button>
                 </div>
               )}
-              
+
               {property.images && property.images.length > 1 && (
                 <>
                   <div className="absolute bottom-3 left-3 bg-black/75 backdrop-blur-sm text-white text-xs px-2 py-1 rounded font-medium">
                     {currentImageIndex + 1}/{property.images.length}
                   </div>
-                  
+
                   {isHovered && (
                     <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30">
-                      <div 
+                      <div
                         className="h-full bg-[#d07648] transition-all duration-100"
                         style={{ width: `${scrollProgress * 100}%` }}
                       />
@@ -1067,11 +1097,10 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
 
           <div className="absolute top-3 left-3 right-3 flex justify-between items-start">
             <div className="flex gap-2">
-              <span className={`text-xs font-bold px-2.5 py-1 rounded shadow-md ${
-                property.price_type === 'Sale' 
+              <span className={`text-xs font-bold px-2.5 py-1 rounded shadow-md ${property.price_type === 'Sale'
                   ? 'bg-[#d07648] text-white'
                   : 'bg-[#13a8b4] text-white'
-              }`}>
+                }`}>
                 {property.price_type}
               </span>
               {property.is_featured && (
@@ -1097,22 +1126,22 @@ const PropertyCard = memo(({ property }: { property: Property }) => {
         </div>
 
         <div className="p-4 flex flex-col flex-1">
-        <div className="mb-2">
-        <div className="flex items-baseline gap-1">
-          <IndianRupee className="h-5 w-5 text-[#d07648]" />
-          <span className="text-2xl font-bold text-[#d07648]">
-            {property.price_per_sqft?.toLocaleString('en-IN')}
-          </span>
-          <span className="text-sm text-gray-600 font-medium">/sqft</span>
-        </div>
-        {property.total_price != null && (
-  <p className="text-xs text-gray-500 mt-0.5">
-    Total: <span className="font-semibold text-gray-700">
-      ₹{property.total_price.toLocaleString('en-IN')}
-    </span>
-  </p>
-)}
-      </div>
+          <div className="mb-2">
+            <div className="flex items-baseline gap-1">
+              <IndianRupee className="h-5 w-5 text-[#d07648]" />
+              <span className="text-2xl font-bold text-[#d07648]">
+                {property.price_per_sqft?.toLocaleString('en-IN')}
+              </span>
+              <span className="text-sm text-gray-600 font-medium">/sqft</span>
+            </div>
+            {property.total_price != null && (
+              <p className="text-xs text-gray-500 mt-0.5">
+                Total: <span className="font-semibold text-gray-700">
+                  ₹{property.total_price.toLocaleString('en-IN')}
+                </span>
+              </p>
+            )}
+          </div>
 
           <h3 className="font-bold text-gray-900 text-base mb-2 line-clamp-2 group-hover:text-[#d07648] transition-colors">
             {property.title}
@@ -1189,7 +1218,7 @@ const LoadingSkeleton = () => (
     </div>
     <div className="flex flex-1 overflow-hidden">
       <div className="w-full lg:w-1/2 p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[1,2,3,4,5,6].map(i => (
+        {[1, 2, 3, 4, 5, 6].map(i => (
           <div key={i} className="rounded-lg overflow-hidden border border-gray-200 animate-pulse">
             <div className="h-40 bg-gray-200" />
             <div className="p-3 space-y-2">
@@ -1205,41 +1234,38 @@ const LoadingSkeleton = () => (
   </div>
 );
 
-const ViewToggle = memo(({ layout, onLayoutChange }: { 
-  layout: 'split' | 'grid' | 'map', 
-  onLayoutChange: (layout: 'split' | 'grid' | 'map') => void 
+const ViewToggle = memo(({ layout, onLayoutChange }: {
+  layout: 'split' | 'grid' | 'map',
+  onLayoutChange: (layout: 'split' | 'grid' | 'map') => void
 }) => {
   return (
     <div className="inline-flex bg-white border border-gray-300 rounded-lg overflow-hidden shadow-sm">
       <button
         onClick={() => onLayoutChange('split')}
-        className={`px-3 py-2 text-sm font-medium transition-colors ${
-          layout === 'split'
+        className={`px-3 py-2 text-sm font-medium transition-colors ${layout === 'split'
             ? 'bg-[#d07648] text-white'
             : 'text-gray-600 hover:bg-gray-50'
-        }`}
+          }`}
         title="Split view"
       >
         <Layers className="h-4 w-4" />
       </button>
       <button
         onClick={() => onLayoutChange('grid')}
-        className={`px-3 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
-          layout === 'grid'
+        className={`px-3 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${layout === 'grid'
             ? 'bg-[#d07648] text-white'
             : 'text-gray-600 hover:bg-gray-50'
-        }`}
+          }`}
         title="Grid view"
       >
         <Grid3x3 className="h-4 w-4" />
       </button>
       <button
         onClick={() => onLayoutChange('map')}
-        className={`px-3 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${
-          layout === 'map'
+        className={`px-3 py-2 text-sm font-medium transition-colors border-l border-gray-300 ${layout === 'map'
             ? 'bg-[#d07648] text-white'
             : 'text-gray-600 hover:bg-gray-50'
-        }`}
+          }`}
         title="Map view"
       >
         <MapIcon className="h-4 w-4" />
@@ -1261,7 +1287,7 @@ function SearchResults() {
   const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high' | 'size-large' | 'size-small' | 'distance'>('newest');
   const [hoveredProperty, setHoveredProperty] = useState<Property | null>(null);
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const [visiblePropertyIds, setVisiblePropertyIds] = useState<Set<number>>(new Set());
 
   const city = searchParams.get('city');
@@ -1284,19 +1310,19 @@ function SearchResults() {
 
   const handleMapBoundsChange = useCallback((bounds: MapBounds) => {
     const visibleIds = new Set<number>();
-    
+
     properties.forEach(property => {
       if (property.latitude && property.longitude) {
         const pLat = property.latitude;
         const pLng = property.longitude;
-        
+
         if (pLat >= bounds.sw.lat && pLat <= bounds.ne.lat &&
-            pLng >= bounds.sw.lng && pLng <= bounds.ne.lng) {
+          pLng >= bounds.sw.lng && pLng <= bounds.ne.lng) {
           visibleIds.add(property.id);
         }
       }
     });
-    
+
     setVisiblePropertyIds(visibleIds);
     setCurrentPage(1);
   }, [properties]);
@@ -1392,12 +1418,12 @@ function SearchResults() {
 
   const handleCitySelect = useCallback((selectedCity: City) => {
     const params = new URLSearchParams();
-    
+
     params.set('city', selectedCity.city);
     if (selectedCity.stateCode) {
       params.set('state', selectedCity.stateCode);
     }
-    
+
     if (selectedCity.latitude !== undefined && selectedCity.longitude !== undefined) {
       params.set('lat', selectedCity.latitude.toString());
       params.set('lng', selectedCity.longitude.toString());
@@ -1421,14 +1447,14 @@ function SearchResults() {
     if (alternates.length > 0) {
       params.set('alternate_names', alternates.join(','));
     }
-    
+
     if (propertyType) {
       params.set('type', propertyType);
     }
     if (distance) {
       params.set('distance', distance);
     }
-    
+
     router.push(`/search?${params.toString()}`);
   }, [router, propertyType, distance]);
 
@@ -1561,12 +1587,12 @@ function SearchResults() {
                   (of {sortedProperties.length.toLocaleString()} in viewport)
                 </span>
               </h1>
-              
+
               <div className="hidden lg:block h-6 w-px bg-gray-300"></div>
-              
-              <CitySearch 
+
+              <CitySearch
                 initialCity={initialCityDisplay}
-                onCitySelect={handleCitySelect} 
+                onCitySelect={handleCitySelect}
               />
             </div>
 
@@ -1594,14 +1620,14 @@ function SearchResults() {
                 <SlidersHorizontal className="h-4 w-4" />
                 <span className="text-sm font-medium">Filters</span>
               </button>
-              
+
               <ViewToggle layout={layout} onLayoutChange={setLayout} />
             </div>
           </div>
         </div>
       </div>
 
-      <FilterPanel 
+      <FilterPanel
         isOpen={showFilters}
         onClose={() => setShowFilters(false)}
         onApplyFilters={handleApplyFilters}
@@ -1625,36 +1651,35 @@ function SearchResults() {
           </div>
         ) : layout === 'split' ? (
           <>
-            <div 
+            <div
               id="property-list"
               className="w-full lg:w-1/2 overflow-y-auto bg-white"
               style={{ height: 'calc(100vh - 73px)' }}
             >
               <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                 {currentProperties.map((property) => (
-                  <CompactPropertyCard 
-                    key={property.id} 
+                  <CompactPropertyCard
+                    key={property.id}
                     property={property}
                     onHover={setHoveredProperty}
                   />
                 ))}
               </div>
-              
+
               {totalPages > 1 && (
                 <div className="sticky bottom-0 bg-white border-t border-gray-200 shadow-lg">
                   <div className="flex items-center justify-center gap-2 p-4">
                     <button
                       onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
-                      className={`p-2.5 rounded-lg transition-all border ${
-                        currentPage === 1
+                      className={`p-2.5 rounded-lg transition-all border ${currentPage === 1
                           ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
                           : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
-                      }`}
+                        }`}
                     >
                       <ChevronLeft className="h-5 w-5" />
                     </button>
-                    
+
                     <div className="flex items-center gap-2">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                         let pageNum;
@@ -1667,31 +1692,29 @@ function SearchResults() {
                         } else {
                           pageNum = currentPage - 2 + i;
                         }
-                        
+
                         return (
                           <button
                             key={pageNum}
                             onClick={() => handlePageChange(pageNum)}
-                            className={`min-w-[42px] h-11 rounded-lg font-semibold transition-all border ${
-                              currentPage === pageNum
+                            className={`min-w-[42px] h-11 rounded-lg font-semibold transition-all border ${currentPage === pageNum
                                 ? 'bg-gradient-to-r from-[#13a8b4] to-[#d07648] text-white shadow-lg border-[#a85832]'
                                 : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
-                            }`}
+                              }`}
                           >
                             {pageNum}
                           </button>
                         );
                       })}
                     </div>
-                    
+
                     <button
                       onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}
-                      className={`p-2.5 rounded-lg transition-all border ${
-                        currentPage === totalPages
+                      className={`p-2.5 rounded-lg transition-all border ${currentPage === totalPages
                           ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
                           : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
-                      }`}
+                        }`}
                     >
                       <ChevronRight className="h-5 w-5" />
                     </button>
@@ -1700,11 +1723,11 @@ function SearchResults() {
               )}
             </div>
 
-            <div 
+            <div
               className="hidden lg:block lg:w-1/2 relative bg-gray-100"
               style={{ height: 'calc(100vh - 136px)' }}
             >
-              <Map 
+              <Map
                 properties={mapProperties}
                 center={mapCenter}
                 zoom={11}
@@ -1714,7 +1737,7 @@ function SearchResults() {
           </>
         ) : layout === 'map' ? (
           <div className="flex-1 relative" style={{ height: 'calc(100vh - 136px)' }}>
-            <Map 
+            <Map
               properties={mapProperties}
               center={mapCenter}
               zoom={11}
@@ -1729,21 +1752,20 @@ function SearchResults() {
                   <PropertyCard key={property.id} property={property} />
                 ))}
               </div>
-              
+
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 py-8">
                   <button
                     onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className={`p-2.5 rounded-lg transition-all border ${
-                      currentPage === 1
+                    className={`p-2.5 rounded-lg transition-all border ${currentPage === 1
                         ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
                         : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
-                    }`}
+                      }`}
                   >
                     <ChevronLeft className="h-5 w-5" />
                   </button>
-                  
+
                   <div className="flex items-center gap-2">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                       let pageNum;
@@ -1756,28 +1778,26 @@ function SearchResults() {
                       } else {
                         pageNum = currentPage - 2 + i;
                       }
-                      
+
                       return (
                         <button
                           key={pageNum}
                           onClick={() => handlePageChange(pageNum)}
-                          className={`min-w-[42px] h-11 rounded-lg font-semibold transition-all border ${
-                            currentPage === pageNum
+                          className={`min-w-[42px] h-11 rounded-lg font-semibold transition-all border ${currentPage === pageNum
                               ? 'bg-gradient-to-r from-[#13a8b4] to-[#d07648] text-white shadow-lg border-[#a85832]'
                               : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
-                          }`}
+                            }`}
                         >
                           {pageNum}
                         </button>
                       );
                     })}
                   </div>
-                  
+
                   <button
                     onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className={`p-2.5 rounded-lg transition-all border ${
-                      currentPage === totalPages
+                    className={`p-2.5 rounded-lg transition-all border ${currentPage === totalPages
                         ? 'text-gray-400 cursor-not-allowed border-gray-200 bg-gray-50'
                         : 'text-gray-700 hover:bg-[#d07648]/10 border-gray-300 hover:border-[#d07648] bg-white'
                       }`}
