@@ -70,16 +70,26 @@ export default function LoginForm({
     e.preventDefault()
     setError('')
     setLoading(true)
-    if (!signUpData.firstName || !signUpData.lastName || !signUpData.email || !signUpData.password) {
+    if (!signUpData.firstName || !signUpData.lastName || !signUpData.email || !signUpData.password ||  !signUpData.phone ) {
       setError('Please fill in all required fields')
       setLoading(false)
       return
     }
+    
+    const cleanedPhone = signUpData.phone.replace(/\D/g, '');
+
+    if (cleanedPhone.length !== 10) {
+      setError('Phone number must be exactly 10 digits');
+      setLoading(false);
+      return;
+    }
+
     if (signUpData.password.length < 8) {
       setError('Password must be at least 8 characters long')
       setLoading(false)
       return
     }
+    
     try {
       await onEmailSignUp(signUpData)
       setSignUpData({ firstName: '', lastName: '', email: '', password: '', phone: '' })
@@ -431,7 +441,7 @@ export default function LoginForm({
                       </div>
 
                       <div>
-                        <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">Phone Number (Optional)</label>
+                        <label htmlFor="phone" className="block text-sm font-semibold text-slate-700 mb-2">Phone Number</label>
                         <div className="relative">
                           <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-[#0f8a94] pointer-events-none" />
                           <input
@@ -440,6 +450,8 @@ export default function LoginForm({
                             value={signUpData.phone}
                             onChange={(e) => setSignUpData({ ...signUpData, phone: e.target.value })}
                             placeholder="+91 98765 43210"
+                            maxLength={10}
+                            required
                             className="w-full pl-12 pr-4 py-3 border-2 border-[#13a8b4]/25 rounded-xl focus:border-[#13a8b4] focus:ring-2 focus:ring-[#13a8b4]/25 focus:outline-none transition-all text-sm"
                           />
                         </div>
