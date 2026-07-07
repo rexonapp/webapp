@@ -413,10 +413,10 @@ export default function HeroWithBanner() {
                 <CardDescription className="home-hero-card-body text-slate-800/95 font-medium">
                   List your warehouse or commercial property and connect with verified buyers
                 </CardDescription>
-                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#a85832] font-semibold transition-all duration-300 group-hover:gap-2 group-hover:text-[#8e4c2d]">
+                {/* <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#a85832] font-semibold transition-all duration-300 group-hover:gap-2 group-hover:text-[#8e4c2d]">
                   <span>Get Started</span>
                   <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
-                </div>
+                </div> */}
               </CardContent>
             </Card>
 
