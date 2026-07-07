@@ -450,7 +450,7 @@ export default function HeroWithBanner() {
             </Card>
 
             <Card
-              onClick={() => router.push('/customer')}
+              // onClick={() => router.push('/customer')}
               className="group relative gap-0 py-0 cursor-pointer overflow-hidden rounded-2xl border border-white/50 bg-white text-slate-900 shadow-xl shadow-black/20 ring-1 ring-white/20 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white/65 hover:border-white/60 hover:shadow-2xl hover:shadow-black/25 sm:col-span-2 lg:col-span-1"
             >
               <div className="pointer-events-none absolute inset-x-0 top-0 h-2/5 rounded-t-[inherit] bg-gradient-to-b from-white/30 to-transparent" aria-hidden />
@@ -471,10 +471,10 @@ export default function HeroWithBanner() {
                 <CardDescription className="home-hero-card-body text-slate-800/95 font-medium">
                   Find the perfect warehouse or commercial space for your business needs
                 </CardDescription>
-                <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#a85832] font-semibold transition-all duration-300 group-hover:gap-2 group-hover:text-[#8e4c2d]">
-                  <span>Find Space</span>
-                  <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
-                </div>
+                {/* <div className="home-hero-card-cta flex items-center gap-1.5 pt-1 text-[#a85832] font-semibold transition-all duration-300 group-hover:gap-2 group-hover:text-[#8e4c2d]"> */}
+                  {/* <span>Find Space</span> */}
+                  {/* <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 transform group-hover:translate-x-1 transition-transform duration-300" />
+                </div> */}
               </CardContent>
             </Card>
 
