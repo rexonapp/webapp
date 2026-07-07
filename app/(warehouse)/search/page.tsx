@@ -718,8 +718,8 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
       // Check if user is logged in
       const authRes = await fetch("/api/auth/me");
 
-      if (authRes.status === 401) {
-        router.push("/login");
+      if (authRes.status === 200) {
+        router.push(`/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`);
         return;
       }
 

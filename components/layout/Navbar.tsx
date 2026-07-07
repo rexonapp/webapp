@@ -4,6 +4,7 @@ import { Menu, X, ChevronDown, User, Building2, Plus, Settings, Heart, LogOut } 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import LoginForm from './LoginForm'
+import { useAuth } from '@/app/hooks/useAuth';
 
 interface UserData {
   id: string;
@@ -42,6 +43,14 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const {
+    handleEmailSignIn,
+    handleEmailSignUp,
+    handleGoogleSignIn,
+    handleMicrosoftSignIn,
+    handleSignOut,
+  } = useAuth();
+  
   useEffect(() => {
     checkSession()
     checkUrlError()
@@ -106,83 +115,83 @@ export default function Navbar() {
     }
   }, [showAuthModal])
 
-  const handleEmailSignIn = async (signInData: SignInData) => {
-    setError('')
-    setLoading(true)
+  // const handleEmailSignIn = async (signInData: SignInData) => {
+  //   setError('')
+  //   setLoading(true)
 
-    try {
-      const res = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: signInData.email,
-          password: signInData.password
-        })
-      })
+  //   try {
+  //     const res = await fetch('/api/auth/signin', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({
+  //         email: signInData.email,
+  //         password: signInData.password
+  //       })
+  //     })
 
-      const data = await res.json()
+  //     const data = await res.json()
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Sign in failed')
-      }
+  //     if (!res.ok) {
+  //       throw new Error(data.error || 'Sign in failed')
+  //     }
 
-      setCurrentUser(data.user)
-      setShowAuthModal(false)
-      window.location.reload()
-    } catch (err) {
-      throw new Error((err as Error).message || 'An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     setCurrentUser(data.user)
+  //     setShowAuthModal(false)
+  //     window.location.reload()
+  //   } catch (err) {
+  //     throw new Error((err as Error).message || 'An error occurred. Please try again.')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  const handleEmailSignUp = async (signUpData: SignUpData) => {
-    setError('')
-    setLoading(true)
+  // const handleEmailSignUp = async (signUpData: SignUpData) => {
+  //   setError('')
+  //   setLoading(true)
 
-    try {
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(signUpData)
-      })
+  //   try {
+  //     const res = await fetch('/api/auth/signup', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(signUpData)
+  //     })
 
-      const data = await res.json()
+  //     const data = await res.json()
 
-      if (!res.ok) {
-        throw new Error(data.error || 'Sign up failed')
-      }
+  //     if (!res.ok) {
+  //       throw new Error(data.error || 'Sign up failed')
+  //     }
 
-      setCurrentUser(data.user)
-      setShowAuthModal(false)
-      window.location.reload()
-    } catch (err) {
-      throw new Error((err as Error).message || 'An error occurred. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+  //     setCurrentUser(data.user)
+  //     setShowAuthModal(false)
+  //     window.location.reload()
+  //   } catch (err) {
+  //     throw new Error((err as Error).message || 'An error occurred. Please try again.')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
 
-  const handleGoogleSignIn = () => {
-    setError('')
-    window.location.href = '/api/auth/google'
-  }
+  // const handleGoogleSignIn = () => {
+  //   setError('')
+  //   window.location.href = '/api/auth/google'
+  // }
 
-  const handleMicrosoftSignIn = () => {
-    setError('')
-    window.location.href = '/api/auth/microsoft'
-  }
+  // const handleMicrosoftSignIn = () => {
+  //   setError('')
+  //   window.location.href = '/api/auth/microsoft'
+  // }
 
-  const handleSignOut = async () => {
-    try {
-      await fetch('/api/auth/signout', { method: 'POST' })
-      setCurrentUser(null)
-      setShowProfileMenu(false)
-      window.location.href = '/'
-    } catch (err) {
-      console.error('Sign out failed:', err)
-    }
-  }
+  // const handleSignOut = async () => {
+  //   try {
+  //     await fetch('/api/auth/signout', { method: 'POST' })
+  //     setCurrentUser(null)
+  //     setShowProfileMenu(false)
+  //     window.location.href = '/'
+  //   } catch (err) {
+  //     console.error('Sign out failed:', err)
+  //   }
+  // }
 
   const openAuthModal = (mode: 'signin' | 'signup') => {
     setAuthMode(mode)
