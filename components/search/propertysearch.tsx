@@ -50,7 +50,7 @@ const PROPERTY_TYPES: PropertyType[] = [
   // { id: 'factory',            label: 'Factory' },
   // { id: 'industrial',         label: 'Industrial' },
   // { id: 'cold-storage',       label: 'Cold Storage' },
-  { id: 'commercial-land',    label: 'Commercial Space' },
+  // { id: 'commercial-land',    label: 'Commercial Space' },
   // { id: 'office-space',       label: 'Office Space' },
   // { id: 'showroom',           label: 'Showroom' },
   // { id: 'retail-space',       label: 'Retail Space' },
