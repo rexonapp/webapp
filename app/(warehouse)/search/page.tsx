@@ -715,6 +715,15 @@ const CompactPropertyCard = memo(({ property, onHover }: { property: Property; o
     e.stopPropagation();
   
     try {
+      // Check if user is logged in
+      const authRes = await fetch("/api/auth/me");
+
+      if (authRes.status === 401) {
+        router.push("/login");
+        return;
+      }
+
+      // User is logged in, send notification
       const res = await fetch(`/api/properties/${property.id}/notify`, {
         method: "POST",
         headers: {
